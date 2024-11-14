@@ -1,0 +1,19 @@
+---
+Language: Cpp
+AlignTrailingComments: false
+ColumnLimit: 100
+BreakBeforeBraces: Attach
+IndentWidth: 4
+SortIncludes: true
+PointerAlignment: Left
+AllowShortFunctionsOnASingleLine: Inline
+AlwaysBreakAfterReturnType: None
+ReflowComments: true
+SpaceAfterLogicalNot: true
+SpaceBeforeParens: ControlStatements
+SpacesInParentheses: false
+AlignAfterOpenBracket: Align
+IndentCaseLabels: true
+#prikaz na formatovanie vsetkych .cpp a .h suborov
+#find . -name "*.cpp" -o -name "*.h" | xargs clang-format -i
+...
