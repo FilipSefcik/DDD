@@ -19,15 +19,17 @@ class module {
     int priority_ = 0; // number of modules between the furthest "child" module and this module
     int var_count_ = 0;
     int function_column_ = 0;
-    double my_reliability_;
     std::unordered_map<std::string, int> sons_map_;
 
     int states_;
-    std::vector<double> my_reliabilities_;
+    std::vector<double>* my_reliabilities_;
 
   public:
     module(std::string paName, int paStates);
-    ~module() { delete this->sons_reliability_; }
+    ~module() {
+        delete this->sons_reliability_;
+        delete this->my_reliabilities_;
+    }
 
     // getters
 
@@ -37,7 +39,6 @@ class module {
     std::string get_path() { return this->path_; }
     std::string get_pla() { return this->pla_file_; }
 
-    double get_reliability() { return this->my_reliability_; }
     std::vector<std::vector<double>>* get_sons_reliability() { return this->sons_reliability_; }
 
     int get_priority() { return this->priority_; }
@@ -46,7 +47,8 @@ class module {
     int get_var_count() { return this->var_count_; }
     int get_function_column() { return this->function_column_; }
 
-    double get_reliability(int state) { return this->my_reliabilities_.at(state); }
+    double get_reliability(int state) { return this->my_reliabilities_->at(state); }
+    std::vector<double>* get_my_reliabilities() { return this->my_reliabilities_; }
 
     // setters
 
@@ -55,7 +57,6 @@ class module {
     void set_path(std::string paPath) { this->path_ = paPath; }
     void set_pla(std::string plaContent) { this->pla_file_ = plaContent; }
 
-    void set_reliability(double paRel) { this->my_reliability_ = paRel; }
     void set_sons_reliability(int sonPosition, double sonRel, int state);
 
     void set_position(int paPosition) { this->position_ = paPosition; }
@@ -64,6 +65,7 @@ class module {
     void set_function_column(int paColumn) { this->function_column_ = paColumn; }
 
     void set_sons_reliability(int sonPosition, std::vector<double>* sonRel);
+    void set_my_reliability(std::vector<double>* rel) { *this->my_reliabilities_ = *rel; }
 
     // special functions
 
@@ -85,4 +87,5 @@ class module {
     void print_sons();
     void write_pla_file();
     void print_sons_reliabilities();
+    void print_reliabilities();
 };
