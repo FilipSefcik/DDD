@@ -6,8 +6,8 @@
 module::module(std::string paName, int paStates) {
     this->name_ = paName;
     this->states_ = paStates;
-    this->my_reliability_ = 1.0 / this->states_;
     this->sons_reliability_ = new std::vector<std::vector<double>>();
+    this->my_reliabilities_ = new std::vector<double>(this->states_);
 }
 
 /*
@@ -100,4 +100,11 @@ void module::print_sons() {
 
 void module::print_pla() {
     std::cout << this->pla_file_ << std::endl;
+}
+
+void module::print_reliabilities() {
+    for (double prob : *this->my_reliabilities_) {
+        std::cout << prob << " ";
+    }
+    std::cout << std::endl;
 }
