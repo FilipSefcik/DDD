@@ -1,6 +1,4 @@
 #include "module.hpp"
-#include <filesystem>
-#include <fstream>
 #include <iostream>
 
 module::module(std::string paName, int paStates) {
@@ -53,30 +51,6 @@ void module::set_sons_reliability(int sonPosition, std::vector<double>* sonRel) 
     this->sons_reliability_->at(sonPosition) = *sonRel;
 }
 
-void module::write_pla_file() {
-    std::filesystem::path dirPath = std::filesystem::path(this->path_).parent_path();
-
-    if (! std::filesystem::exists(dirPath)) {
-        if (! std::filesystem::create_directories(dirPath)) {
-            std::cerr << "Error creating directories!" << std::endl;
-            exit(4);
-            return; // Return an error code
-        }
-    }
-
-    std::ofstream outputFile(this->path_);
-
-    if (! outputFile.is_open()) {
-        std::cerr << "Error opening the file!" << std::endl;
-        exit(4);
-        return;
-    }
-
-    outputFile << this->pla_file_ << std::endl;
-
-    outputFile.close();
-}
-
 void module::print_sons_reliabilities() {
     for (int i = 0; i < this->sons_reliability_->size(); i++) {
         for (int j = 0; j < this->sons_reliability_->at(i).size(); j++) {
@@ -96,10 +70,6 @@ void module::print_sons() {
         }
         std::cout << std::endl;
     }
-}
-
-void module::print_pla() {
-    std::cout << this->pla_file_ << std::endl;
 }
 
 void module::print_reliabilities() {

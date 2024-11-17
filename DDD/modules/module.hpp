@@ -11,7 +11,7 @@
  */
 class module {
   private:
-    std::string name_, path_, pla_file_;
+    std::string name_, path_;
     std::vector<std::vector<double>>* sons_reliability_;
     module* parent_ = nullptr;
     int assigned_process_ = 0;
@@ -37,7 +37,6 @@ class module {
 
     std::string get_name() { return this->name_; }
     std::string get_path() { return this->path_; }
-    std::string get_pla() { return this->pla_file_; }
 
     std::vector<std::vector<double>>* get_sons_reliability() { return this->sons_reliability_; }
 
@@ -55,7 +54,6 @@ class module {
     void set_parent(module* paParent) { this->parent_ = paParent; }
 
     void set_path(std::string paPath) { this->path_ = paPath; }
-    void set_pla(std::string plaContent) { this->pla_file_ = plaContent; }
 
     void set_sons_reliability(int sonPosition, double sonRel, int state);
 
@@ -83,9 +81,7 @@ class module {
         this->sons_map_.at(sonName) = newPosition;
     }
 
-    void print_pla();
     void print_sons();
-    void write_pla_file();
     void print_sons_reliabilities();
     void print_reliabilities();
 };
