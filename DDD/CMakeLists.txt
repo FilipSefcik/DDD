@@ -3,6 +3,8 @@ add_executable(
     main.cpp
     modules/module.hpp
     modules/module.cpp
+    modules/module_manager.hpp
+    modules/module_manager.cpp
 )
 
 find_package(TeDDy REQUIRED)
