@@ -1,8 +1,7 @@
 #include "modules/module.hpp"
-#include "modules/module_manager.hpp"
+#include "processing/module_manager.hpp"
 #include "utils/divider.hpp"
 #include <iostream>
-#include <new>
 #include <ostream>
 #include <vector>
 

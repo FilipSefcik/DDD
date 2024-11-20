@@ -1,4 +1,6 @@
 #include "divider.hpp"
+#include <algorithm>
+#include <iostream>
 
 /*
  * @brief Checks if modules can be divided.
