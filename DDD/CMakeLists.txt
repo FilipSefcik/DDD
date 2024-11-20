@@ -5,6 +5,8 @@ add_executable(
     modules/module.cpp
     modules/module_manager.hpp
     modules/module_manager.cpp
+    utils/divider.hpp
+    utils/divider.cpp
 )
 
 find_package(TeDDy REQUIRED)
