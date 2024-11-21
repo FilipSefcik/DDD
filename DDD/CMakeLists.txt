@@ -7,6 +7,8 @@ add_executable(
     processing/module_manager.cpp
     utils/divider.hpp
     utils/divider.cpp
+    utils/mpi_communicator.hpp
+    utils/mpi_communicator.cpp
 )
 
 find_package(TeDDy REQUIRED)
