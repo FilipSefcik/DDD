@@ -87,12 +87,12 @@ void mpi_communicator::gather_doubles(double* message, double* receiveBuffer) {
 
 void mpi_communicator::serialize_message(const mpi_message message,
                                          std::string& serializedMessage) {
-    serializedMessage = message.header_ + "#\n#" + message.payload_;
+    serializedMessage = message.header_ + message.delimiter_ + message.payload_;
 }
 
 void mpi_communicator::deserialize_message(const std::string& serializedMessage,
                                            mpi_message& message) {
-    size_t delimiter = serializedMessage.find("#\n#");
-    message.header_ = serializedMessage.substr(0, delimiter);
-    message.payload_ = serializedMessage.substr(delimiter + 3);
+    size_t delimiterPos = serializedMessage.find(message.delimiter_);
+    message.header_ = serializedMessage.substr(0, delimiterPos);
+    message.payload_ = serializedMessage.substr(delimiterPos + 3);
 }

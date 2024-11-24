@@ -25,6 +25,13 @@ class module {
     std::vector<double>* my_reliabilities_;
 
   public:
+    struct module_info {
+        module* parent_;
+        std::string name_, pla_path_;
+        std::vector<int> sons_states_;
+        int function_column_, states_, priority_, assigned_process_;
+    };
+
     module(std::string paName, int paStates);
     ~module() {
         delete this->sons_reliability_;
