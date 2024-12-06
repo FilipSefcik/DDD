@@ -15,7 +15,7 @@ class mpi_communicator {
     struct mpi_message {
         std::string header_;
         std::string payload_;
-        std::string delimiter_ = "#\n#";
+        std::string delimiter_ = "\n#\n";
     };
 
     static void send_message(const mpi_message& message, int receiverRank);

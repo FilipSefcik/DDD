@@ -40,6 +40,7 @@ class module_info {
     void add_son(int sonStates) { this->sons_states_.push_back(sonStates); }
     void add_module(module_info* newModule);
     void add_priority(int sonPriority);
+    std::string to_string() const;
 
     void print_sons();
 };

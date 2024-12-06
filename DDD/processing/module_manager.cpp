@@ -14,11 +14,11 @@ module_manager::module_manager() {
 }
 
 module_manager::~module_manager() {
-    for (int i = 0; i < this->modules_->size(); i++) {
+    for (size_t i = 0; i < this->modules_->size(); i++) {
         delete this->modules_->at(i);
     }
 
-    for (int i = 0; i < this->separate_instructions_->size(); i++) {
+    for (size_t i = 0; i < this->separate_instructions_->size(); i++) {
         delete this->separate_instructions_->at(i);
     }
 
@@ -56,9 +56,6 @@ void module_manager::load(std::string confPath) {
  */
 
 void module_manager::load_modules(std::string confPath) {
-    auto constexpr is_space = [](char character) {
-        return std::isspace(static_cast<unsigned char>(character));
-    };
 
     std::ifstream file(confPath);
     if (! file.is_open()) {
@@ -148,14 +145,14 @@ void module_manager::load_modules(std::string confPath) {
  * Instructions consist of: Executing module, Sending module, Receiving module, Link modules, End
  * of processing.
  */
-void module_manager::get_instructions(int processCount) {
+void module_manager::get_instructions(size_t processCount) {
     this->separate_instructions_->resize(
         processCount > this->modules_->size() ? this->modules_->size() : processCount);
 
     std::sort(this->modules_->begin(), this->modules_->end(),
               [](module_info* a, module_info* b) { return a->get_priority() < b->get_priority(); });
 
-    for (int i = 0; i < this->modules_->size(); i++) {
+    for (size_t i = 0; i < this->modules_->size(); i++) {
         module_info* mod = this->modules_->at(i);
         module_info* parent = mod->get_parent();
         if (! this->separate_instructions_->at(mod->get_assigned_process())) {
@@ -192,13 +189,41 @@ void module_manager::get_instructions(int processCount) {
     }
 }
 
+void module_manager::create_messages(int numProcesses,
+                                     std::vector<mpi_communicator::mpi_message>& messages) {
+    // Initialize a vector of messages with "UNUSED" header and "EMPTY" body
+    std::vector<mpi_communicator::mpi_message> messageList(numProcesses, {"UNUSED", "EMPTY"});
+
+    // Iterate over the modules and assign them to the corresponding process
+    for (const auto& mod : *this->modules_) {
+        int assignedProcess = mod->get_assigned_process();
+        if (assignedProcess >= 0 && assignedProcess < numProcesses) {
+            // If the module has an assigned process, append its to_string() to the message body
+            if (messageList[assignedProcess].header_ == "UNUSED") {
+                messageList[assignedProcess].header_ =
+                    "MODULE"; // Change header to "MODULE" once we have the first module for this
+                              // process
+            }
+            // Append the module's string representation to the payload (with a delimiter)
+            if (messageList[assignedProcess].payload_ == "EMPTY") {
+                messageList[assignedProcess].payload_ = mod->to_string();
+            } else {
+                messageList[assignedProcess].payload_ +=
+                    "\n" + mod->to_string(); // Append with a newline separator
+            }
+        }
+    }
+
+    messages = messageList;
+}
+
 /**
  * @brief Returns instructions assigned to a specific process.
  * @param processRank Rank of the process we want instructions for.
  * @return Instructions as a string.
  */
-std::string module_manager::get_instructions_for_process(int processRank) {
-    if (processRank >= 0 && processRank < this->separate_instructions_->size()) {
+std::string module_manager::get_instructions_for_process(size_t processRank) {
+    if (processRank < this->separate_instructions_->size()) {
         return this->separate_instructions_->at(processRank)->str();
     }
     return "INVALID RANK";
@@ -228,7 +253,7 @@ void module_manager::print_assigned_processes() {
 }
 
 void module_manager::print_separate_instructions() {
-    for (int i = 0; i < this->separate_instructions_->size(); i++) {
+    for (size_t i = 0; i < this->separate_instructions_->size(); i++) {
         std::cout << "Node " << i << " instructions:\n";
         std::cout << this->separate_instructions_->at(i)->str() << "\n";
     }
