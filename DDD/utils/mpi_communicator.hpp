@@ -3,13 +3,13 @@
 #include <string>
 #include <vector>
 
-/*
+/**
  * @brief mpi_communicator simplifies usage of MPI message functions.
  * Now unified around the Message struct for communication.
  */
 class mpi_communicator {
   public:
-    /*
+    /**
      * @brief Message struct encapsulates header and payload.
      */
     struct mpi_message {

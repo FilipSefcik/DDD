@@ -8,7 +8,7 @@ module::module(std::string paName, int paStates) {
     this->my_reliabilities_ = new std::vector<double>(this->states_);
 }
 
-/*
+/**
  * @brief Sets this module as a parent for the new module in parameter and calculates the overall
  * priorities.
  * @param newSon New module, which is "child" of this module.
@@ -18,7 +18,7 @@ void module::add_son(module* newSon) {
     this->add_priority(newSon->get_priority());
 }
 
-/*
+/**
  * @brief Calculates new priorities for all modules directly above this module, including this
  * module.
  * @param sonPriority Priority of a son module.

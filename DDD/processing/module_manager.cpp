@@ -38,6 +38,23 @@ void module_manager::load(std::string confPath) {
     }
 }
 
+/**
+ * @brief Loads modules and their relationships from a configuration file.
+ *
+ * This function processes a configuration file in two phases:
+ * 1. Reads module definitions, including their names, file paths, and function columns.
+ *    Creates instances of `module_info` for each module.
+ * 2. Reads the relationships between modules and variables.
+ *    Adds "sons" to modules based on these relationships:
+ *    - For variables (`V`), adds a son with the same number of states as the parent.
+ *    - For modules (`M{num}`), adds a son with the number of states of the referenced module.
+ *
+ * @param confPath Path to the configuration file containing module definitions and relationships.
+ *
+ * @throws std::runtime_error if the file cannot be opened or if unexpected characters are found in
+ * the relationship mappings.
+ */
+
 void module_manager::load_modules(std::string confPath) {
     auto constexpr is_space = [](char character) {
         return std::isspace(static_cast<unsigned char>(character));
@@ -123,7 +140,7 @@ void module_manager::load_modules(std::string confPath) {
     } while (std::getline(file, line));
 }
 
-/*
+/**
  * @brief Creates instructions on how to process all modules.
  * @param processCount Number of all processes.
  *
@@ -175,7 +192,7 @@ void module_manager::get_instructions(int processCount) {
     }
 }
 
-/*
+/**
  * @brief Returns instructions assigned to a specific process.
  * @param processRank Rank of the process we want instructions for.
  * @return Instructions as a string.

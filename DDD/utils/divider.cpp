@@ -2,7 +2,7 @@
 #include <algorithm>
 #include <iostream>
 
-/*
+/**
  * @brief Checks if modules can be divided.
  *
  * Throws an error if no modules are provided.
@@ -14,7 +14,7 @@ void divider::check(std::vector<module_info*>* modules) {
     }
 }
 
-/*
+/**
  * @brief Divides modules among nodes evenly based on no particular property.
  */
 void node_divider::divide_modules(std::vector<module_info*>* modules,
@@ -31,7 +31,7 @@ void node_divider::divide_modules(std::vector<module_info*>* modules,
     }
 }
 
-/*
+/**
  * @brief Divides modules among nodes evenly based on how many variables modules have.
  */
 void var_count_divider::divide_modules(std::vector<module_info*>* modules,
