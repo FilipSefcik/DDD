@@ -11,8 +11,7 @@ class divider {
   public:
     virtual ~divider() = default;
 
-    virtual void divide_modules(std::vector<module_info*>* modules, std::vector<module_info*> nodes[],
-                                std::vector<int>* count) = 0;
+    virtual void divide_modules(std::vector<module_info*>* modules, int nodeCount) = 0;
 
   protected:
     void check(std::vector<module_info*>* modules); // Defined in the base class
@@ -23,8 +22,7 @@ class divider {
  */
 class node_divider : public divider {
   public:
-    void divide_modules(std::vector<module_info*>* modules, std::vector<module_info*> nodes[],
-                        std::vector<int>* count) override;
+    void divide_modules(std::vector<module_info*>* modules, int nodeCount) override;
 };
 
 /**
@@ -32,6 +30,5 @@ class node_divider : public divider {
  */
 class var_count_divider : public divider {
   public:
-    void divide_modules(std::vector<module_info*>* modules, std::vector<module_info*> nodes[],
-                        std::vector<int>* count) override;
+    void divide_modules(std::vector<module_info*>* modules, int nodeCount) override;
 };

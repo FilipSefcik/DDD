@@ -1,4 +1,5 @@
 #include "module_info.hpp"
+#include <sstream>
 
 void module_info::add_module(module_info* newModule) {
     newModule->set_position(this->sons_states_.size());
@@ -16,6 +17,17 @@ void module_info::add_priority(int sonPriority) {
     }
 }
 
+std::string module_info::to_string() const {
+    std::stringstream data;
+    data << this->name_ << " " << this->pla_path_ << " " << this->function_column_ << " "
+         << this->states_ << " " << this->get_var_count();
+    for (int state : this->sons_states_) {
+        data << " ";
+        data << state;
+    }
+    return data.str();
+}
+
 void module_info::print_sons() {
     if (this->parent_) {
         std::cout << "Parent: " << this->parent_->get_name() << std::endl;
@@ -23,7 +35,7 @@ void module_info::print_sons() {
     std::cout << "Var count: " << this->sons_states_.size() << std::endl;
     std::cout << "Priority: " << this->priority_ << std::endl;
     std::cout << "Function column: " << this->function_column_ << std::endl;
-    for (int i = 0; i < this->sons_states_.size(); i++) {
+    for (size_t i = 0; i < this->sons_states_.size(); i++) {
         std::cout << this->sons_states_.at(i) << " ";
     }
 }

@@ -62,14 +62,14 @@ class module {
 
     void set_path(std::string paPath) { this->path_ = paPath; }
 
-    void set_sons_reliability(int sonPosition, double sonRel, int state);
+    void set_sons_reliability(size_t sonPosition, double sonRel, int state);
 
     void set_position(int paPosition) { this->position_ = paPosition; }
     void assign_process(int paProcess) { this->assigned_process_ = paProcess; }
     void set_var_count(int paVarCount);
     void set_function_column(int paColumn) { this->function_column_ = paColumn; }
 
-    void set_sons_reliability(int sonPosition, std::vector<double>* sonRel);
+    void set_sons_reliability(size_t sonPosition, std::vector<double>* sonRel);
     void set_my_reliability(std::vector<double>* rel) { *this->my_reliabilities_ = *rel; }
 
     // special functions
