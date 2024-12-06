@@ -127,7 +127,7 @@ void module_manager::load_modules(std::string confPath) {
 
                 // Pridaj syna so stavmi modulu
                 auto childModule = this->modules_->at(moduleMapping.at(moduleName));
-                parentModule->add_son(childModule->get_states());
+                parentModule->add_module(childModule);
             } else if (val[i] == 'V') {
                 // Ak ide o premennú, pridaj syna so stavmi rodiča
                 parentModule->add_son(parentModule->get_states());
