@@ -1,5 +1,5 @@
 #pragma once
-#include "../modules/module.hpp"
+#include "../modules/module_info.hpp"
 #include <vector>
 
 /*
@@ -11,11 +11,11 @@ class divider {
   public:
     virtual ~divider() = default;
 
-    virtual void divide_modules(std::vector<module*>* modules, std::vector<module*> nodes[],
+    virtual void divide_modules(std::vector<module_info*>* modules, std::vector<module_info*> nodes[],
                                 std::vector<int>* count) = 0;
 
   protected:
-    void check(std::vector<module*>* modules); // Defined in the base class
+    void check(std::vector<module_info*>* modules); // Defined in the base class
 };
 
 /*
@@ -23,7 +23,7 @@ class divider {
  */
 class node_divider : public divider {
   public:
-    void divide_modules(std::vector<module*>* modules, std::vector<module*> nodes[],
+    void divide_modules(std::vector<module_info*>* modules, std::vector<module_info*> nodes[],
                         std::vector<int>* count) override;
 };
 
@@ -32,6 +32,6 @@ class node_divider : public divider {
  */
 class var_count_divider : public divider {
   public:
-    void divide_modules(std::vector<module*>* modules, std::vector<module*> nodes[],
+    void divide_modules(std::vector<module_info*>* modules, std::vector<module_info*> nodes[],
                         std::vector<int>* count) override;
 };
