@@ -4,6 +4,7 @@ add_executable(
     modules/module.hpp
     modules/module.cpp
     modules/module_info.hpp
+    modules/module_info.cpp
     processing/module_manager.hpp
     processing/module_manager.cpp
     utils/divider.hpp

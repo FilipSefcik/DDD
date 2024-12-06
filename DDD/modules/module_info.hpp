@@ -38,12 +38,8 @@ class module_info {
     void set_position(int position) { this->position_ = position; }
 
     void add_son(int sonStates) { this->sons_states_.push_back(sonStates); }
-    void print_sons() {
-        std::cout << "Var count: " << this->sons_states_.size() << std::endl;
-        std::cout << "Priority: " << this->priority_ << std::endl;
-        std::cout << "Function column: " << this->function_column_ << std::endl;
-        for (int i = 0; i < this->sons_states_.size(); i++) {
-            std::cout << this->sons_states_.at(i) << " ";
-        }
-    }
+    void add_module(module_info* newModule);
+    void add_priority(int sonPriority);
+
+    void print_sons();
 };
