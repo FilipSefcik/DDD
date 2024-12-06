@@ -3,7 +3,7 @@
 #include <unordered_map>
 #include <vector>
 
-/*
+/**
  * @brief Class module describes a module in config file
  *
  * It's a binary function described by a PLA file, but

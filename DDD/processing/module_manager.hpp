@@ -3,7 +3,7 @@
 #include <sstream>
 #include <vector>
 
-/*
+/**
  * @brief Manages all modules loaded from a PLA file.
  */
 class module_manager {
