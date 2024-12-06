@@ -1,5 +1,5 @@
 #pragma once
-#include "../modules/module.hpp"
+#include "../modules/module_info.hpp"
 #include <sstream>
 #include <vector>
 
@@ -8,7 +8,7 @@
  */
 class module_manager {
   private:
-    std::vector<module*>* modules_;
+    std::vector<module_info*>* modules_;
     std::vector<std::stringstream*>* separate_instructions_;
 
   public:
@@ -16,7 +16,7 @@ class module_manager {
     ~module_manager();
 
     // getters
-    std::vector<module*>* get_modules() { return this->modules_; }
+    std::vector<module_info*>* get_modules() { return this->modules_; }
     int get_modules_count() { return this->modules_->size(); }
 
     // special functions

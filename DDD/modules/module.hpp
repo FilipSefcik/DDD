@@ -19,18 +19,18 @@ class module {
     int priority_ = 0; // number of modules between the furthest "child" module and this module
     int var_count_ = 0;
     int function_column_ = 0;
-    std::unordered_map<std::string, int> sons_map_;
+    // std::unordered_map<std::string, int> sons_map_; for merging plas
 
     int states_;
     std::vector<double>* my_reliabilities_;
 
   public:
-    struct module_info {
-        module* parent_;
-        std::string name_, pla_path_;
-        std::vector<int> sons_states_;
-        int function_column_, states_, priority_, assigned_process_;
-    };
+    // struct module_info {
+    //     module* parent_;
+    //     std::string name_, pla_path_;
+    //     std::vector<int> sons_states_;
+    //     int function_column_, states_, priority_, assigned_process_, position_;
+    // };
 
     module(std::string paName, int paStates);
     ~module() {
@@ -80,13 +80,13 @@ class module {
     // prints used to get info
     // used only during troubleshooting
 
-    int get_son_position(std::string sonName) { return this->sons_map_.at(sonName); }
-    void add_son_position(std::string sonName, int position) {
-        this->sons_map_.emplace(sonName, position);
-    }
-    void edit_position(std::string sonName, int newPosition) {
-        this->sons_map_.at(sonName) = newPosition;
-    }
+    // int get_son_position(std::string sonName) { return this->sons_map_.at(sonName); }
+    // void add_son_position(std::string sonName, int position) {
+    //     this->sons_map_.emplace(sonName, position);
+    // }
+    // void edit_position(std::string sonName, int newPosition) {
+    //     this->sons_map_.at(sonName) = newPosition;
+    // }
 
     void print_sons();
     void print_sons_reliabilities();
