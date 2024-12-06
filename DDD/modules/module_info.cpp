@@ -1,4 +1,5 @@
 #include "module_info.hpp"
+#include <iostream>
 #include <sstream>
 
 void module_info::add_module(module_info* newModule) {
