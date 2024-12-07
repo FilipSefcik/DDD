@@ -1,5 +1,4 @@
-// #include "modules/module.hpp"
-// #include "modules/module_info.hpp"
+#include "modules/module.hpp"
 #include "processing/module_manager.hpp"
 #include "utils/divider.hpp"
 #include "utils/mpi_communicator.hpp"
@@ -22,23 +21,26 @@ int main(int argc, char* argv[]) {
     if (rank == 0) {
         module_manager manager;
         manager.load("../../DDD/load_files/modules/module_map.conf");
-        // manager.print_modules();
-
         node_divider divider;
         divider.divide_modules(manager.get_modules(), processCount);
 
-        // for (module_info* mod : *nodes) {
-        //     std::cout << mod->to_string() << std::endl;
-        // }
-
         std::vector<mpi_communicator::mpi_message> messages;
         manager.create_messages(processCount, messages);
+        std::vector<module*> modules;
 
         int i = 0;
         for (mpi_communicator::mpi_message message : messages) {
             std::cout << i << std::endl;
             std::cout << message.header_ << std::endl << message.payload_ << std::endl;
             i++;
+            if (message.header_ == "MODULE") {
+                modules.push_back(new module(message.payload_));
+            }
+        }
+
+        for (size_t i = 0; i < modules.size(); i++) {
+            modules.at(i)->print_all();
+            delete modules.at(i);
         }
 
     } else {
