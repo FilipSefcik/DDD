@@ -3,9 +3,11 @@
 #include "utils/divider.hpp"
 #include "utils/mpi_communicator.hpp"
 // #include <cstddef>
+#include <cstddef>
 #include <cstdlib>
 #include <iostream>
 #include <ostream>
+#include <string>
 #include <vector>
 
 int main(int argc, char* argv[]) {
@@ -26,15 +28,18 @@ int main(int argc, char* argv[]) {
 
         std::vector<mpi_communicator::mpi_message> messages;
         manager.create_messages(processCount, messages);
-        std::vector<module*> modules;
 
-        int i = 0;
-        for (mpi_communicator::mpi_message message : messages) {
-            std::cout << i << std::endl;
-            std::cout << message.header_ << std::endl << message.payload_ << std::endl;
-            i++;
-            if (message.header_ == "MODULE") {
-                modules.push_back(new module(message.payload_));
+        mpi_communicator::mpi_message myMessage;
+        mpi_communicator::scatter_messages(&messages, myMessage);
+
+        std::vector<module*> modules;
+        std::cout << "RANK " << rank << std::endl;
+        std::cout << myMessage.header_ << std::endl << myMessage.payload_ << std::endl;
+        if (myMessage.header_ == "MODULE") {
+            std::istringstream payload(myMessage.payload_);
+            std::string line;
+            while (std::getline(payload, line)) {
+                modules.push_back(new module(line));
             }
         }
 
@@ -42,8 +47,25 @@ int main(int argc, char* argv[]) {
             modules.at(i)->print_all();
             delete modules.at(i);
         }
-
     } else {
+        mpi_communicator::mpi_message myMessage;
+        mpi_communicator::scatter_messages(nullptr, myMessage);
+
+        std::vector<module*> modules;
+        std::cout << "RANK " << rank << std::endl;
+        std::cout << myMessage.header_ << std::endl << myMessage.payload_ << std::endl;
+        if (myMessage.header_ == "MODULE") {
+            std::istringstream payload(myMessage.payload_);
+            std::string line;
+            while (std::getline(payload, line)) {
+                modules.push_back(new module(line));
+            }
+        }
+
+        for (size_t i = 0; i < modules.size(); i++) {
+            modules.at(i)->print_all();
+            delete modules.at(i);
+        }
     }
 
     MPI_Finalize();

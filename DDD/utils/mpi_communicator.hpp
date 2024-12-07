@@ -22,7 +22,7 @@ class mpi_communicator {
     static void recv_message(int senderRank, mpi_message& message);
 
     static void scatter_ints(int* message, int* receiveBuffer);
-    static void scatter_messages(const std::vector<mpi_message>& messages,
+    static void scatter_messages(const std::vector<mpi_message>* messages,
                                  mpi_message& receiveBuffer);
     static void gather_doubles(double* message, double* receiveBuffer);
 
