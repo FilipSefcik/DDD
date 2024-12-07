@@ -8,30 +8,6 @@ module::module(std::string paName, int paStates) {
     this->my_reliabilities_ = new std::vector<double>(this->states_);
 }
 
-/**
- * @brief Sets this module as a parent for the new module in parameter and calculates the overall
- * priorities.
- * @param newSon New module, which is "child" of this module.
- */
-void module::add_son(module* newSon) {
-    newSon->set_parent(this);
-    this->add_priority(newSon->get_priority());
-}
-
-/**
- * @brief Calculates new priorities for all modules directly above this module, including this
- * module.
- * @param sonPriority Priority of a son module.
- */
-void module::add_priority(int sonPriority) {
-    if (this->priority_ == sonPriority) {
-        this->priority_++;
-        if (this->parent_) {
-            this->parent_->add_priority(this->priority_);
-        }
-    }
-}
-
 void module::set_var_count(int paVarCount) {
     this->var_count_ = paVarCount;
     for (int i = 0; i < this->var_count_; i++) {
@@ -62,7 +38,6 @@ void module::print_sons_reliabilities() {
 
 void module::print_sons() {
     std::cout << "Var count: " << this->var_count_ << std::endl;
-    std::cout << "Priority: " << this->priority_ << std::endl;
 
     for (size_t i = 0; i < this->sons_reliability_->size(); i++) {
         for (size_t j = 0; j < this->sons_reliability_->at(i).size(); j++) {
