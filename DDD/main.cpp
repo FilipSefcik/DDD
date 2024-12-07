@@ -11,20 +11,6 @@
 
 int main(int argc, char* argv[]) {
 
-    // module_manager manager;
-    // manager.load("../../DDD/load_files/modules/module_map.conf");
-    // // manager.print_modules();
-    // std::vector<module_info*>* nodes = new std::vector<module_info*>[3];
-    // std::vector<int>* moduleCount = new std::vector<int>;
-    // moduleCount->resize(3);
-
-    // node_divider divider;
-    // divider.divide_modules(manager.get_modules(), nodes, moduleCount);
-
-    // manager.get_instructions(3);
-    // manager.print_assigned_processes();
-    // manager.print_separate_instructions();
-
     MPI_Init(&argc, &argv);
 
     int rank;
