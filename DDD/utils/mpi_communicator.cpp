@@ -29,7 +29,7 @@ void mpi_communicator::scatter_ints(int* message, int* receiveBuffer) {
     MPI_Scatter(message, 1, MPI_INT, receiveBuffer, 1, MPI_INT, 0, MPI_COMM_WORLD);
 }
 
-void mpi_communicator::scatter_messages(const std::vector<mpi_message>& messages,
+void mpi_communicator::scatter_messages(const std::vector<mpi_message>* messages,
                                         mpi_message& receiveBuffer) {
     int mpiSize;
     int rank;
@@ -41,7 +41,7 @@ void mpi_communicator::scatter_messages(const std::vector<mpi_message>& messages
     // Only the root process serializes and calculates message sizes
     std::vector<std::string> serializedMessages;
     if (rank == 0) {
-        for (const auto& message : messages) {
+        for (const auto& message : *messages) {
             std::string serializedMessage;
             serialize_message(message, serializedMessage);
             serializedMessages.push_back(serializedMessage);
