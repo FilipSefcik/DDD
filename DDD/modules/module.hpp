@@ -21,6 +21,7 @@ class module {
 
   public:
     module(std::string paName, int paStates);
+    module(std::string infoToString);
     ~module() {
         delete this->sons_reliability_;
         delete this->my_reliabilities_;
@@ -53,7 +54,7 @@ class module {
 
     // prints used to get info
     // used only during troubleshooting
-    void print_sons();
+    void print_all();
     void print_sons_reliabilities();
     void print_reliabilities();
 };
