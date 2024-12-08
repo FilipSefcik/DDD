@@ -10,42 +10,42 @@ mpi_manager::mpi_manager(std::string moduleData) {
     std::string line;
     while (std::getline(input, line)) {
         module* mod = new module(line);
-        this->my_modules.emplace(mod->get_name(), mod);
+        this->my_modules_.emplace(mod->get_name(), mod);
     }
 }
 
 mpi_manager::~mpi_manager() {
-    for (auto& pair : this->my_modules) {
+    for (auto& pair : this->my_modules_) {
         delete pair.second;
     }
-
-    my_modules.clear();
+    this->my_modules_.clear();
 }
 
-void mpi_manager::evaluate(std::string module_name) {
-    module* mod = this->my_modules.at(module_name);
+void mpi_manager::evaluate(std::string moduleName) {
+    module* mod = this->my_modules_.at(moduleName);
     if (mod) {
-        std::cout << "Density of " << this->calculated_state << ": " << mod->get_reliability(1)
+        std::cout << "Density of " << this->calculated_state_ << ": " << mod->get_reliability(1)
                   << std::endl;
     } else {
-        std::cout << "module not found.\n";
+        std::cout << "Module not found.\n";
     }
 }
 
-void mpi_manager::execute_module(std::string module_name, int module_position) {
-    module* mod = this->my_modules.at(module_name);
+void mpi_manager::execute_module(std::string moduleName, int modulePosition) {
+    module* mod = this->my_modules_.at(moduleName);
     if (mod) {
-        mod->set_position(module_position);
+        mod->set_position(modulePosition);
 
         std::string const& path = mod->get_path();
-        teddy::bss_manager bss_manager(mod->get_var_count(), mod->get_var_count() * 100);
-        std::optional<teddy::pla_file> pla_file = teddy::pla_file::load_file(path);
+        teddy::bss_manager bssManager(mod->get_var_count(), mod->get_var_count() * 100);
+        std::optional<teddy::pla_file> plaFile = teddy::pla_file::load_file(path);
         teddy::bss_manager::diagram_t f =
-            bss_manager.from_pla(*pla_file, teddy::fold_type::Left)[mod->get_function_column()];
-        // const double reliability = bss_manager.calculate_probability(
-        //     this->calculated_state, *mod->get_sons_reliability(), f);
+            bssManager.from_pla(*plaFile, teddy::fold_type::Left)[mod->get_function_column()];
 
-        // const double reliability = this->calculated_state == 1 ?
+        // const double reliability = bss_manager.calculate_probability(
+        //     this->calculated_state_, *mod->get_sons_reliability(), f);
+
+        // const double reliability = this->calculated_state_ == 1 ?
         //                             bss_manager.calculate_availability(1,
         //                             *mod->get_sons_reliability(), f) :
         //                             bss_manager.calculate_unavailability(1,
@@ -59,11 +59,13 @@ void mpi_manager::execute_module(std::string module_name, int module_position) {
         // }
 
         // std::cout << "avail 1 " << bss_manager.calculate_availability(1,
-        // *mod->get_sons_reliability(), f) << std::endl; std::cout << "avail 0 " <<
-        // bss_manager.calculate_availability(0, *mod->get_sons_reliability(), f) << std::endl;
+        // *mod->get_sons_reliability(), f) << std::endl;
+        // std::cout << "avail 0 " << bss_manager.calculate_availability(0,
+        // *mod->get_sons_reliability(), f) << std::endl;
         // std::cout << "unavail 1 " << bss_manager.calculate_unavailability(1,
-        // *mod->get_sons_reliability(), f) << std::endl; std::cout << "unavail 0 " <<
-        // bss_manager.calculate_unavailability(0, *mod->get_sons_reliability(), f) << std::endl;
+        // *mod->get_sons_reliability(), f) << std::endl;
+        // std::cout << "unavail 0 " << bss_manager.calculate_unavailability(0,
+        // *mod->get_sons_reliability(), f) << std::endl;
         // std::cout << "state 1 " << bss_manager.state_frequency(f, 1) << std::endl;
         // std::cout << "state 0 " << bss_manager.state_frequency(f, 0) << std::endl;
         // std::cout << "prob 1 "
@@ -73,11 +75,11 @@ void mpi_manager::execute_module(std::string module_name, int module_position) {
         //           << bss_manager.calculate_probability(0, *mod->get_sons_reliability(), f)
         //           << std::endl;
 
-        bss_manager.calculate_probabilities(*mod->get_sons_reliability(), f);
+        bssManager.calculate_probabilities(*mod->get_sons_reliability(), f);
         std::vector<double> result;
         for (int i = 0; i < 2; i++) {
-            std::cout << bss_manager.get_probability(i) << " ";
-            result.push_back(bss_manager.get_probability(i));
+            std::cout << bssManager.get_probability(i) << " ";
+            result.push_back(bssManager.get_probability(i));
         }
         std::cout << std::endl;
 
@@ -92,9 +94,9 @@ void mpi_manager::execute_module(std::string module_name, int module_position) {
     }
 }
 
-void mpi_manager::link_modules(std::string parent_name, std::string son_name) {
-    module* parent = this->my_modules.at(parent_name);
-    module* son = this->my_modules.at(son_name);
+void mpi_manager::link_modules(std::string parentName, std::string sonName) {
+    module* parent = this->my_modules_.at(parentName);
+    module* son = this->my_modules_.at(sonName);
     if (parent && son) {
         parent->set_sons_reliability(son->get_position(), son->get_my_reliabilities());
     } else {
@@ -102,8 +104,8 @@ void mpi_manager::link_modules(std::string parent_name, std::string son_name) {
     }
 }
 
-void mpi_manager::send_module(std::string module_name, int recievers_rank) {
-    module* mod = this->my_modules.at(module_name);
+void mpi_manager::send_module(std::string moduleName, int receiversRank) {
+    module* mod = this->my_modules_.at(moduleName);
     if (mod) {
         mpi_communicator::mpi_message message;
         message.header_ = "MSG";
@@ -111,14 +113,14 @@ void mpi_manager::send_module(std::string module_name, int recievers_rank) {
         for (double rel : *mod->get_my_reliabilities()) {
             message.payload_ += " " + std::to_string(rel);
         }
-        mpi_communicator::send_message(message, recievers_rank);
+        mpi_communicator::send_message(message, receiversRank);
     } else {
         std::cout << "No module found\n";
     }
 }
 
-void mpi_manager::recv_module(std::string parent_name, int sender) {
-    module* parent = this->my_modules.at(parent_name);
+void mpi_manager::recv_module(std::string parentName, int sender) {
+    module* parent = this->my_modules_.at(parentName);
     if (parent) {
         mpi_communicator::mpi_message message;
         mpi_communicator::recv_message(sender, message);
@@ -141,34 +143,33 @@ void mpi_manager::recv_module(std::string parent_name, int sender) {
 }
 
 void mpi_manager::complete_instructions(std::string instructions, int state) {
+    this->calculated_state_ = state;
 
-    this->calculated_state = state;
+    auto inputString = std::istringstream(instructions);
 
-    auto input_string = std::istringstream(instructions);
+    std::string keyWord, paramFirst, paramSecond;
 
-    std::string key_word, param_first, param_second;
-
-    while (input_string >> key_word) {
-        if (key_word == "END") {
-            this->evaluate(param_first);
+    while (inputString >> keyWord) {
+        if (keyWord == "END") {
+            this->evaluate(paramFirst);
         } else {
-            input_string >> param_first >> param_second;
-            if (key_word == "EXEC") {
-                this->execute_module(param_first, std::stoi(param_second));
-            } else if (key_word == "LINK") {
-                this->link_modules(param_first, param_second);
-            } else if (key_word == "SEND") {
-                this->send_module(param_first, std::stoi(param_second));
-            } else if (key_word == "RECV") {
-                this->recv_module(param_first, std::stoi(param_second));
+            inputString >> paramFirst >> paramSecond;
+            if (keyWord == "EXEC") {
+                this->execute_module(paramFirst, std::stoi(paramSecond));
+            } else if (keyWord == "LINK") {
+                this->link_modules(paramFirst, paramSecond);
+            } else if (keyWord == "SEND") {
+                this->send_module(paramFirst, std::stoi(paramSecond));
+            } else if (keyWord == "RECV") {
+                this->recv_module(paramFirst, std::stoi(paramSecond));
             }
         }
     }
 }
 
-void mpi_manager::print_my_modules(int my_rank) {
-    std::cout << my_rank << std::endl;
-    for (auto pair : this->my_modules) {
+void mpi_manager::print_my_modules(int myRank) {
+    std::cout << myRank << std::endl;
+    for (auto pair : this->my_modules_) {
         std::cout << pair.second->get_name() << std::endl;
     }
 }
