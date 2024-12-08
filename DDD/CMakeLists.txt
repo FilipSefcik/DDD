@@ -7,6 +7,8 @@ add_executable(
     modules/module_info.cpp
     processing/module_manager.hpp
     processing/module_manager.cpp
+    processing/mpi_manager.hpp
+    processing/mpi_manager.cpp
     utils/divider.hpp
     utils/divider.cpp
     utils/mpi_communicator.hpp

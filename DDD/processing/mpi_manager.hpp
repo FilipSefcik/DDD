@@ -1,7 +1,5 @@
 #pragma once
 #include "../modules/module.hpp"
-#include "../utils/mpi_communicator.hpp"
-#include <cstdint>
 #include <libteddy/details/diagram_manager.hpp>
 #include <libteddy/reliability.hpp>
 
@@ -14,6 +12,7 @@ class mpi_manager {
     int calculated_state = 0;
 
   public:
+    mpi_manager(std::string moduleData);
     ~mpi_manager();
 
     // instructions as functions
