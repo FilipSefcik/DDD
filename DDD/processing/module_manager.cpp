@@ -206,7 +206,10 @@ void module_manager::create_messages(int numProcesses,
             }
             // Append the module's string representation to the payload (with a delimiter)
             if (messageList[assignedProcess].payload_ == "EMPTY") {
-                messageList[assignedProcess].payload_ = mod->to_string();
+                messageList[assignedProcess].payload_ =
+                    this->get_instructions_for_process(assignedProcess);
+                messageList[assignedProcess].payload_ +=
+                    messageList.at(0).delimiter_ + mod->to_string();
             } else {
                 messageList[assignedProcess].payload_ +=
                     "\n" + mod->to_string(); // Append with a newline separator
@@ -226,7 +229,7 @@ std::string module_manager::get_instructions_for_process(size_t processRank) {
     if (processRank < this->separate_instructions_->size()) {
         return this->separate_instructions_->at(processRank)->str();
     }
-    return "INVALID RANK";
+    return "INVALID OR UNUSED RANK";
 }
 
 void module_manager::print_modules() {

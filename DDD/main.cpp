@@ -26,6 +26,8 @@ int main(int argc, char* argv[]) {
         node_divider divider;
         divider.divide_modules(manager.get_modules(), processCount);
 
+        manager.get_instructions(processCount);
+
         std::vector<mpi_communicator::mpi_message> messages;
         manager.create_messages(processCount, messages);
 
@@ -35,8 +37,13 @@ int main(int argc, char* argv[]) {
         std::vector<module*> modules;
         std::cout << "RANK " << rank << std::endl;
         std::cout << myMessage.header_ << std::endl << myMessage.payload_ << std::endl;
+
+        size_t delimiterPos = myMessage.payload_.find(myMessage.delimiter_);
+        std::string instructions = myMessage.payload_.substr(0, delimiterPos);
+        std::string modules_info = myMessage.payload_.substr(delimiterPos + 3);
+
         if (myMessage.header_ == "MODULE") {
-            std::istringstream payload(myMessage.payload_);
+            std::istringstream payload(modules_info);
             std::string line;
             while (std::getline(payload, line)) {
                 modules.push_back(new module(line));
@@ -54,8 +61,13 @@ int main(int argc, char* argv[]) {
         std::vector<module*> modules;
         std::cout << "RANK " << rank << std::endl;
         std::cout << myMessage.header_ << std::endl << myMessage.payload_ << std::endl;
+
+        size_t delimiterPos = myMessage.payload_.find(myMessage.delimiter_);
+        std::string instructions = myMessage.payload_.substr(0, delimiterPos);
+        std::string modules_info = myMessage.payload_.substr(delimiterPos + 3);
+
         if (myMessage.header_ == "MODULE") {
-            std::istringstream payload(myMessage.payload_);
+            std::istringstream payload(modules_info);
             std::string line;
             while (std::getline(payload, line)) {
                 modules.push_back(new module(line));
