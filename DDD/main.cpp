@@ -1,5 +1,6 @@
 #include "modules/module.hpp"
 #include "processing/module_manager.hpp"
+#include "processing/mpi_manager.hpp"
 #include "utils/divider.hpp"
 #include "utils/mpi_communicator.hpp"
 // #include <cstddef>
@@ -20,6 +21,8 @@ int main(int argc, char* argv[]) {
     int processCount;
     MPI_Comm_size(MPI_COMM_WORLD, &processCount);
 
+    mpi_communicator::mpi_message myMessage;
+
     if (rank == 0) {
         module_manager manager;
         manager.load("../../DDD/load_files/modules/module_map.conf");
@@ -31,53 +34,29 @@ int main(int argc, char* argv[]) {
         std::vector<mpi_communicator::mpi_message> messages;
         manager.create_messages(processCount, messages);
 
-        mpi_communicator::mpi_message myMessage;
         mpi_communicator::scatter_messages(&messages, myMessage);
 
-        std::vector<module*> modules;
-        std::cout << "RANK " << rank << std::endl;
-        std::cout << myMessage.header_ << std::endl << myMessage.payload_ << std::endl;
-
-        size_t delimiterPos = myMessage.payload_.find(myMessage.delimiter_);
-        std::string instructions = myMessage.payload_.substr(0, delimiterPos);
-        std::string modules_info = myMessage.payload_.substr(delimiterPos + 3);
-
-        if (myMessage.header_ == "MODULE") {
-            std::istringstream payload(modules_info);
-            std::string line;
-            while (std::getline(payload, line)) {
-                modules.push_back(new module(line));
-            }
-        }
-
-        for (size_t i = 0; i < modules.size(); i++) {
-            modules.at(i)->print_all();
-            delete modules.at(i);
-        }
     } else {
-        mpi_communicator::mpi_message myMessage;
         mpi_communicator::scatter_messages(nullptr, myMessage);
+    }
 
-        std::vector<module*> modules;
-        std::cout << "RANK " << rank << std::endl;
-        std::cout << myMessage.header_ << std::endl << myMessage.payload_ << std::endl;
+    mpi_manager* mpiManager = nullptr;
+    std::vector<module*> modules;
+    // std::cout << "RANK " << rank << std::endl;
+    // std::cout << myMessage.header_ << std::endl << myMessage.payload_ << std::endl;
 
+    if (myMessage.header_ == "MODULE") {
         size_t delimiterPos = myMessage.payload_.find(myMessage.delimiter_);
         std::string instructions = myMessage.payload_.substr(0, delimiterPos);
         std::string modules_info = myMessage.payload_.substr(delimiterPos + 3);
+        mpiManager = new mpi_manager(modules_info);
+        // mpiManager->print_my_modules(rank);
+        // std::cout << instructions << std::endl;
+        mpiManager->complete_instructions(instructions, 1);
+    }
 
-        if (myMessage.header_ == "MODULE") {
-            std::istringstream payload(modules_info);
-            std::string line;
-            while (std::getline(payload, line)) {
-                modules.push_back(new module(line));
-            }
-        }
-
-        for (size_t i = 0; i < modules.size(); i++) {
-            modules.at(i)->print_all();
-            delete modules.at(i);
-        }
+    if (mpiManager) {
+        delete mpiManager;
     }
 
     MPI_Finalize();

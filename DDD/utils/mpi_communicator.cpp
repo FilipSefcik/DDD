@@ -1,5 +1,6 @@
 #include "mpi_communicator.hpp"
 #include <cstring>
+#include <iostream>
 #include <mpi.h>
 
 void mpi_communicator::send_message(const mpi_message& message, int receiverRank) {
@@ -83,6 +84,11 @@ void mpi_communicator::scatter_messages(const std::vector<mpi_message>* messages
 
 void mpi_communicator::gather_doubles(double* message, double* receiveBuffer) {
     MPI_Gather(message, 1, MPI_DOUBLE, receiveBuffer, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+}
+
+void mpi_communicator::print_message(mpi_message message) {
+    std::cout << "Header: " << message.header_ << std::endl;
+    std::cout << "Payload: " << message.payload_ << std::endl;
 }
 
 void mpi_communicator::serialize_message(const mpi_message message,
