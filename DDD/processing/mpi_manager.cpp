@@ -32,6 +32,13 @@ void mpi_manager::evaluate(std::string moduleName) {
 }
 
 void mpi_manager::execute_module(std::string moduleName, int modulePosition) {
+    module* mod1 = this->my_modules_.at(moduleName);
+    if (mod1) {
+        mod1->set_position(modulePosition);
+        std::cout << "Executing " << moduleName << std::endl;
+    }
+    return;
+    
     module* mod = this->my_modules_.at(moduleName);
     if (mod) {
         mod->set_position(modulePosition);
@@ -98,6 +105,7 @@ void mpi_manager::link_modules(std::string parentName, std::string sonName) {
     module* parent = this->my_modules_.at(parentName);
     module* son = this->my_modules_.at(sonName);
     if (parent && son) {
+        std::cout << "Linking " << parentName << " <- " << sonName << std::endl;
         parent->set_sons_reliability(son->get_position(), son->get_my_reliabilities());
     } else {
         std::cout << "No module found.\n";
@@ -113,6 +121,8 @@ void mpi_manager::send_module(std::string moduleName, int receiversRank) {
         for (double rel : *mod->get_my_reliabilities()) {
             message.payload_ += " " + std::to_string(rel);
         }
+        std::cout << "Sending message to " << receiversRank << std::endl;
+        mpi_communicator::print_message(message);
         mpi_communicator::send_message(message, receiversRank);
     } else {
         std::cout << "No module found\n";
@@ -125,6 +135,8 @@ void mpi_manager::recv_module(std::string parentName, int sender) {
         mpi_communicator::mpi_message message;
         mpi_communicator::recv_message(sender, message);
         if (message.header_ == "MSG") {
+            std::cout << "Received message from " << sender << std::endl;
+            mpi_communicator::print_message(message);
             std::istringstream line(message.payload_);
             int sonPosition;
             line >> sonPosition;

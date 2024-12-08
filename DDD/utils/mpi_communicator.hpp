@@ -25,6 +25,7 @@ class mpi_communicator {
     static void scatter_messages(const std::vector<mpi_message>* messages,
                                  mpi_message& receiveBuffer);
     static void gather_doubles(double* message, double* receiveBuffer);
+    static void print_message(mpi_message message);
 
   private:
     static void serialize_message(const mpi_message message, std::string& serializedMessage);

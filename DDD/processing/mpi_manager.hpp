@@ -23,9 +23,6 @@ class mpi_manager {
     void send_module(std::string moduleName, int receiversRank);
     void recv_module(std::string parentName, int sender);
 
-    // Processing modules
-    void write_to_pla();
-
     // Used for testing
     void print_my_modules(int myRank);
 };
