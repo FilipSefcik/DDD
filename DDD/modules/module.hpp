@@ -18,6 +18,7 @@ class module {
     int states_ = 0;
     std::vector<double>* my_reliabilities_;
     std::vector<std::vector<double>>* sons_reliability_;
+    std::vector<int>* sons_rel_count_;
 
   public:
     module(std::string paName, int paStates);
@@ -25,6 +26,7 @@ class module {
     ~module() {
         delete this->sons_reliability_;
         delete this->my_reliabilities_;
+        delete this->sons_rel_count_;
     }
 
     // getters
@@ -32,9 +34,11 @@ class module {
     std::string get_path() { return this->path_; }
 
     std::vector<std::vector<double>>* get_sons_reliability() { return this->sons_reliability_; }
+    std::vector<int>* get_son_rel_count() { return this->sons_rel_count_; }
     int get_position() { return this->position_; }
     int get_var_count() { return this->var_count_; }
     int get_function_column() { return this->function_column_; }
+    int get_states() { return this->states_; }
 
     double get_reliability(int state) { return this->my_reliabilities_->at(state); }
     std::vector<double>* get_my_reliabilities() { return this->my_reliabilities_; }
@@ -51,6 +55,7 @@ class module {
 
     void set_sons_reliability(size_t sonPosition, std::vector<double>* sonRel);
     void set_my_reliability(std::vector<double>* rel) { *this->my_reliabilities_ = *rel; }
+    void set_my_reliability(int state, double rel) { this->my_reliabilities_->at(state) = rel; }
 
     // prints used to get info
     // used only during troubleshooting
