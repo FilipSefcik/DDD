@@ -1,6 +1,5 @@
 #include "module.hpp"
 #include <iostream>
-#include <new>
 #include <ostream>
 #include <sstream>
 
