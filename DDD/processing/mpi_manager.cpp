@@ -1,9 +1,13 @@
 #include "mpi_manager.hpp"
 #include "../utils/mpi_communicator.hpp"
 #include <iostream>
+#include <libteddy/details/diagram_manager.hpp>
+#include <libteddy/details/types.hpp>
+#include <libteddy/reliability.hpp>
 #include <ostream>
 #include <sstream>
 #include <string>
+#include <vector>
 
 mpi_manager::mpi_manager(std::string moduleData) {
     std::istringstream input(moduleData);
@@ -24,78 +28,32 @@ mpi_manager::~mpi_manager() {
 void mpi_manager::evaluate(std::string moduleName) {
     module* mod = this->my_modules_.at(moduleName);
     if (mod) {
-        std::cout << "Density of " << this->calculated_state_ << ": " << mod->get_reliability(1)
-                  << std::endl;
+        std::cout << "Density of " << this->calculated_state_ << ": "
+                  << mod->get_reliability(this->calculated_state_) << std::endl;
     } else {
         std::cout << "Module not found.\n";
     }
 }
 
 void mpi_manager::execute_module(std::string moduleName, int modulePosition) {
-    module* mod1 = this->my_modules_.at(moduleName);
-    if (mod1) {
-        mod1->set_position(modulePosition);
-        std::cout << "Executing " << moduleName << std::endl;
-    }
-    return;
-    
     module* mod = this->my_modules_.at(moduleName);
     if (mod) {
         mod->set_position(modulePosition);
 
         std::string const& path = mod->get_path();
-        teddy::bss_manager bssManager(mod->get_var_count(), mod->get_var_count() * 100);
+
+        teddy::ifmss_manager<2> ifmssManager(mod->get_var_count(), mod->get_var_count() * 100,
+                                             *mod->get_son_rel_count());
         std::optional<teddy::pla_file> plaFile = teddy::pla_file::load_file(path);
-        teddy::bss_manager::diagram_t f =
-            bssManager.from_pla(*plaFile, teddy::fold_type::Left)[mod->get_function_column()];
 
-        // const double reliability = bss_manager.calculate_probability(
-        //     this->calculated_state_, *mod->get_sons_reliability(), f);
+        teddy::ifmss_manager<2>::diagram_t f2 =
+            ifmssManager.from_pla(*plaFile, teddy::fold_type::Left)[mod->get_function_column()];
 
-        // const double reliability = this->calculated_state_ == 1 ?
-        //                             bss_manager.calculate_availability(1,
-        //                             *mod->get_sons_reliability(), f) :
-        //                             bss_manager.calculate_unavailability(1,
-        //                             *mod->get_sons_reliability(), f);
-        // std::cout << mod->get_name() << std::endl;
-        // for (int i = 0; i < mod->get_sons_reliability()->size(); i++) {
-        //     for (int j = 0; j < mod->get_sons_reliability()->at(i).size(); j++) {
-        //         std::cout << mod->get_sons_reliability()->at(i).at(j) << " ";
-        //     }
-        //     std::cout << std::endl;
-        // }
-
-        // std::cout << "avail 1 " << bss_manager.calculate_availability(1,
-        // *mod->get_sons_reliability(), f) << std::endl;
-        // std::cout << "avail 0 " << bss_manager.calculate_availability(0,
-        // *mod->get_sons_reliability(), f) << std::endl;
-        // std::cout << "unavail 1 " << bss_manager.calculate_unavailability(1,
-        // *mod->get_sons_reliability(), f) << std::endl;
-        // std::cout << "unavail 0 " << bss_manager.calculate_unavailability(0,
-        // *mod->get_sons_reliability(), f) << std::endl;
-        // std::cout << "state 1 " << bss_manager.state_frequency(f, 1) << std::endl;
-        // std::cout << "state 0 " << bss_manager.state_frequency(f, 0) << std::endl;
-        // std::cout << "prob 1 "
-        //           << bss_manager.calculate_probability(1, *mod->get_sons_reliability(), f)
-        //           << std::endl;
-        // std::cout << "prob 0 "
-        //           << bss_manager.calculate_probability(0, *mod->get_sons_reliability(), f)
-        //           << std::endl;
-
-        bssManager.calculate_probabilities(*mod->get_sons_reliability(), f);
-        std::vector<double> result;
-        for (int i = 0; i < 2; i++) {
-            std::cout << bssManager.get_probability(i) << " ";
-            result.push_back(bssManager.get_probability(i));
+        ifmssManager.calculate_probabilities(*mod->get_sons_reliability(), f2);
+        for (int i = 0; i < mod->get_states(); i++) {
+            double prob = ifmssManager.get_probability(i);
+            mod->set_my_reliability(i, prob);
         }
-        std::cout << std::endl;
-
-        for (double prob : result) {
-            std::cout << prob << " ";
-        }
-        std::cout << std::endl;
-
-        // mod->set_reliability(reliability);
     } else {
         std::cout << "Module not found.\n";
     }
@@ -105,7 +63,6 @@ void mpi_manager::link_modules(std::string parentName, std::string sonName) {
     module* parent = this->my_modules_.at(parentName);
     module* son = this->my_modules_.at(sonName);
     if (parent && son) {
-        std::cout << "Linking " << parentName << " <- " << sonName << std::endl;
         parent->set_sons_reliability(son->get_position(), son->get_my_reliabilities());
     } else {
         std::cout << "No module found.\n";
@@ -121,8 +78,6 @@ void mpi_manager::send_module(std::string moduleName, int receiversRank) {
         for (double rel : *mod->get_my_reliabilities()) {
             message.payload_ += " " + std::to_string(rel);
         }
-        std::cout << "Sending message to " << receiversRank << std::endl;
-        mpi_communicator::print_message(message);
         mpi_communicator::send_message(message, receiversRank);
     } else {
         std::cout << "No module found\n";
@@ -135,8 +90,6 @@ void mpi_manager::recv_module(std::string parentName, int sender) {
         mpi_communicator::mpi_message message;
         mpi_communicator::recv_message(sender, message);
         if (message.header_ == "MSG") {
-            std::cout << "Received message from " << sender << std::endl;
-            mpi_communicator::print_message(message);
             std::istringstream line(message.payload_);
             int sonPosition;
             line >> sonPosition;
@@ -182,6 +135,6 @@ void mpi_manager::complete_instructions(std::string instructions, int state) {
 void mpi_manager::print_my_modules(int myRank) {
     std::cout << myRank << std::endl;
     for (auto pair : this->my_modules_) {
-        std::cout << pair.second->get_name() << std::endl;
+        pair.second->print_all();
     }
 }

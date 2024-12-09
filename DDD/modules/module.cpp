@@ -1,5 +1,6 @@
 #include "module.hpp"
 #include <iostream>
+#include <new>
 #include <ostream>
 #include <sstream>
 
@@ -34,12 +35,14 @@ module::module(std::string infoToString) {
     this->my_reliabilities_ =
         new std::vector<double>(this->states_, 1.0 / this->states_); // Default reliability
     this->sons_reliability_ = new std::vector<std::vector<double>>(this->var_count_);
+    this->sons_rel_count_ = new std::vector<int>(this->var_count_);
 
     // Reading son states into sons_reliability_
     for (int i = 0; i < this->var_count_; ++i) {
         int sonState;
         if (fields >> sonState) {
-            (*this->sons_reliability_)[i] = std::vector<double>(sonState, 1.0 / sonState);
+            this->sons_reliability_->at(i) = std::vector<double>(sonState, 1.0 / sonState);
+            this->sons_rel_count_->at(i) = (sonState);
         }
     }
 }
@@ -62,6 +65,7 @@ void module::set_sons_reliability(size_t sonPosition, std::vector<double>* sonRe
 
 void module::print_sons_reliabilities() {
     for (size_t i = 0; i < this->sons_reliability_->size(); i++) {
+        std::cout << this->sons_rel_count_->at(i) << " ";
         for (size_t j = 0; j < this->sons_reliability_->at(i).size(); j++) {
             std::cout << this->sons_reliability_->at(i).at(j) << " ";
         }
