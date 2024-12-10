@@ -25,8 +25,8 @@ module_manager::~module_manager() {
     this->modules_->clear();
     this->separate_instructions_->clear();
 
-    delete modules_;
-    delete separate_instructions_;
+    delete this->modules_;
+    delete this->separate_instructions_;
 }
 
 void module_manager::load(std::string confPath) {

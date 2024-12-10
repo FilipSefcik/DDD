@@ -1,6 +1,7 @@
 #include "process.hpp"
 
 // -------process---------
+
 void process::process_instructions(int state) {
     if (this->mpi_manager_) {
         this->mpi_manager_->complete_instructions(this->my_instructions_, state);
@@ -22,7 +23,6 @@ process::~process() {
         mpi_manager_ = nullptr;
     }
 }
-
 
 // -------main process-------
 
