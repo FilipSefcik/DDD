@@ -15,6 +15,8 @@ add_executable(
     utils/divider.cpp
     utils/mpi_communicator.hpp
     utils/mpi_communicator.cpp
+    ddd_core/ddd.hpp
+    ddd_core/ddd.cpp
 )
 
 find_package(TeDDy REQUIRED)
