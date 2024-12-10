@@ -39,7 +39,7 @@ int main(int argc, char* argv[]) {
     }
 
     process->process_information();
-    process->process_instructions(1);
+    process->process_instructions(0);
 
     delete process; // Virtual destructor ensures proper cleanup
     //  std::cout << rank << " PROCESS DELETE OK\n";
