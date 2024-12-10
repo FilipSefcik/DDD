@@ -17,6 +17,11 @@ ddd::ddd() {
     } else {
         this->process_ = new slave_process(this->my_rank);
     }
+
+    char processorName[MPI_MAX_PROCESSOR_NAME];
+    int nameLength;
+    MPI_Get_processor_name(processorName, &nameLength); // Get the processor name
+    std::cout << "Rank " << this->my_rank << " runs on " << processorName << std::endl;
 }
 
 ddd::~ddd() {
