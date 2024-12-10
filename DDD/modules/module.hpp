@@ -16,9 +16,9 @@ class module {
     int var_count_ = 0;
     int function_column_ = 0;
     int states_ = 0;
-    std::vector<double>* my_reliabilities_;
-    std::vector<std::vector<double>>* sons_reliability_;
-    std::vector<int>* sons_rel_count_;
+    std::vector<double>* my_reliabilities_ = nullptr;
+    std::vector<std::vector<double>>* sons_reliability_ = nullptr;
+    std::vector<int>* sons_rel_count_ = nullptr;
 
   public:
     module(std::string paName, int paStates);
@@ -27,6 +27,9 @@ class module {
         delete this->sons_reliability_;
         delete this->my_reliabilities_;
         delete this->sons_rel_count_;
+        this->sons_reliability_ = nullptr;
+        this->my_reliabilities_ = nullptr;
+        this->sons_rel_count_ = nullptr;
     }
 
     // getters

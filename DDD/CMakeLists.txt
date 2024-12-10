@@ -9,10 +9,14 @@ add_executable(
     processing/module_manager.cpp
     processing/mpi_manager.hpp
     processing/mpi_manager.cpp
+    processing/process.hpp
+    processing/process.cpp
     utils/divider.hpp
     utils/divider.cpp
     utils/mpi_communicator.hpp
     utils/mpi_communicator.cpp
+    ddd_core/ddd.hpp
+    ddd_core/ddd.cpp
 )
 
 find_package(TeDDy REQUIRED)

@@ -21,6 +21,7 @@ mpi_manager::mpi_manager(std::string moduleData) {
 mpi_manager::~mpi_manager() {
     for (auto& pair : this->my_modules_) {
         delete pair.second;
+        pair.second = nullptr;
     }
     this->my_modules_.clear();
 }
