@@ -1,7 +1,7 @@
 #pragma once
 #include "../modules/module.hpp"
-#include <libteddy/details/diagram_manager.hpp>
-#include <libteddy/reliability.hpp>
+#include <libteddy/impl/diagram_manager.hpp>
+#include <libteddy/inc/reliability.hpp>
 
 /**
  * @brief Completes instructions from the mpi_manager class and communicates using mpi_communicator.

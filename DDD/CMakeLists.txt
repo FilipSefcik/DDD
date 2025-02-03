@@ -19,7 +19,7 @@ add_executable(
     ddd_core/ddd.cpp
 )
 
-find_package(TeDDy REQUIRED)
+# find_package(TeDDy REQUIRED)
 
 target_link_libraries(
     main PRIVATE teddy::teddy

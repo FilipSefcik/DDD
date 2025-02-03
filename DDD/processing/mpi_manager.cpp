@@ -1,9 +1,9 @@
 #include "mpi_manager.hpp"
 #include "../utils/mpi_communicator.hpp"
 #include <iostream>
-#include <libteddy/details/diagram_manager.hpp>
-#include <libteddy/details/types.hpp>
-#include <libteddy/reliability.hpp>
+#include <libteddy/impl/diagram_manager.hpp>
+#include <libteddy/impl/types.hpp>
+#include <libteddy/inc/reliability.hpp>
 #include <ostream>
 #include <sstream>
 #include <string>
@@ -43,16 +43,23 @@ void mpi_manager::execute_module(std::string moduleName, int modulePosition) {
 
         std::string const& path = mod->get_path();
 
-        teddy::ifmss_manager<2> ifmssManager(mod->get_var_count(), mod->get_var_count() * 100,
-                                             *mod->get_son_rel_count());
+        // teddy::ifmss_manager<2> ifmssManager(mod->get_var_count(), mod->get_var_count() * 100,
+        //                                      *mod->get_son_rel_count());
+        teddy::imss_manager ifmssManager(mod->get_var_count(), mod->get_var_count() * 100,
+                                         *mod->get_son_rel_count());
         std::optional<teddy::pla_file> plaFile = teddy::pla_file::load_file(path);
 
-        teddy::ifmss_manager<2>::diagram_t f2 =
-            ifmssManager.from_pla(*plaFile, teddy::fold_type::Left)[mod->get_function_column()];
+        // teddy::ifmss_manager<2>::diagram_t f2 =
+        //     ifmssManager.from_pla(*plaFile, teddy::fold_type::Left)[mod->get_function_column()];
+        // ifmssManager.from_pla(const pla_file &file)
+        // teddy::imss_manager::diagram_t f2 =
+        // /*ifmssManager.from_pla(*plaFile)[mod->get_function_column()];*/
+        // ifmssManager.from_pla(*plaFile, teddy::fold_type::Left)[mod->get_function_column()];
 
-        ifmssManager.calculate_probabilities(*mod->get_sons_reliability(), f2);
+        std::vector<double> ps =
+            ifmssManager.calculate_probabilities(*mod->get_sons_reliability(), f2);
         for (int i = 0; i < mod->get_states(); i++) {
-            double prob = ifmssManager.get_probability(i);
+            double prob = ps[i];
             mod->set_my_reliability(i, prob);
         }
     } else {
