@@ -1,0 +1,3 @@
+[submodule "DecisionDiagrams"]
+	path = DecisionDiagrams
+	url = https://github.com/MichalMrena/DecisionDiagrams.git
