@@ -11,6 +11,8 @@ add_executable(
     processing/mpi_manager.cpp
     processing/process.hpp
     processing/process.cpp
+    utils/callbacks.hpp
+    utils/callbacks.cpp
     utils/divider.hpp
     utils/divider.cpp
     utils/mpi_communicator.hpp
