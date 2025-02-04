@@ -56,8 +56,8 @@ void mpi_manager::execute_module(std::string moduleName, int modulePosition) {
         // /*ifmssManager.from_pla(*plaFile)[mod->get_function_column()];*/
         // ifmssManager.from_pla(*plaFile, teddy::fold_type::Left)[mod->get_function_column()];
 
-        std::vector<double> ps =
-            ifmssManager.calculate_probabilities(*mod->get_sons_reliability(), f2);
+        // std::vector<double> ps =
+        //     ifmssManager.calculate_probabilities(*mod->get_sons_reliability(), f2);
         for (int i = 0; i < mod->get_states(); i++) {
             double prob = ps[i];
             mod->set_my_reliability(i, prob);
