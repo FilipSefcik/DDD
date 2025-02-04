@@ -30,8 +30,9 @@ class main_process : public process {
   private:
     int process_count_ = 0;
     module_manager module_manager_;
-    divider* divider_ = nullptr;
+    // divider* divider_ = nullptr;
     std::string conf_path_;
+    bool (*divide_function_)(std::vector<module_info*>* modules, int nodeCount);
 
   public:
     // main_process class implementation
@@ -39,6 +40,9 @@ class main_process : public process {
     ~main_process();
 
     void set_conf_path(std::string path) { this->conf_path_ = path; };
+    void set_divide_function(bool (*divide)(std::vector<module_info*>* modules, int nodeCount)) {
+        this->divide_function_ = divide;
+    };
     void process_information() override;
     void set_divider(int flag);
 };

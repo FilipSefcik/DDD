@@ -150,7 +150,7 @@ void module_manager::get_instructions(size_t processCount) {
         processCount > this->modules_->size() ? this->modules_->size() : processCount);
 
     std::sort(this->modules_->begin(), this->modules_->end(),
-              [](module_info* a, module_info* b) { return a->get_priority() < b->get_priority(); });
+              [](module_info* a, module_info* b) { return a->get_priority() < b->get_priority(); });            
 
     for (size_t i = 0; i < this->modules_->size(); i++) {
         module_info* mod = this->modules_->at(i);

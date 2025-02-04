@@ -26,16 +26,19 @@ process::~process() {
 
 // -------main process-------
 
-main_process::~main_process() {
-    if (divider_) {
-        delete divider_;
-        divider_ = nullptr; // Avoid dangling pointer
-    }
-}
+// main_process::~main_process() {
+//     if (divider_) {
+//         delete divider_;
+//         divider_ = nullptr; // Avoid dangling pointer
+//     }
+// }
 
 void main_process::process_information() {
     this->module_manager_.load(this->conf_path_);
-    this->divider_->divide_modules(this->module_manager_.get_modules(), this->process_count_);
+    if (! this->divide_function_(this->module_manager_.get_modules(), this->process_count_)) {
+        // add mpi broadcast to end the program
+        return;
+    }
 
     this->module_manager_.get_instructions(this->process_count_);
 
@@ -47,16 +50,16 @@ void main_process::process_information() {
     this->deserialize_message(myMessage);
 }
 
-void main_process::set_divider(int flag) {
-    switch (flag) {
-        case 0:
-            this->divider_ = new var_count_divider();
-            break;
-        default:
-            this->divider_ = new node_divider();
-            break;
-    }
-}
+// void main_process::set_divider(int flag) {
+//     switch (flag) {
+//         case 0:
+//             this->divider_ = new var_count_divider();
+//             break;
+//         default:
+//             this->divider_ = new node_divider();
+//             break;
+//     }
+// }
 
 // ------slave process-------
 
