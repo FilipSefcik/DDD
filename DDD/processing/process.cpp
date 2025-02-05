@@ -26,13 +26,6 @@ process::~process() {
 
 // -------main process-------
 
-// main_process::~main_process() {
-//     if (divider_) {
-//         delete divider_;
-//         divider_ = nullptr; // Avoid dangling pointer
-//     }
-// }
-
 void main_process::process_information() {
     this->module_manager_.load(this->conf_path_);
     if (! this->divide_function_(this->module_manager_.get_modules(), this->process_count_)) {
@@ -40,7 +33,9 @@ void main_process::process_information() {
         return;
     }
 
-    this->module_manager_.get_instructions(this->process_count_);
+    this->module_manager_.get_instructions(this->process_count_, this->add_instruction_);
+
+    this->module_manager_.print_separate_instructions();
 
     std::vector<mpi_communicator::mpi_message> messages;
     this->module_manager_.create_messages(this->process_count_, messages);
@@ -49,17 +44,6 @@ void main_process::process_information() {
     mpi_communicator::scatter_messages(&messages, myMessage);
     this->deserialize_message(myMessage);
 }
-
-// void main_process::set_divider(int flag) {
-//     switch (flag) {
-//         case 0:
-//             this->divider_ = new var_count_divider();
-//             break;
-//         default:
-//             this->divider_ = new node_divider();
-//             break;
-//     }
-// }
 
 // ------slave process-------
 

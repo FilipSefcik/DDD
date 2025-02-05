@@ -1,5 +1,4 @@
 #pragma once
-#include "../utils/divider.hpp"
 #include "../utils/mpi_communicator.hpp"
 #include "module_manager.hpp"
 #include "mpi_manager.hpp"
@@ -30,21 +29,22 @@ class main_process : public process {
   private:
     int process_count_ = 0;
     module_manager module_manager_;
-    // divider* divider_ = nullptr;
     std::string conf_path_;
     bool (*divide_function_)(std::vector<module_info*>* modules, int nodeCount);
+    void (*add_instruction_)(module_info* mod, std::string* instructions);
 
   public:
     // main_process class implementation
     main_process(int rank, int process_count) : process(rank), process_count_(process_count){};
-    ~main_process();
 
     void set_conf_path(std::string path) { this->conf_path_ = path; };
     void set_divide_function(bool (*divide)(std::vector<module_info*>* modules, int nodeCount)) {
         this->divide_function_ = divide;
     };
+    void set_add_instruction(void (*addInstruction)(module_info* mod, std::string* instructions)) {
+        this->add_instruction_ = addInstruction;
+    };
     void process_information() override;
-    void set_divider(int flag);
 };
 
 /**

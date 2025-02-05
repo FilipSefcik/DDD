@@ -1,7 +1,6 @@
 #pragma once
 #include "../modules/module_info.hpp"
 #include "../utils/mpi_communicator.hpp"
-#include <sstream>
 #include <vector>
 
 /**
@@ -10,7 +9,7 @@
 class module_manager {
   private:
     std::vector<module_info*>* modules_;
-    std::vector<std::stringstream*>* separate_instructions_;
+    std::vector<std::string>* separate_instructions_;
 
   public:
     module_manager();
@@ -21,7 +20,7 @@ class module_manager {
     int get_modules_count() { return this->modules_->size(); }
 
     // special functions
-    void get_instructions(size_t processCount);
+    void get_instructions(size_t processCount, void (*addInstruction)(module_info* mod, std::string* instructions));
     std::string get_instructions_for_process(size_t processRank);
 
     void create_messages(int numProcesses, std::vector<mpi_communicator::mpi_message>& messages);
