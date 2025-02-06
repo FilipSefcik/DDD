@@ -1,9 +1,12 @@
 #include "mpi_manager.hpp"
 #include "../utils/mpi_communicator.hpp"
+#include "libteddy/inc/core.hpp"
 #include <iostream>
 #include <libteddy/impl/diagram_manager.hpp>
 #include <libteddy/impl/types.hpp>
+#include <libteddy/inc/io.hpp>
 #include <libteddy/inc/reliability.hpp>
+#include <libtsl/pla-description.hpp>
 #include <ostream>
 #include <sstream>
 #include <string>
@@ -45,9 +48,15 @@ void mpi_manager::execute_module(std::string moduleName, int modulePosition) {
 
         // teddy::ifmss_manager<2> ifmssManager(mod->get_var_count(), mod->get_var_count() * 100,
         //                                      *mod->get_son_rel_count());
-        teddy::imss_manager ifmssManager(mod->get_var_count(), mod->get_var_count() * 100,
-                                         *mod->get_son_rel_count());
-        std::optional<teddy::pla_file> plaFile = teddy::pla_file::load_file(path);
+        // teddy::imss_manager ifmssManager(mod->get_var_count(), mod->get_var_count() * 100,
+        //                                  *mod->get_son_rel_count());
+
+        teddy::bss_manager manager(mod->get_var_count(), mod->get_var_count() * 100);
+        std::optional<teddy::pla_file_binary> file = teddy::load_binary_pla(path, nullptr);
+        teddy::bdd_manager::diagram_t f =
+            teddy::io::from_pla(manager, *file)[mod->get_function_column()];
+        std::vector<double> ps = manager.calculate_probabilities(*mod->get_sons_reliability(), f);
+        mod->set_my_reliability(&ps);
 
         // teddy::ifmss_manager<2>::diagram_t f2 =
         //     ifmssManager.from_pla(*plaFile, teddy::fold_type::Left)[mod->get_function_column()];
