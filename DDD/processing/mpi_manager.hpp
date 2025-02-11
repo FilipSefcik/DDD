@@ -10,16 +10,22 @@ class mpi_manager {
   private:
     std::unordered_map<std::string, module*> my_modules_;
     int calculated_state_ = 0;
+    void (*execute_module_)(mpi_manager* manager, std::string inputString);
 
   public:
     mpi_manager(std::string moduleData);
     ~mpi_manager();
 
+    void set_function(void (*executeModule)(mpi_manager* manager,
+                                            std::string inputString)) {
+        this->execute_module_ = executeModule;
+    }
+
+    std::unordered_map<std::string, module*> get_my_modules() { return this->my_modules_; }
+
     // Instructions as functions
     void complete_instructions(std::string instructions, int state);
     void evaluate(std::string moduleName);
-    void execute_module(std::string moduleName, int modulePosition);
-    void link_modules(std::string parentName, std::string sonName);
     void send_module(std::string moduleName, int receiversRank);
     void recv_module(std::string parentName, int sender);
 

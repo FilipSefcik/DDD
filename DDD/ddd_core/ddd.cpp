@@ -62,6 +62,7 @@ void ddd::calculate_availability(int divider_flag, int state, bool timer_on) {
         mainProcess->set_add_instruction(add_instruction_density);
     }
     this->process_->process_information();
+    this->process_->set_function(calculate_true_density);
     this->process_->process_instructions(state);
 
     if (timer_on) {

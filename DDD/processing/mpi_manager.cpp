@@ -1,12 +1,7 @@
 #include "mpi_manager.hpp"
 #include "../utils/mpi_communicator.hpp"
-#include "libteddy/inc/core.hpp"
+#include <cstdio>
 #include <iostream>
-#include <libteddy/impl/diagram_manager.hpp>
-#include <libteddy/impl/types.hpp>
-#include <libteddy/inc/io.hpp>
-#include <libteddy/inc/reliability.hpp>
-#include <libtsl/pla-description.hpp>
 #include <ostream>
 #include <sstream>
 #include <string>
@@ -39,52 +34,14 @@ void mpi_manager::evaluate(std::string moduleName) {
     }
 }
 
-void mpi_manager::execute_module(std::string moduleName, int modulePosition) {
-    module* mod = this->my_modules_.at(moduleName);
-    if (mod) {
-        mod->set_position(modulePosition);
-
-        std::string const& path = mod->get_path();
-
-        // teddy::ifmss_manager<2> ifmssManager(mod->get_var_count(), mod->get_var_count() * 100,
-        //                                      *mod->get_son_rel_count());
-        // teddy::imss_manager ifmssManager(mod->get_var_count(), mod->get_var_count() * 100,
-        //                                  *mod->get_son_rel_count());
-
-        teddy::bss_manager manager(mod->get_var_count(), mod->get_var_count() * 100);
-        std::optional<teddy::pla_file_binary> file = teddy::load_binary_pla(path, nullptr);
-        teddy::bdd_manager::diagram_t f =
-            teddy::io::from_pla(manager, *file)[mod->get_function_column()];
-        std::vector<double> ps = manager.calculate_probabilities(*mod->get_sons_reliability(), f);
-        mod->set_my_reliability(&ps);
-
-        // teddy::ifmss_manager<2>::diagram_t f2 =
-        //     ifmssManager.from_pla(*plaFile, teddy::fold_type::Left)[mod->get_function_column()];
-        // ifmssManager.from_pla(const pla_file &file)
-        // teddy::imss_manager::diagram_t f2 =
-        // /*ifmssManager.from_pla(*plaFile)[mod->get_function_column()];*/
-        // ifmssManager.from_pla(*plaFile, teddy::fold_type::Left)[mod->get_function_column()];
-
-        // std::vector<double> ps =
-        //     ifmssManager.calculate_probabilities(*mod->get_sons_reliability(), f2);
-        // for (int i = 0; i < mod->get_states(); i++) {
-        //     double prob = ps[i];
-        //     mod->set_my_reliability(i, prob);
-        // }
-    } else {
-        std::cout << "Module not found.\n";
-    }
-}
-
-void mpi_manager::link_modules(std::string parentName, std::string sonName) {
-    module* parent = this->my_modules_.at(parentName);
-    module* son = this->my_modules_.at(sonName);
-    if (parent && son) {
-        parent->set_sons_reliability(son->get_position(), son->get_my_reliabilities());
-    } else {
-        std::cout << "No module found.\n";
-    }
-}
+//     module* parent = this->my_modules_.at(parentName);
+//     module* son = this->my_modules_.at(sonName);
+//     if (parent && son) {
+//         parent->set_sons_reliability(son->get_position(), son->get_my_reliabilities());
+//     } else {
+//         std::cout << "No module found.\n";
+//     }
+// }
 
 void mpi_manager::send_module(std::string moduleName, int receiversRank) {
     module* mod = this->my_modules_.at(moduleName);
@@ -127,23 +84,22 @@ void mpi_manager::recv_module(std::string parentName, int sender) {
 void mpi_manager::complete_instructions(std::string instructions, int state) {
     this->calculated_state_ = state;
 
-    auto inputString = std::istringstream(instructions);
+    std::istringstream inputString(instructions);
+    std::string line, keyWord, paramFirst, paramSecond;
 
-    std::string keyWord, paramFirst, paramSecond;
-
-    while (inputString >> keyWord) {
+    while (std::getline(inputString, line)) {
+        std::istringstream inputLine(line);
+        inputLine >> keyWord;
         if (keyWord == "END") {
             this->evaluate(paramFirst);
         } else {
-            inputString >> paramFirst >> paramSecond;
-            if (keyWord == "EXEC") {
-                this->execute_module(paramFirst, std::stoi(paramSecond));
-            } else if (keyWord == "LINK") {
-                this->link_modules(paramFirst, paramSecond);
-            } else if (keyWord == "SEND") {
+            inputLine >> paramFirst >> paramSecond;
+            if (keyWord == "SEND") {
                 this->send_module(paramFirst, std::stoi(paramSecond));
             } else if (keyWord == "RECV") {
                 this->recv_module(paramFirst, std::stoi(paramSecond));
+            } else {
+                this->execute_module_(this, line);
             }
         }
     }
