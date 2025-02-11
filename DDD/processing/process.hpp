@@ -20,6 +20,10 @@ class process {
     virtual ~process();
     virtual void process_information() = 0;
     void process_instructions(int state);
+    void set_function(void (*executeModule)(mpi_manager* manager,
+                                            std::string inputString)) {
+        this->mpi_manager_->set_function(executeModule);
+    }
 };
 
 /**

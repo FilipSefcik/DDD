@@ -13,8 +13,6 @@ add_executable(
     processing/process.cpp
     utils/callbacks.hpp
     utils/callbacks.cpp
-    utils/divider.hpp
-    utils/divider.cpp
     utils/mpi_communicator.hpp
     utils/mpi_communicator.cpp
     ddd_core/ddd.hpp
