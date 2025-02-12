@@ -63,6 +63,8 @@ void ddd::calculate_availability(int divider_flag, int state, bool timer_on) {
     }
     this->process_->process_information();
     this->process_->set_function(calculate_true_density);
+    this->process_->set_serialize_function(serialize_true_density);
+    this->process_->set_deserialize_function(deserialize_true_density);
     this->process_->process_instructions(state);
 
     if (timer_on) {
