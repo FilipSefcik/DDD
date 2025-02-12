@@ -5,7 +5,6 @@
 #include <ostream>
 #include <sstream>
 #include <string>
-#include <vector>
 
 mpi_manager::mpi_manager(std::string moduleData) {
     std::istringstream input(moduleData);
@@ -48,10 +47,7 @@ void mpi_manager::send_module(std::string moduleName, int receiversRank) {
     if (mod) {
         mpi_communicator::mpi_message message;
         message.header_ = "MSG";
-        message.payload_ = std::to_string(mod->get_position());
-        for (double rel : *mod->get_my_reliabilities()) {
-            message.payload_ += " " + std::to_string(rel);
-        }
+        message.payload_ = this->serialize_module_(mod);
         mpi_communicator::send_message(message, receiversRank);
     } else {
         std::cout << "No module found\n";
@@ -64,15 +60,7 @@ void mpi_manager::recv_module(std::string parentName, int sender) {
         mpi_communicator::mpi_message message;
         mpi_communicator::recv_message(sender, message);
         if (message.header_ == "MSG") {
-            std::istringstream line(message.payload_);
-            int sonPosition;
-            line >> sonPosition;
-            std::vector<double> sonRels;
-            double temp;
-            while (line >> temp) {
-                sonRels.push_back(temp);
-            }
-            parent->set_sons_reliability(sonPosition, &sonRels);
+            this->deserialize_module_(message.payload_, parent);
         } else {
             std::cout << "INVALID MESSAGE TYPE\n";
         }

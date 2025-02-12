@@ -109,3 +109,23 @@ void calculate_true_density(mpi_manager* manager, std::string inputString) {
         }
     }
 }
+
+std::string serialize_true_density(module* mod) {
+    std::string result = std::to_string(mod->get_position());
+    for (double rel : *mod->get_my_reliabilities()) {
+        result += " " + std::to_string(rel);
+    }
+    return result;
+}
+
+void deserialize_true_density(std::string inputString, module* mod) {
+    std::istringstream line(inputString);
+    int sonPosition;
+    line >> sonPosition;
+    std::vector<double> sonRels;
+    double temp;
+    while (line >> temp) {
+        sonRels.push_back(temp);
+    }
+    mod->set_sons_reliability(sonPosition, &sonRels);
+}
