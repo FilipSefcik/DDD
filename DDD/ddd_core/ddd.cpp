@@ -1,4 +1,5 @@
 #include "ddd.hpp"
+#include "../utils/callbacks.hpp"
 #include "../utils/mpi_communicator.hpp"
 #include <iostream>
 
@@ -17,6 +18,11 @@ ddd::ddd() {
     } else {
         this->process_ = new slave_process(this->my_rank);
     }
+
+    char processorName[MPI_MAX_PROCESSOR_NAME];
+    int nameLength;
+    MPI_Get_processor_name(processorName, &nameLength); // Get the processor name
+    std::cout << "Rank " << this->my_rank << " runs on " << processorName << std::endl;
 }
 
 ddd::~ddd() {
@@ -45,9 +51,20 @@ void ddd::calculate_availability(int divider_flag, int state, bool timer_on) {
 
     if (this->my_rank == 0 && this->process_) {
         main_process* mainProcess = dynamic_cast<main_process*>(this->process_);
-        mainProcess->set_divider(divider_flag);
+        switch (divider_flag) {
+            case 0:
+                mainProcess->set_divide_function(divide_by_var_count);
+                break;
+            default:
+                mainProcess->set_divide_function(divide_evenly);
+                break;
+        }
+        mainProcess->set_add_instruction(add_instruction_density);
     }
     this->process_->process_information();
+    this->process_->set_function(calculate_true_density);
+    this->process_->set_serialize_function(serialize_true_density);
+    this->process_->set_deserialize_function(deserialize_true_density);
     this->process_->process_instructions(state);
 
     if (timer_on) {

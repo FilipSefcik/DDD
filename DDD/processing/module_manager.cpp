@@ -2,15 +2,14 @@
 #include <algorithm>
 #include <fstream>
 #include <iostream>
-// #include <regex>
-#include <sstream>
 #include <string>
 #include <unordered_map>
 #include <vector>
 
 module_manager::module_manager() {
     this->modules_ = new std::vector<module_info*>();
-    this->separate_instructions_ = new std::vector<std::stringstream*>();
+    //this->separate_instructions_ = new std::vector<std::stringstream*>();
+    this->separate_instructions_ = new std::vector<std::string>();
 }
 
 module_manager::~module_manager() {
@@ -18,9 +17,9 @@ module_manager::~module_manager() {
         delete this->modules_->at(i);
     }
 
-    for (size_t i = 0; i < this->separate_instructions_->size(); i++) {
-        delete this->separate_instructions_->at(i);
-    }
+    // for (size_t i = 0; i < this->separate_instructions_->size(); i++) {
+    //     delete this->separate_instructions_->at(i);
+    // }
 
     this->modules_->clear();
     this->separate_instructions_->clear();
@@ -145,46 +144,20 @@ void module_manager::load_modules(std::string confPath) {
  * Instructions consist of: Executing module, Sending module, Receiving module, Link modules, End
  * of processing.
  */
-void module_manager::get_instructions(size_t processCount) {
+void module_manager::get_instructions(size_t processCount, void (*addInstruction)(module_info* mod, std::string* instructions)) {
     this->separate_instructions_->resize(
         processCount > this->modules_->size() ? this->modules_->size() : processCount);
 
     std::sort(this->modules_->begin(), this->modules_->end(),
-              [](module_info* a, module_info* b) { return a->get_priority() < b->get_priority(); });
+              [](module_info* a, module_info* b) { return a->get_priority() < b->get_priority(); });            
 
     for (size_t i = 0; i < this->modules_->size(); i++) {
         module_info* mod = this->modules_->at(i);
-        module_info* parent = mod->get_parent();
-        if (! this->separate_instructions_->at(mod->get_assigned_process())) {
-            this->separate_instructions_->at(mod->get_assigned_process()) = new std::stringstream;
-        }
-
-        // EXEC - module name - position of the module in parent
-        *this->separate_instructions_->at(mod->get_assigned_process())
-            << "EXEC " << mod->get_name() << " " << mod->get_position() << "\n";
-        if (parent) {
-            if (! this->separate_instructions_->at(parent->get_assigned_process())) {
-                this->separate_instructions_->at(parent->get_assigned_process()) =
-                    new std::stringstream;
-            }
-
-            if (mod->get_assigned_process() == parent->get_assigned_process()) {
-                // LINK - name of parent module - name of son module
-                *this->separate_instructions_->at(mod->get_assigned_process())
-                    << "LINK " << parent->get_name() << " " << mod->get_name() << "\n";
-            } else {
-                // SEND - name of module - rank of the process to send
-                *this->separate_instructions_->at(mod->get_assigned_process())
-                    << "SEND " << mod->get_name() << " " << parent->get_assigned_process() << "\n";
-
-                // RECV - parent module name - rank of the process received from
-                *this->separate_instructions_->at(parent->get_assigned_process())
-                    << "RECV " << parent->get_name() << " " << mod->get_assigned_process() << "\n";
-            }
-        } else {
-            // END - module which gives answer
-            *this->separate_instructions_->at(mod->get_assigned_process())
-                << "END " << mod->get_name() << "\n";
+        std::string instructions[2] = {"", ""};
+        addInstruction(mod, instructions);
+        this->separate_instructions_->at(mod->get_assigned_process()) += instructions[0];
+        if (mod->get_parent()) {
+            this->separate_instructions_->at(mod->get_parent()->get_assigned_process()) += instructions[1];
         }
     }
 }
@@ -227,7 +200,7 @@ void module_manager::create_messages(int numProcesses,
  */
 std::string module_manager::get_instructions_for_process(size_t processRank) {
     if (processRank < this->separate_instructions_->size()) {
-        return this->separate_instructions_->at(processRank)->str();
+        return this->separate_instructions_->at(processRank);
     }
     return "INVALID OR UNUSED RANK";
 }
@@ -258,6 +231,6 @@ void module_manager::print_assigned_processes() {
 void module_manager::print_separate_instructions() {
     for (size_t i = 0; i < this->separate_instructions_->size(); i++) {
         std::cout << "Node " << i << " instructions:\n";
-        std::cout << this->separate_instructions_->at(i)->str() << "\n";
+        std::cout << this->separate_instructions_->at(i) << "\n";
     }
 }

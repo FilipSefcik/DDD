@@ -11,15 +11,15 @@ add_executable(
     processing/mpi_manager.cpp
     processing/process.hpp
     processing/process.cpp
-    utils/divider.hpp
-    utils/divider.cpp
+    utils/callbacks.hpp
+    utils/callbacks.cpp
     utils/mpi_communicator.hpp
     utils/mpi_communicator.cpp
     ddd_core/ddd.hpp
     ddd_core/ddd.cpp
 )
 
-find_package(TeDDy REQUIRED)
+# find_package(TeDDy REQUIRED)
 
 target_link_libraries(
     main PRIVATE teddy::teddy
