@@ -33,15 +33,6 @@ void mpi_manager::evaluate(std::string moduleName) {
     }
 }
 
-//     module* parent = this->my_modules_.at(parentName);
-//     module* son = this->my_modules_.at(sonName);
-//     if (parent && son) {
-//         parent->set_sons_reliability(son->get_position(), son->get_my_reliabilities());
-//     } else {
-//         std::cout << "No module found.\n";
-//     }
-// }
-
 void mpi_manager::send_module(std::string moduleName, int receiversRank) {
     module* mod = this->my_modules_.at(moduleName);
     if (mod) {

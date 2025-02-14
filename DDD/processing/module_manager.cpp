@@ -82,7 +82,7 @@ void module_manager::load_modules(std::string confPath) {
         std::string path = line.substr(spaceIndex + 1, plaIndex + 4 - spaceIndex - 1);
         int column = std::stoi(line.substr(plaIndex + 5));
 
-        std::cout << "Nezabudnut ako nacitat stavy ci z pla alebo configuraku.\n";
+        //std::cout << "Nezabudnut ako nacitat stavy ci z pla alebo configuraku.\n";
         // Vytvorenie nového modulu
         module_info* mod = new module_info;
         mod->set_name(name);
