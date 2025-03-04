@@ -1,4 +1,5 @@
 #include "module.hpp"
+#include <cstdio>
 #include <iostream>
 #include <ostream>
 #include <sstream>
@@ -62,6 +63,23 @@ void module::set_sons_reliability(size_t sonPosition, std::vector<double>* sonRe
     this->sons_reliability_->at(sonPosition) = *sonRel;
 }
 
+void module::set_sons_reliability(std::vector<int>* domains) {
+    this->sons_reliability_->resize(domains->size());
+    this->sons_rel_count_->resize(domains->size());
+    for (size_t i = 0; i < domains->size(); i++) {
+        std::cout << domains->at(i) << std::endl;
+        this->sons_reliability_->at(i).resize(domains->at(i), 1.0 / domains->at(i));
+        this->sons_rel_count_->at(i) = domains->at(i);
+    }
+}
+
+void module::set_my_reliability(std::vector<double>* rel) {
+    this->my_reliabilities_->resize(rel->size());
+    for (size_t i = 0; i < rel->size(); i++) {
+        this->my_reliabilities_->at(i) = rel->at(i);
+    }
+}
+
 void module::print_sons_reliabilities() {
     for (size_t i = 0; i < this->sons_reliability_->size(); i++) {
         std::cout << this->sons_rel_count_->at(i) << " ";
@@ -85,8 +103,12 @@ void module::print_all() {
 }
 
 void module::print_reliabilities() {
+    double sum = 0;
+    std::cout << this->my_reliabilities_->size() << "\n";
     for (double prob : *this->my_reliabilities_) {
+        sum += prob;
         std::cout << prob << " ";
     }
+    std::cout << "Sum: " << sum << std::endl;
     std::cout << std::endl;
 }

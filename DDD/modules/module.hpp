@@ -57,7 +57,8 @@ class module {
     void set_function_column(int paColumn) { this->function_column_ = paColumn; }
 
     void set_sons_reliability(size_t sonPosition, std::vector<double>* sonRel);
-    void set_my_reliability(std::vector<double>* rel) { *this->my_reliabilities_ = *rel; }
+    void set_sons_reliability(std::vector<int>* domains);
+    void set_my_reliability(std::vector<double>* rel);
     void set_my_reliability(int state, double rel) { this->my_reliabilities_->at(state) = rel; }
 
     // prints used to get info
