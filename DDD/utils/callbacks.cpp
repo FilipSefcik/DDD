@@ -1,4 +1,6 @@
 #include "callbacks.hpp"
+#include "libteddy/inc/reliability.hpp"
+#include <cstdio>
 #include <iostream>
 #include <libteddy/inc/io.hpp>
 #include <sstream>
@@ -85,17 +87,35 @@ void calculate_true_density(mpi_manager* manager, std::string inputString) {
     if (keyWord == "EXEC") {
         module* mod = manager->get_my_modules().at(paramFirst);
         if (mod) {
+            
             mod->set_position(std::stoi(paramSecond));
-
             std::string const& path = mod->get_path();
-            teddy::bss_manager bssManager(mod->get_var_count(), mod->get_var_count() * 100);
-            std::optional<teddy::pla_file_binary> file = teddy::load_binary_pla(path, nullptr);
-            teddy::bdd_manager::diagram_t f =
-                teddy::io::from_pla(bssManager, *file)[mod->get_function_column()];
-            std::vector<double> ps =
-                bssManager.calculate_probabilities(*mod->get_sons_reliability(), f);
+            int pla_type = is_binary_pla(path);
+            std::vector<double> ps;
+            if (pla_type == 0) {
+                std::optional<teddy::pla_file_binary> file = teddy::load_binary_pla(path, nullptr);
+                teddy::bss_manager bssManager(file->input_count_, mod->get_var_count() * 100);
+                teddy::bdd_manager::diagram_t f =
+                    teddy::io::from_pla(bssManager, *file)[mod->get_function_column()];
+                ps = bssManager.calculate_probabilities(*mod->get_sons_reliability(), f);
+            } else if (pla_type == 1) {
+                std::optional<teddy::pla_file_mvl> file = teddy::load_mvl_pla(path, nullptr);
+                mod->set_sons_reliability(&file->domains_);
+                teddy::imss_manager imssManager(file->input_count_, mod->get_var_count() * 100,
+                                                file->domains_);
+                teddy::imss_manager::diagram_t f = teddy::io::from_pla(imssManager, *file);
+                ps = imssManager.calculate_probabilities(*mod->get_sons_reliability(), f);
+            } else {
+                std::cout << "Invalid PLA file.\n";
+                return;
+            }
+            printf("exec\n");
+            //mod->print_reliabilities();
 
             mod->set_my_reliability(&ps);
+
+            mod->print_reliabilities();
+
         } else {
             std::cout << "Module not found.\n";
         }
@@ -128,4 +148,31 @@ void deserialize_true_density(std::string inputString, module* mod) {
         sonRels.push_back(temp);
     }
     mod->set_sons_reliability(sonPosition, &sonRels);
+}
+
+int is_binary_pla(const std::string& path) {
+    std::ifstream file(path);
+    if (! file.is_open()) {
+        std::cerr << "Chyba pri otváraní súboru: " << path << std::endl;
+        return -1;
+    }
+
+    std::string line;
+    while (std::getline(file, line)) {
+        // Ignorujeme komentáre
+        if (! line.empty() && line[0] == '#') {
+            continue;
+        }
+
+        // Hľadáme indikátory binárneho alebo viachodnotového formátu
+        if (line.find(".i ") == 0 || line.find(".o ") == 0) {
+            return 0; // Binárna funkcia
+        }
+        if (line.find(".mv ") == 0) {
+            return 1; // Viachodnotová funkcia
+        }
+    }
+
+    // Ak nenájdeme žiadne z indikátorov, vrátime false ako predvolené
+    return -1;
 }

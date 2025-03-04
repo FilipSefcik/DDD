@@ -1,6 +1,6 @@
 #pragma once
-#include "../modules/module_info.hpp"
 #include "../modules/module.hpp"
+#include "../modules/module_info.hpp"
 #include "../processing/mpi_manager.hpp"
 #include <vector>
 
@@ -13,3 +13,5 @@ void calculate_true_density(mpi_manager* manager, std::string inputString);
 
 std::string serialize_true_density(module* mod);
 void deserialize_true_density(std::string inputString, module* mod);
+
+int is_binary_pla(const std::string& path);

@@ -39,11 +39,11 @@ void ddd::set_conf_path(std::string pa_conf_path) {
 }
 
 void ddd::calculate_availability(int divider_flag, int state, bool timer_on) {
-    if (state != 0 && state != 1) {
-        std::cerr << "Invalid state" << std::endl;
-        exit(2);
-        return;
-    }
+    // if (state != 0 && state != 1) {
+    //     std::cerr << "Invalid state" << std::endl;
+    //     exit(2);
+    //     return;
+    // }
 
     if (timer_on) {
         this->start_time = MPI_Wtime();
