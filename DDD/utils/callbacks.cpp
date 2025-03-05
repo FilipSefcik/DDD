@@ -87,7 +87,7 @@ void calculate_true_density(mpi_manager* manager, std::string inputString) {
     if (keyWord == "EXEC") {
         module* mod = manager->get_my_modules().at(paramFirst);
         if (mod) {
-            
+
             mod->set_position(std::stoi(paramSecond));
             std::string const& path = mod->get_path();
             int pla_type = is_binary_pla(path);
@@ -109,8 +109,8 @@ void calculate_true_density(mpi_manager* manager, std::string inputString) {
                 std::cout << "Invalid PLA file.\n";
                 return;
             }
-            printf("exec\n");
-            //mod->print_reliabilities();
+
+            mod->print_sons_reliabilities();
 
             mod->set_my_reliability(&ps);
 
