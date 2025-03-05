@@ -64,6 +64,7 @@ void module::set_sons_reliability(size_t sonPosition, std::vector<double>* sonRe
 }
 
 void module::set_sons_reliability(std::vector<int>* domains) {
+    this->sons_reliability_->clear();
     this->sons_reliability_->resize(domains->size());
     this->sons_rel_count_->resize(domains->size());
     for (size_t i = 0; i < domains->size(); i++) {
