@@ -3,6 +3,7 @@
 #include <cstdio>
 #include <iostream>
 #include <libteddy/inc/io.hpp>
+#include <ostream>
 #include <sstream>
 
 bool divide_evenly(std::vector<module_info*>* modules, int nodeCount) {
@@ -79,7 +80,7 @@ void add_instruction_density(module_info* mod, std::string* instructions) {
     }
 }
 
-void calculate_true_density(mpi_manager* manager, std::string inputString) {
+void calculate_true_density(mpi_manager* manager, const std::string& inputString) {
     std::string keyWord, paramFirst, paramSecond;
     std::istringstream inpueStream(inputString);
     inpueStream >> keyWord >> paramFirst >> paramSecond;
@@ -101,6 +102,9 @@ void calculate_true_density(mpi_manager* manager, std::string inputString) {
             } else if (pla_type == 1) {
                 std::optional<teddy::pla_file_mvl> file = teddy::load_mvl_pla(path, nullptr);
                 mod->set_sons_reliability(&file->domains_);
+                std::cout << std::endl;
+                std::cout << file->codomain_ << std::endl;
+                std::cout << std::endl;
                 teddy::imss_manager imssManager(file->input_count_, mod->get_var_count() * 100,
                                                 file->domains_);
                 teddy::imss_manager::diagram_t f = teddy::io::from_pla(imssManager, *file);
@@ -110,11 +114,17 @@ void calculate_true_density(mpi_manager* manager, std::string inputString) {
                 return;
             }
 
-            mod->print_sons_reliabilities();
+            // mod->print_sons_reliabilities();
 
             mod->set_my_reliability(&ps);
 
-            mod->print_reliabilities();
+            std::cout << std::endl;
+            for (size_t i = 0; i < ps.size(); i++) {
+                std::cout << ps.at(i) << " ";
+            }
+            std::cout << std::endl;
+
+            // mod->print_reliabilities();
 
         } else {
             std::cout << "Module not found.\n";
@@ -138,7 +148,7 @@ std::string serialize_true_density(module* mod) {
     return result;
 }
 
-void deserialize_true_density(std::string inputString, module* mod) {
+void deserialize_true_density(const std::string& inputString, module* mod) {
     std::istringstream line(inputString);
     int sonPosition;
     line >> sonPosition;

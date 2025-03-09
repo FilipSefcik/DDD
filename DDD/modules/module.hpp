@@ -21,7 +21,7 @@ class module {
     std::vector<int>* sons_rel_count_ = nullptr;
 
   public:
-    module(std::string paName, int paStates);
+    module(const std::string& paName, int paStates);
     module(std::string infoToString);
     ~module() {
         delete this->sons_reliability_;
@@ -48,7 +48,7 @@ class module {
 
     // setters
 
-    void set_path(std::string paPath) { this->path_ = paPath; }
+    void set_path(const std::string& paPath) { this->path_ = paPath; }
 
     void set_sons_reliability(size_t sonPosition, double sonRel, int state);
 
