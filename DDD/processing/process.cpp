@@ -1,4 +1,5 @@
 #include "process.hpp"
+#include <iostream>
 
 // -------process---------
 
@@ -29,7 +30,11 @@ process::~process() {
 void main_process::process_information() {
     this->module_manager_.load(this->conf_path_);
     if (! this->divide_function_(this->module_manager_.get_modules(), this->process_count_)) {
-        // add mpi broadcast to end the program
+        std::vector<mpi_communicator::mpi_message> error_messages;
+        error_messages.resize(this->process_count_, {"ERROR", "EMPTY"});
+        mpi_communicator::mpi_message myMessage;
+        mpi_communicator::scatter_messages(&error_messages, myMessage);
+        std::cerr << "Error: No modules to divide." << std::endl;
         return;
     }
 
