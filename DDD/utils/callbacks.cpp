@@ -1,5 +1,6 @@
 #include "callbacks.hpp"
 #include "libteddy/inc/reliability.hpp"
+#include <cstddef>
 #include <cstdio>
 #include <iostream>
 #include <libteddy/inc/io.hpp>
@@ -89,7 +90,7 @@ void calculate_true_density(mpi_manager* manager, const std::string& inputString
 
             mod->set_position(std::stoi(paramSecond));
             std::string const& path = mod->get_path();
-            int pla_type = is_binary_pla(path);
+            int pla_type = is_binary_pla(path, nullptr);
             std::vector<double> ps;
             if (pla_type == 0) {
                 std::optional<teddy::pla_file_binary> file = teddy::load_binary_pla(path, nullptr);
@@ -158,7 +159,7 @@ void deserialize_true_density(const std::string& inputString, module* mod) {
     mod->set_sons_reliability(sonPosition, &sonRels);
 }
 
-int is_binary_pla(const std::string& path) {
+int is_binary_pla(const std::string& path, int* states) {
     std::ifstream file(path);
     if (! file.is_open()) {
         std::cerr << "Chyba pri otváraní súboru: " << path << std::endl;
@@ -174,9 +175,21 @@ int is_binary_pla(const std::string& path) {
 
         // Hľadáme indikátory binárneho alebo viachodnotového formátu
         if (line.find(".i ") == 0 || line.find(".o ") == 0) {
+            if (states) {
+                *states = 2;
+            }
             return 0; // Binárna funkcia
         }
+
         if (line.find(".mv ") == 0) {
+            if (states) {
+                size_t pos = line.find_last_not_of(" \t"); // Nájde posledný neprázdny znak
+                while (pos > 0 && isdigit(line[pos]))
+                    --pos; // Posúva sa späť na začiatok čísla
+                int lastNumber =
+                    std::stoi(line.substr(pos + 1)); // Skonvertuje posledné číslo na int
+                *states = lastNumber;
+            }
             return 1; // Viachodnotová funkcia
         }
     }
