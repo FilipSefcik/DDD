@@ -1,4 +1,5 @@
 #include "module_manager.hpp"
+#include "../utils/callbacks.hpp"
 #include <algorithm>
 #include <fstream>
 #include <iostream>
@@ -8,7 +9,7 @@
 
 module_manager::module_manager() {
     this->modules_ = new std::vector<module_info*>();
-    //this->separate_instructions_ = new std::vector<std::stringstream*>();
+    // this->separate_instructions_ = new std::vector<std::stringstream*>();
     this->separate_instructions_ = new std::vector<std::string>();
 }
 
@@ -28,7 +29,7 @@ module_manager::~module_manager() {
     delete this->separate_instructions_;
 }
 
-void module_manager::load(std::string confPath) {
+void module_manager::load(const std::string& confPath) {
     try {
         this->load_modules(confPath);
     } catch (const std::exception& e) {
@@ -54,7 +55,7 @@ void module_manager::load(std::string confPath) {
  * the relationship mappings.
  */
 
-void module_manager::load_modules(std::string confPath) {
+void module_manager::load_modules(const std::string& confPath) {
 
     std::ifstream file(confPath);
     if (! file.is_open()) {
@@ -82,12 +83,18 @@ void module_manager::load_modules(std::string confPath) {
         std::string path = line.substr(spaceIndex + 1, plaIndex + 4 - spaceIndex - 1);
         int column = std::stoi(line.substr(plaIndex + 5));
 
-        //std::cout << "Nezabudnut ako nacitat stavy ci z pla alebo configuraku.\n";
-        // Vytvorenie nového modulu
+        //  Vytvorenie nového modulu
         module_info* mod = new module_info;
         mod->set_name(name);
-        mod->set_states(2); // Prednastavený počet stavov
         mod->set_pla_path(path);
+        int states = 2;
+        int is_binary = is_binary_pla(mod->get_pla_path(), &states);
+
+        if (is_binary == -1) {
+            throw std::runtime_error("Invalid PLA file: " + mod->get_pla_path());
+        }
+
+        mod->set_states(states); // Prednastavený počet stavov
         mod->set_function_column(column);
 
         // Uloženie modulu
@@ -144,12 +151,14 @@ void module_manager::load_modules(std::string confPath) {
  * Instructions consist of: Executing module, Sending module, Receiving module, Link modules, End
  * of processing.
  */
-void module_manager::get_instructions(size_t processCount, void (*addInstruction)(module_info* mod, std::string* instructions)) {
+void module_manager::get_instructions(size_t processCount,
+                                      void (*addInstruction)(module_info* mod,
+                                                             std::string* instructions)) {
     this->separate_instructions_->resize(
         processCount > this->modules_->size() ? this->modules_->size() : processCount);
 
     std::sort(this->modules_->begin(), this->modules_->end(),
-              [](module_info* a, module_info* b) { return a->get_priority() < b->get_priority(); });            
+              [](module_info* a, module_info* b) { return a->get_priority() < b->get_priority(); });
 
     for (size_t i = 0; i < this->modules_->size(); i++) {
         module_info* mod = this->modules_->at(i);
@@ -157,7 +166,8 @@ void module_manager::get_instructions(size_t processCount, void (*addInstruction
         addInstruction(mod, instructions);
         this->separate_instructions_->at(mod->get_assigned_process()) += instructions[0];
         if (mod->get_parent()) {
-            this->separate_instructions_->at(mod->get_parent()->get_assigned_process()) += instructions[1];
+            this->separate_instructions_->at(mod->get_parent()->get_assigned_process()) +=
+                instructions[1];
         }
     }
 }

@@ -14,4 +14,4 @@ void calculate_true_density(mpi_manager* manager, const std::string& inputString
 std::string serialize_true_density(module* mod);
 void deserialize_true_density(const std::string& inputString, module* mod);
 
-int is_binary_pla(const std::string& path);
+int is_binary_pla(const std::string& path, int* states);
