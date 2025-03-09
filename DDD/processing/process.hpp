@@ -21,13 +21,20 @@ class process {
     virtual void process_information() = 0;
     void process_instructions(int state);
     void set_function(void (*executeModule)(mpi_manager* manager, const std::string& inputString)) {
-        this->mpi_manager_->set_function(executeModule);
+        if (this->mpi_manager_) {
+            this->mpi_manager_->set_function(executeModule);
+        }
     }
     void set_serialize_function(std::string (*serializeModule)(module* mod)) {
-        this->mpi_manager_->set_serialize_function(serializeModule);
+        if (this->mpi_manager_) {
+            this->mpi_manager_->set_serialize_function(serializeModule);
+        }
     }
-    void set_deserialize_function(void (*deserializeModule)(const std::string& inputString, module* mod)) {
-        this->mpi_manager_->set_deserialize_function(deserializeModule);
+    void set_deserialize_function(void (*deserializeModule)(const std::string& inputString,
+                                                            module* mod)) {
+        if (this->mpi_manager_) {
+            this->mpi_manager_->set_deserialize_function(deserializeModule);
+        }
     }
 };
 
