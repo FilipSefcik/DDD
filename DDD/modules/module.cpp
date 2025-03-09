@@ -4,7 +4,7 @@
 #include <ostream>
 #include <sstream>
 
-module::module(std::string paName, int paStates) {
+module::module(const std::string& paName, int paStates) {
     this->name_ = paName;
     this->states_ = paStates;
     this->sons_reliability_ = new std::vector<std::vector<double>>();
@@ -68,13 +68,14 @@ void module::set_sons_reliability(std::vector<int>* domains) {
     this->sons_reliability_->resize(domains->size());
     this->sons_rel_count_->resize(domains->size());
     for (size_t i = 0; i < domains->size(); i++) {
-        std::cout << domains->at(i) << std::endl;
+        // std::cout << domains->at(i) << std::endl;
         this->sons_reliability_->at(i).resize(domains->at(i), 1.0 / domains->at(i));
         this->sons_rel_count_->at(i) = domains->at(i);
     }
 }
 
 void module::set_my_reliability(std::vector<double>* rel) {
+    this->my_reliabilities_->clear();
     this->my_reliabilities_->resize(rel->size());
     for (size_t i = 0; i < rel->size(); i++) {
         this->my_reliabilities_->at(i) = rel->at(i);

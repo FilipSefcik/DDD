@@ -20,13 +20,13 @@ class process {
     virtual ~process();
     virtual void process_information() = 0;
     void process_instructions(int state);
-    void set_function(void (*executeModule)(mpi_manager* manager, std::string inputString)) {
+    void set_function(void (*executeModule)(mpi_manager* manager, const std::string& inputString)) {
         this->mpi_manager_->set_function(executeModule);
     }
     void set_serialize_function(std::string (*serializeModule)(module* mod)) {
         this->mpi_manager_->set_serialize_function(serializeModule);
     }
-    void set_deserialize_function(void (*deserializeModule)(std::string inputString, module* mod)) {
+    void set_deserialize_function(void (*deserializeModule)(const std::string& inputString, module* mod)) {
         this->mpi_manager_->set_deserialize_function(deserializeModule);
     }
 };
@@ -46,7 +46,7 @@ class main_process : public process {
     // main_process class implementation
     main_process(int rank, int process_count) : process(rank), process_count_(process_count){};
 
-    void set_conf_path(std::string path) { this->conf_path_ = path; };
+    void set_conf_path(const std::string& path) { this->conf_path_ = path; };
     void set_divide_function(bool (*divide)(std::vector<module_info*>* modules, int nodeCount)) {
         this->divide_function_ = divide;
     };

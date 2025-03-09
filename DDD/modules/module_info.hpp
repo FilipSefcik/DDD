@@ -28,8 +28,8 @@ class module_info {
 
     // Setters
     void set_parent(module_info* parent) { this->parent_ = parent; }
-    void set_name(const std::string name) { this->name_ = name; }
-    void set_pla_path(const std::string plaPath) { this->pla_path_ = plaPath; }
+    void set_name(const std::string& name) { this->name_ = name; }
+    void set_pla_path(const std::string& plaPath) { this->pla_path_ = plaPath; }
     void set_function_column(int functionColumn) { this->function_column_ = functionColumn; }
     void set_states(int states) { this->states_ = states; }
     void set_priority(int priority) { this->priority_ = priority; }

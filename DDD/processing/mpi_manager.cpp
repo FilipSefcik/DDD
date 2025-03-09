@@ -23,7 +23,7 @@ mpi_manager::~mpi_manager() {
     this->my_modules_.clear();
 }
 
-void mpi_manager::evaluate(std::string moduleName) {
+void mpi_manager::evaluate(const std::string& moduleName) {
     module* mod = this->my_modules_.at(moduleName);
     if (mod) {
         std::cout << "Density of " << this->calculated_state_ << ": "
@@ -33,7 +33,7 @@ void mpi_manager::evaluate(std::string moduleName) {
     }
 }
 
-void mpi_manager::send_module(std::string moduleName, int receiversRank) {
+void mpi_manager::send_module(const std::string& moduleName, int receiversRank) {
     module* mod = this->my_modules_.at(moduleName);
     if (mod) {
         mpi_communicator::mpi_message message;
@@ -45,7 +45,7 @@ void mpi_manager::send_module(std::string moduleName, int receiversRank) {
     }
 }
 
-void mpi_manager::recv_module(std::string parentName, int sender) {
+void mpi_manager::recv_module(const std::string& parentName, int sender) {
     module* parent = this->my_modules_.at(parentName);
     if (parent) {
         mpi_communicator::mpi_message message;
@@ -60,7 +60,7 @@ void mpi_manager::recv_module(std::string parentName, int sender) {
     }
 }
 
-void mpi_manager::complete_instructions(std::string instructions, int state) {
+void mpi_manager::complete_instructions(const std::string& instructions, int state) {
     this->calculated_state_ = state;
 
     std::istringstream inputString(instructions);

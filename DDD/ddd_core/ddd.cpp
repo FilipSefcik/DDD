@@ -31,7 +31,7 @@ ddd::~ddd() {
     MPI_Finalize();
 }
 
-void ddd::set_conf_path(std::string pa_conf_path) {
+void ddd::set_conf_path(const std::string& pa_conf_path) {
     if (this->my_rank == 0 && this->process_) {
         main_process* mainProcess = dynamic_cast<main_process*>(this->process_);
         mainProcess->set_conf_path(pa_conf_path);
