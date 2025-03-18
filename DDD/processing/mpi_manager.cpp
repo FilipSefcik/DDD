@@ -26,6 +26,10 @@ mpi_manager::~mpi_manager() {
 void mpi_manager::evaluate(const std::string& moduleName) {
     module* mod = this->my_modules_.at(moduleName);
     if (mod) {
+        if (this->calculated_state_ < 0 || this->calculated_state_ >= mod->get_states()) {
+            std::cout << "Invalid state\n";
+            return;
+        }
         std::cout << "Density of " << this->calculated_state_ << ": "
                   << mod->get_reliability(this->calculated_state_) << std::endl;
     } else {

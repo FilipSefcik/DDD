@@ -76,8 +76,9 @@ void module::set_sons_reliability(std::vector<int>* domains) {
 
 void module::set_my_reliability(std::vector<double>* rel) {
     this->my_reliabilities_->clear();
-    this->my_reliabilities_->resize(rel->size());
-    for (size_t i = 0; i < rel->size(); i++) {
+    std::cout << this->states_ << std::endl;
+    this->my_reliabilities_->resize(this->states_);
+    for (int i = 0; i < this->states_; i++) {
         this->my_reliabilities_->at(i) = rel->at(i);
     }
 }

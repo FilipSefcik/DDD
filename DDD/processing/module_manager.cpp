@@ -88,7 +88,8 @@ void module_manager::load_modules(const std::string& confPath) {
         mod->set_name(name);
         mod->set_pla_path(path);
         int states = 2;
-        int is_binary = is_binary_pla(mod->get_pla_path(), &states);
+        std::vector<int> domains;
+        int is_binary = is_binary_pla(mod->get_pla_path(), &states, &domains);
 
         if (is_binary == -1) {
             throw std::runtime_error("Invalid PLA file: " + mod->get_pla_path());
@@ -96,6 +97,7 @@ void module_manager::load_modules(const std::string& confPath) {
 
         mod->set_states(states); // Prednastavený počet stavov
         mod->set_function_column(column);
+        mod->set_sons_domains(&domains);
 
         // Uloženie modulu
         moduleMapping[name] = this->modules_->size();
@@ -133,7 +135,7 @@ void module_manager::load_modules(const std::string& confPath) {
                 parentModule->add_module(childModule);
             } else if (val[i] == 'V') {
                 // Ak ide o premennú, pridaj syna so stavmi rodiča
-                parentModule->add_son(parentModule->get_states());
+                // parentModule->add_son(parentModule->get_states());
                 i++;
             } else {
                 throw std::runtime_error("Unexpected character in mapping: " +
