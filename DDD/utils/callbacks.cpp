@@ -79,6 +79,22 @@ void add_instruction_density(module_info* mod, std::string* instructions) {
     }
 }
 
+void add_instruction_merging(module_info* mod, std::string* instructions) {
+    module_info* parent = mod->get_parent();
+
+    if (parent) {
+        std::string latest_path = mod->get_latest_path();
+        
+        
+    } else {
+        // END - module which gives answer
+        *instructions += "FIN " + mod->get_name() + "\n";
+    }
+    
+}
+
+
+
 void calculate_true_density(mpi_manager* manager, const std::string& inputString) {
     std::string keyWord, paramFirst, paramSecond;
     std::istringstream inpueStream(inputString);
