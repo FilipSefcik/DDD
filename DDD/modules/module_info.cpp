@@ -4,6 +4,7 @@
 
 void module_info::add_module(module_info* newModule) {
     //newModule->set_position(this->sons_states_.size());
+    this->son_count_++;
     std::cout << this->name_ << " son states size: ";;
     std::cout << this->sons_states_.size() << std::endl;
     newModule->set_parent(this);
@@ -18,6 +19,10 @@ void module_info::add_priority(int sonPriority) {
             this->parent_->add_priority(this->priority_);
         }
     }
+}
+
+void module_info::add_merge_path(std::string son_path) {
+    
 }
 
 std::string module_info::to_string() const {
