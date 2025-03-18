@@ -120,6 +120,7 @@ void module_manager::load_modules(const std::string& confPath) {
 
         // Spracovanie vzťahov (M a V)
         size_t i = 0;
+        int son_position = 0;
         while (i < val.size()) {
             if (val[i] == 'M') {
                 // Ak ide o modul, extrahuj názov
@@ -132,11 +133,14 @@ void module_manager::load_modules(const std::string& confPath) {
 
                 // Pridaj syna so stavmi modulu
                 auto childModule = this->modules_->at(moduleMapping.at(moduleName));
+                childModule->set_position(son_position);
                 parentModule->add_module(childModule);
+                son_position++;
             } else if (val[i] == 'V') {
                 // Ak ide o premennú, pridaj syna so stavmi rodiča
                 // parentModule->add_son(parentModule->get_states());
                 i++;
+                son_position++;
             } else {
                 throw std::runtime_error("Unexpected character in mapping: " +
                                          std::string(1, val[i]));
