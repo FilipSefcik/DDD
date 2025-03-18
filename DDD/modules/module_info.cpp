@@ -3,9 +3,11 @@
 #include <sstream>
 
 void module_info::add_module(module_info* newModule) {
-    newModule->set_position(this->sons_states_.size());
+    //newModule->set_position(this->sons_states_.size());
+    std::cout << this->name_ << " son states size: ";;
+    std::cout << this->sons_states_.size() << std::endl;
     newModule->set_parent(this);
-    this->add_son(newModule->get_states());
+    //this->add_son(newModule->get_states());
     this->add_priority(newModule->get_priority());
 }
 
