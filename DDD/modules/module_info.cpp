@@ -40,3 +40,12 @@ void module_info::print_sons() {
         std::cout << this->sons_states_.at(i) << " ";
     }
 }
+
+void module_info::set_sons_domains(std::vector<int>* domains) {
+    for (int i = 0; i < domains->at(0); i++) {
+        this->sons_states_.push_back(2);
+    }
+    for (size_t i = 1; i < domains->size(); i++) {
+        this->sons_states_.push_back(domains->at(i));
+    }
+}

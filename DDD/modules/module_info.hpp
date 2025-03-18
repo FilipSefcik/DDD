@@ -35,6 +35,7 @@ class module_info {
     void set_priority(int priority) { this->priority_ = priority; }
     void set_assigned_process(int assignedProcess) { this->assigned_process_ = assignedProcess; }
     void set_position(int position) { this->position_ = position; }
+    void set_sons_domains(std::vector<int>* domains);
 
     void add_son(int sonStates) { this->sons_states_.push_back(sonStates); }
     void add_module(module_info* newModule);

@@ -90,7 +90,7 @@ void calculate_true_density(mpi_manager* manager, const std::string& inputString
 
             mod->set_position(std::stoi(paramSecond));
             std::string const& path = mod->get_path();
-            int pla_type = is_binary_pla(path, nullptr);
+            int pla_type = is_binary_pla(path, nullptr, nullptr);
             std::vector<double> ps;
             if (pla_type == 0) {
                 std::optional<teddy::pla_file_binary> file = teddy::load_binary_pla(path, nullptr);
@@ -100,7 +100,7 @@ void calculate_true_density(mpi_manager* manager, const std::string& inputString
                 ps = bssManager.calculate_probabilities(*mod->get_sons_reliability(), f);
             } else if (pla_type == 1) {
                 std::optional<teddy::pla_file_mvl> file = teddy::load_mvl_pla(path, nullptr);
-                mod->set_sons_reliability(&file->domains_);
+                // mod->set_sons_reliability(&file->domains_);
                 std::cout << std::endl;
                 std::cout << file->codomain_ << std::endl;
                 std::cout << std::endl;
@@ -113,17 +113,11 @@ void calculate_true_density(mpi_manager* manager, const std::string& inputString
                 return;
             }
 
-            // mod->print_sons_reliabilities();
+            mod->print_sons_reliabilities();
 
             mod->set_my_reliability(&ps);
 
-            std::cout << std::endl;
-            for (size_t i = 0; i < ps.size(); i++) {
-                std::cout << ps.at(i) << " ";
-            }
-            std::cout << std::endl;
-
-            // mod->print_reliabilities();
+            mod->print_reliabilities();
 
         } else {
             std::cout << "Module not found.\n";
@@ -159,7 +153,7 @@ void deserialize_true_density(const std::string& inputString, module* mod) {
     mod->set_sons_reliability(sonPosition, &sonRels);
 }
 
-int is_binary_pla(const std::string& path, int* states) {
+int is_binary_pla(const std::string& path, int* states, std::vector<int>* domains) {
     std::ifstream file(path);
     if (! file.is_open()) {
         std::cerr << "Chyba pri otváraní súboru: " << path << std::endl;
@@ -173,27 +167,45 @@ int is_binary_pla(const std::string& path, int* states) {
             continue;
         }
 
-        // Hľadáme indikátory binárneho alebo viachodnotového formátu
-        if (line.find(".i ") == 0 || line.find(".o ") == 0) {
+        std::istringstream iss(line);
+        std::string token;
+        iss >> token; // Prvé slovo (napr. .i alebo .mv)
+
+        // Ak riadok začína ".i", znamená to binárnu funkciu
+        if (token == ".i") {
+            int number;
+            while (iss >> number) {
+                if (domains) {
+                    domains->push_back(number);
+                }
+            }
             if (states) {
-                *states = 2;
+                *states = 2; // Binárna funkcia má vždy 2 stavy
             }
             return 0; // Binárna funkcia
         }
 
-        if (line.find(".mv ") == 0) {
-            if (states) {
-                size_t pos = line.find_last_not_of(" \t"); // Nájde posledný neprázdny znak
-                while (pos > 0 && isdigit(line[pos]))
-                    --pos; // Posúva sa späť na začiatok čísla
-                int lastNumber =
-                    std::stoi(line.substr(pos + 1)); // Skonvertuje posledné číslo na int
-                *states = lastNumber;
+        // Ak riadok začína ".mv", znamená to viachodnotovú funkciu
+        if (token == ".mv") {
+            int number;
+            std::vector<int> numbers;
+            while (iss >> number) {
+                numbers.push_back(number);
+            }
+            if (! numbers.empty()) {
+                if (states) {
+                    *states = numbers.back(); // Posledné číslo ide do `states`
+                }
+                if (domains) {
+                    if (! numbers.empty()) {
+                        numbers.erase(numbers.begin());
+                    }
+                    domains->insert(domains->end(), numbers.begin(), numbers.end());
+                }
             }
             return 1; // Viachodnotová funkcia
         }
     }
 
-    // Ak nenájdeme žiadne z indikátorov, vrátime false ako predvolené
-    return -1;
+    return -1; // Ak súbor neobsahuje .i ani .mv
 }
