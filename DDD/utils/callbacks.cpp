@@ -84,16 +84,12 @@ void add_instruction_merging(module_info* mod, std::string* instructions) {
 
     if (parent) {
         std::string latest_path = mod->get_latest_path();
-        
-        
+
     } else {
         // END - module which gives answer
         *instructions += "FIN " + mod->get_name() + "\n";
     }
-    
 }
-
-
 
 void calculate_true_density(mpi_manager* manager, const std::string& inputString) {
     std::string keyWord, paramFirst, paramSecond;
@@ -108,13 +104,13 @@ void calculate_true_density(mpi_manager* manager, const std::string& inputString
             std::string const& path = mod->get_path();
             int pla_type = is_binary_pla(path, nullptr, nullptr);
             std::vector<double> ps;
-            if (pla_type == 0) {
+            if (pla_type == 1) {
                 std::optional<teddy::pla_file_binary> file = teddy::load_binary_pla(path, nullptr);
                 teddy::bss_manager bssManager(file->input_count_, mod->get_var_count() * 100);
                 teddy::bdd_manager::diagram_t f =
                     teddy::io::from_pla(bssManager, *file)[mod->get_function_column()];
                 ps = bssManager.calculate_probabilities(*mod->get_sons_reliability(), f);
-            } else if (pla_type == 1) {
+            } else if (pla_type == 0) {
                 std::optional<teddy::pla_file_mvl> file = teddy::load_mvl_pla(path, nullptr);
                 // mod->set_sons_reliability(&file->domains_);
                 std::cout << std::endl;
@@ -189,16 +185,16 @@ int is_binary_pla(const std::string& path, int* states, std::vector<int>* domain
 
         // Ak riadok začína ".i", znamená to binárnu funkciu
         if (token == ".i") {
-            int number;
-            while (iss >> number) {
-                if (domains) {
+            if (domains) {
+                int number;
+                while (iss >> number) {
                     domains->push_back(number);
                 }
             }
             if (states) {
                 *states = 2; // Binárna funkcia má vždy 2 stavy
             }
-            return 0; // Binárna funkcia
+            return 1; // Binárna funkcia
         }
 
         // Ak riadok začína ".mv", znamená to viachodnotovú funkciu
@@ -213,13 +209,11 @@ int is_binary_pla(const std::string& path, int* states, std::vector<int>* domain
                     *states = numbers.back(); // Posledné číslo ide do `states`
                 }
                 if (domains) {
-                    if (! numbers.empty()) {
-                        numbers.erase(numbers.begin());
-                    }
+                    numbers.erase(numbers.begin());
                     domains->insert(domains->end(), numbers.begin(), numbers.end());
                 }
             }
-            return 1; // Viachodnotová funkcia
+            return 0; // Viachodnotová funkcia
         }
     }
 
