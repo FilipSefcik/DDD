@@ -95,7 +95,7 @@ void module_manager::load_modules(const std::string& confPath) {
             throw std::runtime_error("Invalid PLA file: " + mod->get_pla_path());
         }
 
-        mod->set_states(states); // Prednastavený počet stavov
+        mod->set_states(states); // Nastavenie počtu stavov
         mod->set_function_column(column);
         mod->set_sons_domains(&domains);
 
