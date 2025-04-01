@@ -32,6 +32,7 @@ class mpi_manager {
     }
 
     std::unordered_map<std::string, module*> get_my_modules() { return this->my_modules_; }
+    int get_calculated_state() const { return this->calculated_state_; }
 
     // Instructions as functions
     void complete_instructions(const std::string& instructions, int state);
