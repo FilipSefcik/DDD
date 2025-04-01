@@ -3,12 +3,12 @@
 #include <sstream>
 
 void module_info::add_module(module_info* newModule) {
-    //newModule->set_position(this->sons_states_.size());
+    // newModule->set_position(this->sons_states_.size());
     this->son_count_++;
-    std::cout << this->name_ << " son states size: ";;
+    std::cout << this->name_ << " son states size: ";
     std::cout << this->sons_states_.size() << std::endl;
     newModule->set_parent(this);
-    //this->add_son(newModule->get_states());
+    // this->add_son(newModule->get_states());
     this->add_priority(newModule->get_priority());
 }
 
@@ -21,14 +21,12 @@ void module_info::add_priority(int sonPriority) {
     }
 }
 
-void module_info::add_merge_path(std::string son_path) {
-    
-}
+void module_info::add_merge_path(std::string son_path) {}
 
 std::string module_info::to_string() const {
     std::stringstream data;
     data << this->name_ << " " << this->pla_path_ << " " << this->function_column_ << " "
-         << this->states_ << " " << this->get_var_count();
+         << this->position_ << " " << this->states_ << " " << this->get_var_count();
     for (int state : this->sons_states_) {
         data << " ";
         data << state;

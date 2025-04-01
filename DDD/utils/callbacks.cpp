@@ -61,7 +61,7 @@ bool divide_for_merging(std::vector<module_info*>* modules, int nodeCount) {
     }
 
     std::sort(modules->begin(), modules->end(),
-              [](module_info* a, module_info* b) { return a->get_priority() < b->get_priority(); });
+              [](module_info* a, module_info* b) { return a->get_priority() > b->get_priority(); });
 
     int nodeUsed = 0;
 
@@ -105,10 +105,7 @@ void add_instruction_merging(module_info* mod, std::string* instructions) {
     module_info* parent = mod->get_parent();
 
     if (parent) {
-        if (parent->get_assigned_process() == mod->get_assigned_process()) {
-            // LINK - name of parent module - name of son module
-            *instructions += "LINK " + parent->get_name() + " " + mod->get_name() + "\n";
-        } else {
+        if (parent->get_assigned_process() != mod->get_assigned_process()) {
             // SEND - name of module - rank of the process to send
             *instructions += "SEND " + mod->get_name() + " " +
                              std::to_string(parent->get_assigned_process()) + "\n";
@@ -118,11 +115,12 @@ void add_instruction_merging(module_info* mod, std::string* instructions) {
                                    std::to_string(mod->get_assigned_process()) + "\n";
         }
 
-        std::string latest_path = mod->get_latest_path();
+        // LINK - name of parent module - name of son module
+        *(instructions + 1) += "MERG " + parent->get_name() + " " + mod->get_name() + "\n";
 
     } else {
         // END - module which gives answer
-        *instructions += "FIN " + mod->get_name() + "\n";
+        *instructions += "END " + mod->get_name() + "\n";
     }
 }
 
@@ -160,7 +158,7 @@ void calculate_true_density(mpi_manager* manager, const std::string& inputString
                 return;
             }
 
-            // mod->print_sons_reliabilities();
+            mod->print_sons_reliabilities();
 
             mod->set_my_reliability(&ps);
 
