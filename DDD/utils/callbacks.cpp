@@ -55,6 +55,28 @@ bool divide_by_var_count(std::vector<module_info*>* modules, int nodeCount) {
     return true;
 }
 
+bool divide_for_merging(std::vector<module_info*>* modules, int nodeCount) {
+    if (modules->empty()) {
+        return false;
+    }
+
+    std::sort(modules->begin(), modules->end(),
+              [](module_info* a, module_info* b) { return a->get_priority() < b->get_priority(); });
+
+    int nodeUsed = 0;
+
+    for (module_info* mod : *modules) {
+        if (mod->get_son_count() == 0) {
+            mod->set_assigned_process(mod->get_parent()->get_assigned_process());
+            continue;
+        }
+        mod->set_assigned_process(nodeUsed);
+        nodeUsed = (nodeUsed + 1) % nodeCount;
+    }
+
+    return true;
+}
+
 void add_instruction_density(module_info* mod, std::string* instructions) {
     module_info* parent = mod->get_parent();
 
@@ -83,6 +105,19 @@ void add_instruction_merging(module_info* mod, std::string* instructions) {
     module_info* parent = mod->get_parent();
 
     if (parent) {
+        if (parent->get_assigned_process() == mod->get_assigned_process()) {
+            // LINK - name of parent module - name of son module
+            *instructions += "LINK " + parent->get_name() + " " + mod->get_name() + "\n";
+        } else {
+            // SEND - name of module - rank of the process to send
+            *instructions += "SEND " + mod->get_name() + " " +
+                             std::to_string(parent->get_assigned_process()) + "\n";
+
+            // RECV - parent module name - rank of the process received from
+            *(instructions + 1) += "RECV " + parent->get_name() + " " +
+                                   std::to_string(mod->get_assigned_process()) + "\n";
+        }
+
         std::string latest_path = mod->get_latest_path();
 
     } else {
@@ -93,13 +128,13 @@ void add_instruction_merging(module_info* mod, std::string* instructions) {
 
 void calculate_true_density(mpi_manager* manager, const std::string& inputString) {
     std::string keyWord, paramFirst, paramSecond;
-    std::istringstream inpueStream(inputString);
-    inpueStream >> keyWord >> paramFirst >> paramSecond;
+    std::istringstream inputStream(inputString);
+    inputStream >> keyWord >> paramFirst;
 
     if (keyWord == "EXEC") {
+        inputStream >> paramSecond;
         module* mod = manager->get_my_modules().at(paramFirst);
         if (mod) {
-
             mod->set_position(std::stoi(paramSecond));
             std::string const& path = mod->get_path();
             int pla_type = is_binary_pla(path, nullptr, nullptr);
@@ -113,9 +148,9 @@ void calculate_true_density(mpi_manager* manager, const std::string& inputString
             } else if (pla_type == 0) {
                 std::optional<teddy::pla_file_mvl> file = teddy::load_mvl_pla(path, nullptr);
                 // mod->set_sons_reliability(&file->domains_);
-                std::cout << std::endl;
-                std::cout << file->codomain_ << std::endl;
-                std::cout << std::endl;
+                // std::cout << std::endl;
+                // std::cout << file->codomain_ << std::endl;
+                // std::cout << std::endl;
                 teddy::imss_manager imssManager(file->input_count_, mod->get_var_count() * 100,
                                                 file->domains_);
                 teddy::imss_manager::diagram_t f = teddy::io::from_pla(imssManager, *file);
@@ -125,7 +160,7 @@ void calculate_true_density(mpi_manager* manager, const std::string& inputString
                 return;
             }
 
-            mod->print_sons_reliabilities();
+            // mod->print_sons_reliabilities();
 
             mod->set_my_reliability(&ps);
 
@@ -135,12 +170,25 @@ void calculate_true_density(mpi_manager* manager, const std::string& inputString
             std::cout << "Module not found.\n";
         }
     } else if (keyWord == "LINK") {
+        inputStream >> paramSecond;
         module* parent = manager->get_my_modules().at(paramFirst);
         module* son = manager->get_my_modules().at(paramSecond);
         if (parent && son) {
             parent->set_sons_reliability(son->get_position(), son->get_my_reliabilities());
         } else {
             std::cout << "No module found.\n";
+        }
+    } else if (keyWord == "END") {
+        module* mod = manager->get_my_modules().at(paramFirst);
+        if (mod) {
+            int state = manager->get_calculated_state();
+            if (state < 0 || state >= mod->get_states()) {
+                std::cout << "Invalid state\n";
+                return;
+            }
+            std::cout << "Density of " << state << ": " << mod->get_reliability(state) << std::endl;
+        } else {
+            std::cout << "Module not found.\n";
         }
     }
 }

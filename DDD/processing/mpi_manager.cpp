@@ -69,23 +69,23 @@ void mpi_manager::complete_instructions(const std::string& instructions, int sta
 
     std::istringstream inputString(instructions);
     std::string line, keyWord, paramFirst, paramSecond;
+    // std::cout << "Instructions\n";
 
     while (std::getline(inputString, line)) {
         std::istringstream inputLine(line);
-        inputLine >> keyWord;
-        if (keyWord == "END") {
-            this->evaluate(paramFirst);
-        } else {
+
+        if (keyWord == "SEND") {
             inputLine >> paramFirst >> paramSecond;
-            if (keyWord == "SEND") {
-                this->send_module(paramFirst, std::stoi(paramSecond));
-            } else if (keyWord == "RECV") {
-                this->recv_module(paramFirst, std::stoi(paramSecond));
-            } else {
-                this->execute_module_(this, line);
-            }
+            this->send_module(paramFirst, std::stoi(paramSecond));
+        } else if (keyWord == "RECV") {
+            inputLine >> paramFirst >> paramSecond;
+            this->recv_module(paramFirst, std::stoi(paramSecond));
+        } else {
+            this->execute_module_(this, line);
         }
     }
+    // std::cout << "End of instructions\n";
+    // std::cout << "------------------------\n";
 }
 
 void mpi_manager::print_my_modules(int myRank) {
