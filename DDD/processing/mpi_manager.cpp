@@ -69,10 +69,11 @@ void mpi_manager::complete_instructions(const std::string& instructions, int sta
 
     std::istringstream inputString(instructions);
     std::string line, keyWord, paramFirst, paramSecond;
-    // std::cout << "Instructions\n";
 
     while (std::getline(inputString, line)) {
         std::istringstream inputLine(line);
+
+        inputLine >> keyWord;
 
         if (keyWord == "SEND") {
             inputLine >> paramFirst >> paramSecond;
@@ -84,8 +85,6 @@ void mpi_manager::complete_instructions(const std::string& instructions, int sta
             this->execute_module_(this, line);
         }
     }
-    // std::cout << "End of instructions\n";
-    // std::cout << "------------------------\n";
 }
 
 void mpi_manager::print_my_modules(int myRank) {

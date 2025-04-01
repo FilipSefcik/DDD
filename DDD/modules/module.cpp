@@ -29,7 +29,7 @@ module::module(std::string infoToString) {
     // Move to the fields after the path
     size_t afterPathIndex = plaIndex + 5; // ".pla" + space
     std::stringstream fields(infoToString.substr(afterPathIndex));
-    fields >> this->function_column_ >> this->states_ >> this->var_count_;
+    fields >> this->function_column_ >> this->position_ >> this->states_ >> this->var_count_;
 
     // Initialize reliabilities
     this->my_reliabilities_ =
@@ -53,7 +53,7 @@ void module::set_var_count(int paVarCount) {
 
 void module::set_sons_reliability(size_t sonPosition, double sonRel, int state) {
     if (sonPosition < this->sons_reliability_->size()) {
-        //std::cout << sonRel << std::endl;
+        // std::cout << sonRel << std::endl;
         this->sons_reliability_->at(sonPosition).at(state) = sonRel;
         this->sons_reliability_->at(sonPosition).at((state + 1) % 2) = 1.0 - sonRel;
     }
@@ -76,7 +76,7 @@ void module::set_sons_reliability(std::vector<int>* domains) {
 
 void module::set_my_reliability(std::vector<double>* rel) {
     this->my_reliabilities_->clear();
-    //std::cout << this->states_ << std::endl;
+    // std::cout << this->states_ << std::endl;
     this->my_reliabilities_->resize(this->states_);
     for (int i = 0; i < this->states_; i++) {
         this->my_reliabilities_->at(i) = rel->at(i);
@@ -84,6 +84,8 @@ void module::set_my_reliability(std::vector<double>* rel) {
 }
 
 void module::print_sons_reliabilities() {
+    std::cout << "-------------------------\n";
+    std::cout << this->get_name() << " Sons reliabilities: \n";
     for (size_t i = 0; i < this->sons_reliability_->size(); i++) {
         std::cout << this->sons_rel_count_->at(i) << " ";
         for (size_t j = 0; j < this->sons_reliability_->at(i).size(); j++) {
@@ -91,6 +93,8 @@ void module::print_sons_reliabilities() {
         }
         std::cout << std::endl;
     }
+    std::cout << std::endl;
+    std::cout << "-------------------------\n";
 }
 
 void module::print_all() {
@@ -106,6 +110,8 @@ void module::print_all() {
 }
 
 void module::print_reliabilities() {
+    std::cout << "-------------------------\n";
+    std::cout << this->get_name() << " Reliabilities: \n";
     double sum = 0;
     std::cout << this->my_reliabilities_->size() << "\n";
     for (double prob : *this->my_reliabilities_) {
@@ -114,4 +120,5 @@ void module::print_reliabilities() {
     }
     std::cout << "Sum: " << sum << std::endl;
     std::cout << std::endl;
+    std::cout << "-------------------------\n";
 }
