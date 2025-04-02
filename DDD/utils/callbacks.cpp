@@ -145,10 +145,6 @@ void calculate_true_density(mpi_manager* manager, const std::string& inputString
                 ps = bssManager.calculate_probabilities(*mod->get_sons_reliability(), f);
             } else if (pla_type == 0) {
                 std::optional<teddy::pla_file_mvl> file = teddy::load_mvl_pla(path, nullptr);
-                // mod->set_sons_reliability(&file->domains_);
-                // std::cout << std::endl;
-                // std::cout << file->codomain_ << std::endl;
-                // std::cout << std::endl;
                 teddy::imss_manager imssManager(file->input_count_, mod->get_var_count() * 100,
                                                 file->domains_);
                 teddy::imss_manager::diagram_t f = teddy::io::from_pla(imssManager, *file);
@@ -191,15 +187,32 @@ void calculate_true_density(mpi_manager* manager, const std::string& inputString
     }
 }
 
-std::string serialize_true_density(module* mod) {
-    std::string result = std::to_string(mod->get_position());
-    for (double rel : *mod->get_my_reliabilities()) {
-        result += " " + std::to_string(rel);
+std::string serialize_true_density(mpi_manager* manager, const std::string& inputString) {
+    module* mod = manager->get_my_modules().at(inputString);
+    std::string result;
+
+    if (mod) {
+        result = std::to_string(mod->get_position());
+        for (double rel : *mod->get_my_reliabilities()) {
+            result += " " + std::to_string(rel);
+        }
+    } else {
+        std::cout << "Module not found.\n";
+        result = "ABORT";
     }
+
     return result;
 }
 
-void deserialize_true_density(const std::string& inputString, module* mod) {
+void deserialize_true_density(mpi_manager* manager, const std::string& parameter,
+                              const std::string& inputString) {
+    module* mod = manager->get_my_modules().at(parameter);
+
+    if (! mod) {
+        std::cout << "Module not found.\n";
+        return;
+    }
+
     std::istringstream line(inputString);
     int sonPosition;
     line >> sonPosition;
