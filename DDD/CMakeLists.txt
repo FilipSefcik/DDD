@@ -5,6 +5,8 @@ add_executable(
     modules/module.cpp
     modules/module_info.hpp
     modules/module_info.cpp
+    modules/pla_function.hpp
+    modules/pla_function.cpp
     processing/module_manager.hpp
     processing/module_manager.cpp
     processing/mpi_manager.hpp
