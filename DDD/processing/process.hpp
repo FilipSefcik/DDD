@@ -25,13 +25,15 @@ class process {
             this->mpi_manager_->set_function(executeModule);
         }
     }
-    void set_serialize_function(std::string (*serializeModule)(module* mod)) {
+    void set_serialize_function(std::string (*serializeModule)(mpi_manager* manager,
+                                                               const std::string& inputString)) {
         if (this->mpi_manager_) {
             this->mpi_manager_->set_serialize_function(serializeModule);
         }
     }
-    void set_deserialize_function(void (*deserializeModule)(const std::string& inputString,
-                                                            module* mod)) {
+    void set_deserialize_function(void (*deserializeModule)(mpi_manager* manager,
+                                                            const std::string& parameter,
+                                                            const std::string& inputString)) {
         if (this->mpi_manager_) {
             this->mpi_manager_->set_deserialize_function(deserializeModule);
         }
