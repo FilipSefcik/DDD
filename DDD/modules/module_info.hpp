@@ -5,10 +5,10 @@
 class module_info {
   private:
     module_info* parent_ = nullptr;
+    std::vector<module_info*> sons_;
     std::string name_;
     std::string pla_path_;
     std::vector<int> sons_states_;
-    std::vector<std::string> paths_;
     int function_column_ = 0;
     int states_ = 0;
     int priority_ = 0;
@@ -28,7 +28,6 @@ class module_info {
     int get_assigned_process() const { return this->assigned_process_; }
     int get_position() const { return this->position_; }
     int get_son_count() const { return this->son_count_; }
-    std::string get_latest_path() const { return this->paths_.empty() ? this->pla_path_ : this->paths_.back(); }
 
     // Setters
     void set_parent(module_info* parent) { this->parent_ = parent; }
@@ -41,7 +40,6 @@ class module_info {
     void set_position(int position) { this->position_ = position; }
     void set_sons_domains(std::vector<int>* domains);
 
-    void add_merge_path(std::string son_path);
     void add_son(int sonStates) { this->sons_states_.push_back(sonStates); }
     void add_module(module_info* newModule);
     void add_priority(int sonPriority);
