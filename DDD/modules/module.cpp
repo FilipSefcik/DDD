@@ -9,6 +9,7 @@ module::module(const std::string& paName, int paStates) {
     this->states_ = paStates;
     this->sons_reliability_ = new std::vector<std::vector<double>>();
     this->my_reliabilities_ = new std::vector<double>(this->states_);
+    this->sons_map_ = new std::unordered_map<std::string, int>();
 }
 
 module::module(std::string infoToString) {
@@ -40,10 +41,20 @@ module::module(std::string infoToString) {
     // Reading son states into sons_reliability_
     for (int i = 0; i < this->var_count_; ++i) {
         int sonState;
-        if (fields >> sonState) {
-            this->sons_reliability_->at(i) = std::vector<double>(sonState, 1.0 / sonState);
-            this->sons_rel_count_->at(i) = (sonState);
-        }
+        fields >> sonState;
+        this->sons_reliability_->at(i) = std::vector<double>(sonState, 1.0 / sonState);
+        this->sons_rel_count_->at(i) = (sonState);
+    }
+
+    fields >> this->son_count_;
+
+    this->sons_map_ = new std::unordered_map<std::string, int>();
+
+    for (int i = 0; i < this->son_count_; ++i) {
+        std::string sonName;
+        int sonPosition;
+        fields >> sonName >> sonPosition;
+        this->sons_map_->insert({sonName, sonPosition});
     }
 }
 
@@ -119,6 +130,16 @@ void module::print_reliabilities() {
         std::cout << prob << " ";
     }
     std::cout << "Sum: " << sum << std::endl;
+    std::cout << std::endl;
+    std::cout << "-------------------------\n";
+}
+
+void module::print_son_map() {
+    std::cout << "-------------------------\n";
+    std::cout << this->get_name() << " Sons map: \n";
+    for (const auto& pair : *this->sons_map_) {
+        std::cout << pair.first << " " << pair.second << std::endl;
+    }
     std::cout << std::endl;
     std::cout << "-------------------------\n";
 }

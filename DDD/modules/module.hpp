@@ -1,6 +1,7 @@
 #pragma once
 #include "pla_function.hpp"
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 /**
@@ -16,10 +17,12 @@ class module {
     int var_count_ = 0;
     int function_column_ = 0;
     int states_ = 0;
+    int son_count_ = 0;
     std::vector<double>* my_reliabilities_ = nullptr;
     std::vector<std::vector<double>>* sons_reliability_ = nullptr;
     std::vector<int>* sons_rel_count_ = nullptr;
     pla_function* function_ = nullptr;
+    std::unordered_map<std::string, int>* sons_map_ = nullptr;
 
   public:
     module(const std::string& paName, int paStates);
@@ -29,6 +32,7 @@ class module {
         delete this->my_reliabilities_;
         delete this->sons_rel_count_;
         delete this->function_;
+        delete this->sons_map_;
         this->sons_reliability_ = nullptr;
         this->my_reliabilities_ = nullptr;
         this->sons_rel_count_ = nullptr;
@@ -47,6 +51,8 @@ class module {
 
     double get_reliability(int state) { return this->my_reliabilities_->at(state); }
     std::vector<double>* get_my_reliabilities() { return this->my_reliabilities_; }
+
+    pla_function* get_function() { return this->function_; }
 
     // setters
 
@@ -68,4 +74,5 @@ class module {
     void print_all();
     void print_sons_reliabilities();
     void print_reliabilities();
+    void print_son_map();
 };
