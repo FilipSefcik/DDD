@@ -1,6 +1,6 @@
 #pragma once
+#include "pla_function.hpp"
 #include <string>
-// #include <unordered_map>
 #include <vector>
 
 /**
@@ -19,6 +19,7 @@ class module {
     std::vector<double>* my_reliabilities_ = nullptr;
     std::vector<std::vector<double>>* sons_reliability_ = nullptr;
     std::vector<int>* sons_rel_count_ = nullptr;
+    pla_function* function_ = nullptr;
 
   public:
     module(const std::string& paName, int paStates);
@@ -27,6 +28,7 @@ class module {
         delete this->sons_reliability_;
         delete this->my_reliabilities_;
         delete this->sons_rel_count_;
+        delete this->function_;
         this->sons_reliability_ = nullptr;
         this->my_reliabilities_ = nullptr;
         this->sons_rel_count_ = nullptr;
