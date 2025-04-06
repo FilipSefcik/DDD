@@ -48,11 +48,13 @@ class module {
     int get_var_count() { return this->var_count_; }
     int get_function_column() { return this->function_column_; }
     int get_states() { return this->states_; }
+    int get_son_count() { return this->son_count_; }
 
     double get_reliability(int state) { return this->my_reliabilities_->at(state); }
     std::vector<double>* get_my_reliabilities() { return this->my_reliabilities_; }
 
     pla_function* get_function() { return this->function_; }
+    void initialize_pla_function() { this->function_ = new pla_function(this->path_); }
 
     // setters
 
@@ -68,6 +70,8 @@ class module {
     void set_sons_reliability(std::vector<int>* domains);
     void set_my_reliability(std::vector<double>* rel);
     void set_my_reliability(int state, double rel) { this->my_reliabilities_->at(state) = rel; }
+
+    void insert_function(pla_function* otherFunction, std::string sonName);
 
     // prints used to get info
     // used only during troubleshooting

@@ -13,6 +13,9 @@ class pla_function {
     // Konštruktory a destruktor.
     pla_function() = default;
     pla_function(int varCount, int lineCount);
+    pla_function(const std::string& filePath) {
+        this->load_from_pla(filePath);
+    }
     ~pla_function();
 
     void assign(const pla_function& other);

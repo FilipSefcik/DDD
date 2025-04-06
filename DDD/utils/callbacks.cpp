@@ -283,9 +283,70 @@ void add_instruction_merging(module_info* mod, std::string* instructions) {
     }
 }
 
-void execute_merging(mpi_manager* manager, const std::string& inputString) {}
+void execute_merging(mpi_manager* manager, const std::string& inputString) {
+    std::string keyWord, paramFirst, paramSecond;
+    std::istringstream inputStream(inputString);
+    inputStream >> keyWord >> paramFirst;
 
-std::string serialize_merging(mpi_manager* manager, const std::string& inputString) {}
+    if (keyWord == "MERG") {
+        inputStream >> paramSecond;
+        module* parent = manager->get_my_modules().at(paramFirst);
+        module* son = manager->get_my_modules().at(paramSecond);
+        if (parent && son) {
+            if (! son->get_function()) {
+                son->initialize_pla_function();
+            }
+            if (! parent->get_function()) {
+                parent->initialize_pla_function();
+            }
+            parent->insert_function(son->get_function(), son->get_name());
+        } else {
+            std::cout << "No module found.\n";
+        }
+    } else if (keyWord == "END") {
+        module* mod = manager->get_my_modules().at(paramFirst);
+        if (mod) {
+            if (mod->get_function()) {
+                mod->set_path("../merged/" + mod->get_name() + ".pla");
+                mod->get_function()->write_to_pla(mod->get_path());
+            }
+            std::cout << "Merged module saved to: " << mod->get_path() << std::endl;
+        } else {
+            std::cout << "Module not found.\n";
+        }
+    }
+}
+
+std::string serialize_merging(mpi_manager* manager, const std::string& inputString) {
+    module* mod = manager->get_my_modules().at(inputString);
+    std::string result;
+    if (mod) {
+        if (mod->get_function()) {
+            mod->set_path("../merged/" + mod->get_name() + ".pla");
+            mod->get_function()->write_to_pla(mod->get_path());
+        }
+        result = mod->get_name() + "\n" + mod->get_path();
+    } else {
+        std::cout << "Module not found.\n";
+        result = "ABORT";
+    }
+    return result;
+}
 
 void deserialize_merging(mpi_manager* manager, const std::string& parameter,
-                         const std::string& inputString) {}
+                         const std::string& inputString) {
+    module* mod = manager->get_my_modules().at(parameter);
+
+    if (! mod) {
+        std::cout << "Module not found.\n";
+        return;
+    }
+
+    std::istringstream line(inputString);
+    std::string sonName, sonPath;
+    std::getline(line, sonName);
+    std::getline(line, sonPath);
+    module* son = new module(sonName, 0);
+    son->set_path(sonPath);
+    manager->get_my_modules().insert({son->get_name(), son});
+}
