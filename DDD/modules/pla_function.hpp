@@ -25,6 +25,7 @@ class pla_function {
     const int* get_fun_val_count() const { return this->fun_val_count_; };
 
     void load_from_pla(const std::string& filePath);
+    void write_to_pla(const std::string& filePath) const;
 
     // Funkcie na alokáciu a uvoľnenie hodnôt.
     void alloc_values();
