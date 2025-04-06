@@ -111,6 +111,25 @@ void pla_function::load_from_pla(const std::string& filePath) {
     inputFile.close();
 }
 
+void pla_function::write_to_pla(const std::string& filePath) const {
+    std::ofstream outputFile(filePath);
+    if (! outputFile.is_open()) {
+        throw std::runtime_error("Error opening file: " + filePath + "\n");
+    }
+
+    outputFile << ".i " << this->var_count_ << "\n";
+    outputFile << ".o 1\n";
+    outputFile << ".p " << this->num_lines_ << "\n";
+
+    for (int i = 0; i < this->num_lines_; i++) {
+        outputFile << std::string(this->variables_[i], this->var_count_) << " "
+                   << this->fun_values_[i] << "\n";
+    }
+
+    outputFile << ".e\n";
+    outputFile.close();
+}
+
 // Funkcie na alokáciu a uvoľnenie hodnôt.
 void pla_function::alloc_values() {
     this->variables_ = (char**)malloc(this->num_lines_ * sizeof(char*));
