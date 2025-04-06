@@ -58,6 +58,18 @@ module::module(std::string infoToString) {
     }
 }
 
+void module::insert_function(pla_function* otherFunction, std::string sonName) {
+    if (this->function_ && otherFunction) {
+        int sonPosition = this->sons_map_->at(sonName);
+        this->function_->input_variables(otherFunction, sonPosition);
+        for (auto& pair : *this->sons_map_) {
+            if (sonPosition < pair.second) {
+                pair.second += otherFunction->get_var_count() - 1;
+            }
+        }
+    }
+}
+
 void module::set_var_count(int paVarCount) {
     this->var_count_ = paVarCount;
 }
