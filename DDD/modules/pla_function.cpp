@@ -90,7 +90,7 @@ void pla_function::load_from_pla(const std::string& filePath) {
 
     int lineIndex = 0;
     std::string variables;
-    int value;
+    char value;
     do {
         // Preskoč prázdne riadky, komentáre a príkazy začínajúce bodkou
         if (line.empty() || line[0] == '#') {
@@ -263,7 +263,7 @@ void pla_function::print_function() const {
     for (int i = 0; i < this->num_lines_; i++, varPtr++, funPtr++) {
         printf("%.*s\t%c\n", this->var_count_, *varPtr, *funPtr);
     }
-    printf("\n");
+    printf("0:%d\n1:%d\n", this->fun_val_count_[0], this->fun_val_count_[1]);
 }
 
 void pla_function::input_variables(pla_function* other, int position) {
@@ -310,6 +310,9 @@ void pla_function::input_variables(pla_function* other, int position) {
     }
     std::cout << "BEFORE\n";
     this->print_function();
+    // std::cout << this->fun_val_count_[0] << " " << this->fun_val_count_[1] << "\n";
+    std::cout << "OTHER\n";
+    other->print_function();
     std::cout << "AFTER\n";
     newPla.print_function();
 
