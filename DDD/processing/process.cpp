@@ -1,7 +1,7 @@
 #include "process.hpp"
 #include <iostream>
 
-// -------process---------
+// -------process--------
 
 void process::process_instructions(int state) {
     if (this->mpi_manager_) {
