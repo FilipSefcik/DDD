@@ -167,11 +167,7 @@ void calculate_true_density(mpi_manager* manager, const std::string& inputString
                 return;
             }
 
-            // mod->print_sons_reliabilities();
-
             mod->set_my_reliability(&ps);
-
-            // mod->print_reliabilities();
 
         } else {
             std::cout << "Module not found.\n";
