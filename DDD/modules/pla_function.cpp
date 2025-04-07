@@ -104,8 +104,6 @@ void pla_function::load_from_pla(const std::string& filePath) {
         std::istringstream iss(line);
         iss >> variables >> value; // načítaj premenné
 
-        // std::cout << lineIndex << " " << variables << " " << value << std::endl;
-
         // Pridaj načítaný riadok do PLA funkcie
         this->add_line(variables.c_str(), value, lineIndex);
         lineIndex++;
@@ -308,13 +306,6 @@ void pla_function::input_variables(pla_function* other, int position) {
             }
         }
     }
-    std::cout << "BEFORE\n";
-    this->print_function();
-    // std::cout << this->fun_val_count_[0] << " " << this->fun_val_count_[1] << "\n";
-    std::cout << "OTHER\n";
-    other->print_function();
-    std::cout << "AFTER\n";
-    newPla.print_function();
 
     this->assign(newPla);
 
@@ -325,6 +316,4 @@ void pla_function::input_variables(pla_function* other, int position) {
 
     this->free_sort(myVars, 3);
     this->free_sort(additionalVars, 2);
-
-    // this->print_function();
 }

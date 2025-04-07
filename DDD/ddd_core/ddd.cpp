@@ -19,10 +19,10 @@ ddd::ddd() {
         this->process_ = new slave_process(this->my_rank);
     }
 
-    char processorName[MPI_MAX_PROCESSOR_NAME];
-    int nameLength;
-    MPI_Get_processor_name(processorName, &nameLength); // Get the processor name
-    std::cout << "Rank " << this->my_rank << " runs on " << processorName << std::endl;
+    // char processorName[MPI_MAX_PROCESSOR_NAME];
+    // int nameLength;
+    // MPI_Get_processor_name(processorName, &nameLength); // Get the processor name
+    // std::cout << "Rank " << this->my_rank << " runs on " << processorName << std::endl;
 }
 
 ddd::~ddd() {
@@ -39,12 +39,6 @@ void ddd::set_conf_path(const std::string& pa_conf_path) {
 }
 
 void ddd::calculate_availability(int divider_flag, int state, bool timer_on) {
-    // if (state != 0 && state != 1) {
-    //     std::cerr << "Invalid state" << std::endl;
-    //     exit(2);
-    //     return;
-    // }
-
     if (timer_on) {
         this->start_time = MPI_Wtime();
     }
