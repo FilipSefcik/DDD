@@ -3,6 +3,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <fstream>
+#include <iostream>
 #include <sstream>
 #include <stdexcept>
 
@@ -90,7 +91,7 @@ void pla_function::load_from_pla(const std::string& filePath) {
     int lineIndex = 0;
     std::string variables;
     int value;
-    while (std::getline(inputFile, line)) {
+    do {
         // Preskoč prázdne riadky, komentáre a príkazy začínajúce bodkou
         if (line.empty() || line[0] == '#') {
             continue;
@@ -103,10 +104,12 @@ void pla_function::load_from_pla(const std::string& filePath) {
         std::istringstream iss(line);
         iss >> variables >> value; // načítaj premenné
 
+        // std::cout << lineIndex << " " << variables << " " << value << std::endl;
+
         // Pridaj načítaný riadok do PLA funkcie
         this->add_line(variables.c_str(), value, lineIndex);
         lineIndex++;
-    }
+    } while (std::getline(inputFile, line));
 
     inputFile.close();
 }
@@ -260,6 +263,7 @@ void pla_function::print_function() const {
     for (int i = 0; i < this->num_lines_; i++, varPtr++, funPtr++) {
         printf("%.*s\t%c\n", this->var_count_, *varPtr, *funPtr);
     }
+    printf("\n");
 }
 
 void pla_function::input_variables(pla_function* other, int position) {
@@ -304,6 +308,10 @@ void pla_function::input_variables(pla_function* other, int position) {
             }
         }
     }
+    std::cout << "BEFORE\n";
+    this->print_function();
+    std::cout << "AFTER\n";
+    newPla.print_function();
 
     this->assign(newPla);
 
@@ -314,4 +322,6 @@ void pla_function::input_variables(pla_function* other, int position) {
 
     this->free_sort(myVars, 3);
     this->free_sort(additionalVars, 2);
+
+    // this->print_function();
 }
