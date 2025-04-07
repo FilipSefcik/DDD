@@ -35,6 +35,7 @@ class mpi_manager {
     }
 
     std::unordered_map<std::string, module*> get_my_modules() { return this->my_modules_; }
+    void add_module(module* mod) { this->my_modules_.insert({mod->get_name(), mod}); }
     int get_calculated_state() const { return this->calculated_state_; }
 
     // Instructions as functions

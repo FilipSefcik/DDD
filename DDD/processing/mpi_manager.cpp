@@ -54,6 +54,8 @@ void mpi_manager::complete_instructions(const std::string& instructions, int sta
     std::istringstream inputString(instructions);
     std::string line, keyWord, paramFirst, paramSecond;
 
+    std::cout << "COMPLETING\n";
+
     while (std::getline(inputString, line)) {
         std::istringstream inputLine(line);
 
