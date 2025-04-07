@@ -288,32 +288,22 @@ void execute_merging(mpi_manager* manager, const std::string& inputString) {
     std::string keyWord, paramFirst, paramSecond;
     std::istringstream inputStream(inputString);
     inputStream >> keyWord >> paramFirst;
-    // int rank;
-    // MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-    // manager->print_my_modules(rank);
 
     if (keyWord == "MERG") {
-        std::cout << "MERGING\n";
         inputStream >> paramSecond;
         module* parent = manager->get_my_modules().at(paramFirst);
         module* son = manager->get_my_modules().at(paramSecond);
-        std::cout << "Initializing function for son module: " << son->get_name() << std::endl;
         if (parent && son) {
             if (! son->get_function()) {
                 son->initialize_pla_function();
-                std::cout << "Function initialized.\n";
             }
             if (! parent->get_function()) {
                 parent->initialize_pla_function();
             }
-            // parent->get_function()->print_function();
-            // son->get_function()->print_function();
             parent->insert_function(son->get_function(), son->get_name());
-            //parent->get_function()->print_function();
         } else {
             std::cout << "No module found.\n";
         }
-        std::cout << "MERGED " << paramFirst << " and " << paramSecond << std::endl;
     } else if (keyWord == "END") {
         module* mod = manager->get_my_modules().at(paramFirst);
         if (mod) {
@@ -341,7 +331,7 @@ std::string serialize_merging(mpi_manager* manager, const std::string& inputStri
         std::cout << "Module not found.\n";
         result = "ABORT";
     }
-    std::cout << "Serialized module: " << result << std::endl;
+
     return result;
 }
 
@@ -360,9 +350,5 @@ void deserialize_merging(mpi_manager* manager, const std::string& parameter,
     std::getline(line, sonPath);
     module* son = new module(sonName, 0);
     son->set_path(sonPath);
-    std::cout << "Deserialized module: " << sonName << " from " << sonPath << std::endl;
     manager->add_module(son);
-    // int rank;
-    // MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-    // manager->print_my_modules(rank);
 }
