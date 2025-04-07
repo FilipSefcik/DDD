@@ -1,11 +1,70 @@
 #include "callbacks.hpp"
+#include "libteddy/inc/reliability.hpp"
+#include <cstddef>
+#include <cstdio>
 #include <iostream>
 #include <libteddy/inc/io.hpp>
+#include <mpi.h>
+#include <ostream>
 #include <sstream>
+
+int is_binary_pla(const std::string& path, int* states, std::vector<int>* domains) {
+    std::ifstream file(path);
+    if (! file.is_open()) {
+        std::cerr << "Chyba pri otváraní súboru: " << path << std::endl;
+        return -1;
+    }
+
+    std::string line;
+    while (std::getline(file, line)) {
+        // Ignorujeme komentáre
+        if (! line.empty() && line[0] == '#') {
+            continue;
+        }
+
+        std::istringstream iss(line);
+        std::string token;
+        iss >> token; // Prvé slovo (napr. .i alebo .mv)
+
+        // Ak riadok začína ".i", znamená to binárnu funkciu
+        if (token == ".i") {
+            if (domains) {
+                int number;
+                while (iss >> number) {
+                    domains->push_back(number);
+                }
+            }
+            if (states) {
+                *states = 2; // Binárna funkcia má vždy 2 stavy
+            }
+            return 1; // Binárna funkcia
+        }
+
+        // Ak riadok začína ".mv", znamená to viachodnotovú funkciu
+        if (token == ".mv") {
+            int number;
+            std::vector<int> numbers;
+            while (iss >> number) {
+                numbers.push_back(number);
+            }
+            if (! numbers.empty()) {
+                if (states) {
+                    *states = numbers.back(); // Posledné číslo ide do `states`
+                }
+                if (domains) {
+                    numbers.erase(numbers.begin());
+                    domains->insert(domains->end(), numbers.begin(), numbers.end());
+                }
+            }
+            return 0; // Viachodnotová funkcia
+        }
+    }
+
+    return -1; // Ak súbor neobsahuje .i ani .mv
+}
 
 bool divide_evenly(std::vector<module_info*>* modules, int nodeCount) {
     if (modules->empty()) {
-        std::cerr << "There are no modules to divide.\n";
         return false;
     }
 
@@ -21,7 +80,6 @@ bool divide_evenly(std::vector<module_info*>* modules, int nodeCount) {
 
 bool divide_by_var_count(std::vector<module_info*>* modules, int nodeCount) {
     if (modules->empty()) {
-        std::cerr << "There are no modules to divide.\n";
         return false;
     }
 
@@ -53,6 +111,8 @@ bool divide_by_var_count(std::vector<module_info*>* modules, int nodeCount) {
     return true;
 }
 
+//--------True density---------
+
 void add_instruction_density(module_info* mod, std::string* instructions) {
     module_info* parent = mod->get_parent();
 
@@ -77,29 +137,43 @@ void add_instruction_density(module_info* mod, std::string* instructions) {
     }
 }
 
-void calculate_true_density(mpi_manager* manager, std::string inputString) {
+void calculate_true_density(mpi_manager* manager, const std::string& inputString) {
     std::string keyWord, paramFirst, paramSecond;
-    std::istringstream inpueStream(inputString);
-    inpueStream >> keyWord >> paramFirst >> paramSecond;
+    std::istringstream inputStream(inputString);
+    inputStream >> keyWord >> paramFirst;
 
     if (keyWord == "EXEC") {
+        inputStream >> paramSecond;
         module* mod = manager->get_my_modules().at(paramFirst);
         if (mod) {
             mod->set_position(std::stoi(paramSecond));
-
             std::string const& path = mod->get_path();
-            teddy::bss_manager bssManager(mod->get_var_count(), mod->get_var_count() * 100);
-            std::optional<teddy::pla_file_binary> file = teddy::load_binary_pla(path, nullptr);
-            teddy::bdd_manager::diagram_t f =
-                teddy::io::from_pla(bssManager, *file)[mod->get_function_column()];
-            std::vector<double> ps =
-                bssManager.calculate_probabilities(*mod->get_sons_reliability(), f);
+            int pla_type = is_binary_pla(path, nullptr, nullptr);
+            std::vector<double> ps;
+            if (pla_type == 1) {
+                std::optional<teddy::pla_file_binary> file = teddy::load_binary_pla(path, nullptr);
+                teddy::bss_manager bssManager(file->input_count_, mod->get_var_count() * 100);
+                teddy::bdd_manager::diagram_t f =
+                    teddy::io::from_pla(bssManager, *file)[mod->get_function_column()];
+                ps = bssManager.calculate_probabilities(*mod->get_sons_reliability(), f);
+            } else if (pla_type == 0) {
+                std::optional<teddy::pla_file_mvl> file = teddy::load_mvl_pla(path, nullptr);
+                teddy::imss_manager imssManager(file->input_count_, mod->get_var_count() * 100,
+                                                file->domains_);
+                teddy::imss_manager::diagram_t f = teddy::io::from_pla(imssManager, *file);
+                ps = imssManager.calculate_probabilities(*mod->get_sons_reliability(), f);
+            } else {
+                std::cout << "Invalid PLA file.\n";
+                return;
+            }
 
             mod->set_my_reliability(&ps);
+
         } else {
             std::cout << "Module not found.\n";
         }
     } else if (keyWord == "LINK") {
+        inputStream >> paramSecond;
         module* parent = manager->get_my_modules().at(paramFirst);
         module* son = manager->get_my_modules().at(paramSecond);
         if (parent && son) {
@@ -107,18 +181,47 @@ void calculate_true_density(mpi_manager* manager, std::string inputString) {
         } else {
             std::cout << "No module found.\n";
         }
+    } else if (keyWord == "END") {
+        module* mod = manager->get_my_modules().at(paramFirst);
+        if (mod) {
+            int state = manager->get_calculated_state();
+            if (state < 0 || state >= mod->get_states()) {
+                std::cout << "Invalid state\n";
+                return;
+            }
+            std::cout << "Density of " << state << ": " << mod->get_reliability(state) << std::endl;
+        } else {
+            std::cout << "Module not found.\n";
+        }
     }
 }
 
-std::string serialize_true_density(module* mod) {
-    std::string result = std::to_string(mod->get_position());
-    for (double rel : *mod->get_my_reliabilities()) {
-        result += " " + std::to_string(rel);
+std::string serialize_true_density(mpi_manager* manager, const std::string& inputString) {
+    module* mod = manager->get_my_modules().at(inputString);
+    std::string result;
+
+    if (mod) {
+        result = std::to_string(mod->get_position());
+        for (double rel : *mod->get_my_reliabilities()) {
+            result += " " + std::to_string(rel);
+        }
+    } else {
+        std::cout << "Module not found.\n";
+        result = "ABORT";
     }
+
     return result;
 }
 
-void deserialize_true_density(std::string inputString, module* mod) {
+void deserialize_true_density(mpi_manager* manager, const std::string& parameter,
+                              const std::string& inputString) {
+    module* mod = manager->get_my_modules().at(parameter);
+
+    if (! mod) {
+        std::cout << "Module not found.\n";
+        return;
+    }
+
     std::istringstream line(inputString);
     int sonPosition;
     line >> sonPosition;
@@ -128,4 +231,120 @@ void deserialize_true_density(std::string inputString, module* mod) {
         sonRels.push_back(temp);
     }
     mod->set_sons_reliability(sonPosition, &sonRels);
+}
+
+// ----------Merging-----------
+
+bool divide_for_merging(std::vector<module_info*>* modules, int nodeCount) {
+    if (modules->empty()) {
+        return false;
+    }
+
+    std::sort(modules->begin(), modules->end(),
+              [](module_info* a, module_info* b) { return a->get_priority() > b->get_priority(); });
+
+    int nodeUsed = 0;
+
+    for (module_info* mod : *modules) {
+        if (mod->get_son_count() == 0) {
+            mod->set_assigned_process(mod->get_parent()->get_assigned_process());
+            continue;
+        }
+        mod->set_assigned_process(nodeUsed);
+        nodeUsed = (nodeUsed + 1) % nodeCount;
+    }
+
+    return true;
+}
+
+void add_instruction_merging(module_info* mod, std::string* instructions) {
+    module_info* parent = mod->get_parent();
+
+    if (parent) {
+        if (parent->get_assigned_process() != mod->get_assigned_process()) {
+            // SEND - name of module - rank of the process to send
+            *instructions += "SEND " + mod->get_name() + " " +
+                             std::to_string(parent->get_assigned_process()) + "\n";
+
+            // RECV - parent module name - rank of the process received from
+            *(instructions + 1) += "RECV " + parent->get_name() + " " +
+                                   std::to_string(mod->get_assigned_process()) + "\n";
+        }
+
+        // LINK - name of parent module - name of son module
+        *(instructions + 1) += "MERG " + parent->get_name() + " " + mod->get_name() + "\n";
+
+    } else {
+        // END - module which gives answer
+        *instructions += "END " + mod->get_name() + "\n";
+    }
+}
+
+void execute_merging(mpi_manager* manager, const std::string& inputString) {
+    std::string keyWord, paramFirst, paramSecond;
+    std::istringstream inputStream(inputString);
+    inputStream >> keyWord >> paramFirst;
+
+    if (keyWord == "MERG") {
+        inputStream >> paramSecond;
+        module* parent = manager->get_my_modules().at(paramFirst);
+        module* son = manager->get_my_modules().at(paramSecond);
+        if (parent && son) {
+            if (! son->get_function()) {
+                son->initialize_pla_function();
+            }
+            if (! parent->get_function()) {
+                parent->initialize_pla_function();
+            }
+            parent->insert_function(son->get_function(), son->get_name());
+        } else {
+            std::cout << "No module found.\n";
+        }
+    } else if (keyWord == "END") {
+        module* mod = manager->get_my_modules().at(paramFirst);
+        if (mod) {
+            if (mod->get_function()) {
+                mod->set_path("../merged/" + mod->get_name() + ".pla");
+                mod->get_function()->write_to_pla(mod->get_path());
+            }
+            std::cout << "Merged module saved to: " << mod->get_path() << std::endl;
+        } else {
+            std::cout << "Module not found.\n";
+        }
+    }
+}
+
+std::string serialize_merging(mpi_manager* manager, const std::string& inputString) {
+    module* mod = manager->get_my_modules().at(inputString);
+    std::string result;
+    if (mod) {
+        if (mod->get_function()) {
+            mod->set_path("../merged/" + mod->get_name() + ".pla");
+            mod->get_function()->write_to_pla(mod->get_path());
+        }
+        result = mod->get_name() + "\n" + mod->get_path();
+    } else {
+        std::cout << "Module not found.\n";
+        result = "ABORT";
+    }
+
+    return result;
+}
+
+void deserialize_merging(mpi_manager* manager, const std::string& parameter,
+                         const std::string& inputString) {
+    module* mod = manager->get_my_modules().at(parameter);
+
+    if (! mod) {
+        std::cout << "Module not found.\n";
+        return;
+    }
+
+    std::istringstream line(inputString);
+    std::string sonName, sonPath;
+    std::getline(line, sonName);
+    std::getline(line, sonPath);
+    module* son = new module(sonName, 0);
+    son->set_path(sonPath);
+    manager->add_module(son);
 }

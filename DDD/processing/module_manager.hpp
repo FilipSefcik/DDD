@@ -26,8 +26,8 @@ class module_manager {
     void create_messages(int numProcesses, std::vector<mpi_communicator::mpi_message>& messages);
 
     // loading of modules
-    void load(std::string confPath);
-    void load_modules(std::string confPath);
+    void load(const std::string& confPath);
+    void load_modules(const std::string& confPath);
 
     // info prints used only for troubleshooting
     void print_modules();

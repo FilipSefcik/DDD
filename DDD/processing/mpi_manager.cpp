@@ -23,53 +23,32 @@ mpi_manager::~mpi_manager() {
     this->my_modules_.clear();
 }
 
-void mpi_manager::evaluate(std::string moduleName) {
-    module* mod = this->my_modules_.at(moduleName);
-    if (mod) {
-        std::cout << "Density of " << this->calculated_state_ << ": "
-                  << mod->get_reliability(this->calculated_state_) << std::endl;
+void mpi_manager::send_module(const std::string& parameter, int receiversRank) {
+    mpi_communicator::mpi_message message;
+    message.header_ = "MSG";
+    std::string payload = this->serialize_module_(this, parameter);
+
+    if (payload == "ABORT") {
+        std::cout << "SENDING of message aborted\n";
+        return;
+    }
+
+    message.payload_ = payload;
+    mpi_communicator::send_message(message, receiversRank);
+}
+
+void mpi_manager::recv_module(const std::string& parameter, int sender) {
+    mpi_communicator::mpi_message message;
+    mpi_communicator::recv_message(sender, message);
+
+    if (message.header_ == "MSG") {
+        this->deserialize_module_(this, parameter, message.payload_);
     } else {
-        std::cout << "Module not found.\n";
+        std::cout << "INVALID MESSAGE TYPE\n";
     }
 }
 
-//     module* parent = this->my_modules_.at(parentName);
-//     module* son = this->my_modules_.at(sonName);
-//     if (parent && son) {
-//         parent->set_sons_reliability(son->get_position(), son->get_my_reliabilities());
-//     } else {
-//         std::cout << "No module found.\n";
-//     }
-// }
-
-void mpi_manager::send_module(std::string moduleName, int receiversRank) {
-    module* mod = this->my_modules_.at(moduleName);
-    if (mod) {
-        mpi_communicator::mpi_message message;
-        message.header_ = "MSG";
-        message.payload_ = this->serialize_module_(mod);
-        mpi_communicator::send_message(message, receiversRank);
-    } else {
-        std::cout << "No module found\n";
-    }
-}
-
-void mpi_manager::recv_module(std::string parentName, int sender) {
-    module* parent = this->my_modules_.at(parentName);
-    if (parent) {
-        mpi_communicator::mpi_message message;
-        mpi_communicator::recv_message(sender, message);
-        if (message.header_ == "MSG") {
-            this->deserialize_module_(message.payload_, parent);
-        } else {
-            std::cout << "INVALID MESSAGE TYPE\n";
-        }
-    } else {
-        std::cout << "No module found\n";
-    }
-}
-
-void mpi_manager::complete_instructions(std::string instructions, int state) {
+void mpi_manager::complete_instructions(const std::string& instructions, int state) {
     this->calculated_state_ = state;
 
     std::istringstream inputString(instructions);
@@ -77,18 +56,17 @@ void mpi_manager::complete_instructions(std::string instructions, int state) {
 
     while (std::getline(inputString, line)) {
         std::istringstream inputLine(line);
+
         inputLine >> keyWord;
-        if (keyWord == "END") {
-            this->evaluate(paramFirst);
-        } else {
+
+        if (keyWord == "SEND") {
             inputLine >> paramFirst >> paramSecond;
-            if (keyWord == "SEND") {
-                this->send_module(paramFirst, std::stoi(paramSecond));
-            } else if (keyWord == "RECV") {
-                this->recv_module(paramFirst, std::stoi(paramSecond));
-            } else {
-                this->execute_module_(this, line);
-            }
+            this->send_module(paramFirst, std::stoi(paramSecond));
+        } else if (keyWord == "RECV") {
+            inputLine >> paramFirst >> paramSecond;
+            this->recv_module(paramFirst, std::stoi(paramSecond));
+        } else {
+            this->execute_module_(this, line);
         }
     }
 }

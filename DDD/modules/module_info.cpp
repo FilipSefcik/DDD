@@ -3,9 +3,9 @@
 #include <sstream>
 
 void module_info::add_module(module_info* newModule) {
-    newModule->set_position(this->sons_states_.size());
+    this->son_count_++;
     newModule->set_parent(this);
-    this->add_son(newModule->get_states());
+    this->sons_.push_back(newModule);
     this->add_priority(newModule->get_priority());
 }
 
@@ -21,11 +21,19 @@ void module_info::add_priority(int sonPriority) {
 std::string module_info::to_string() const {
     std::stringstream data;
     data << this->name_ << " " << this->pla_path_ << " " << this->function_column_ << " "
-         << this->states_ << " " << this->get_var_count();
+         << this->position_ << " " << this->states_ << " " << this->get_var_count();
     for (int state : this->sons_states_) {
         data << " ";
         data << state;
     }
+
+    data << " " << this->sons_.size();
+
+    for (const auto& son : this->sons_) {
+        data << " " << son->get_name();
+        data << " " << son->get_position();
+    }
+
     return data.str();
 }
 
@@ -38,5 +46,14 @@ void module_info::print_sons() {
     std::cout << "Function column: " << this->function_column_ << std::endl;
     for (size_t i = 0; i < this->sons_states_.size(); i++) {
         std::cout << this->sons_states_.at(i) << " ";
+    }
+}
+
+void module_info::set_sons_domains(std::vector<int>* domains) {
+    for (int i = 0; i < domains->at(0); i++) {
+        this->sons_states_.push_back(2);
+    }
+    for (size_t i = 1; i < domains->size(); i++) {
+        this->sons_states_.push_back(domains->at(i));
     }
 }

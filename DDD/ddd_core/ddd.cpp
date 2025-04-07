@@ -19,10 +19,10 @@ ddd::ddd() {
         this->process_ = new slave_process(this->my_rank);
     }
 
-    char processorName[MPI_MAX_PROCESSOR_NAME];
-    int nameLength;
-    MPI_Get_processor_name(processorName, &nameLength); // Get the processor name
-    std::cout << "Rank " << this->my_rank << " runs on " << processorName << std::endl;
+    // char processorName[MPI_MAX_PROCESSOR_NAME];
+    // int nameLength;
+    // MPI_Get_processor_name(processorName, &nameLength); // Get the processor name
+    // std::cout << "Rank " << this->my_rank << " runs on " << processorName << std::endl;
 }
 
 ddd::~ddd() {
@@ -31,7 +31,7 @@ ddd::~ddd() {
     MPI_Finalize();
 }
 
-void ddd::set_conf_path(std::string pa_conf_path) {
+void ddd::set_conf_path(const std::string& pa_conf_path) {
     if (this->my_rank == 0 && this->process_) {
         main_process* mainProcess = dynamic_cast<main_process*>(this->process_);
         mainProcess->set_conf_path(pa_conf_path);
@@ -39,12 +39,6 @@ void ddd::set_conf_path(std::string pa_conf_path) {
 }
 
 void ddd::calculate_availability(int divider_flag, int state, bool timer_on) {
-    if (state != 0 && state != 1) {
-        std::cerr << "Invalid state" << std::endl;
-        exit(2);
-        return;
-    }
-
     if (timer_on) {
         this->start_time = MPI_Wtime();
     }
@@ -55,16 +49,23 @@ void ddd::calculate_availability(int divider_flag, int state, bool timer_on) {
             case 0:
                 mainProcess->set_divide_function(divide_by_var_count);
                 break;
+            case 1:
+                mainProcess->set_divide_function(divide_for_merging);
+                break;
             default:
                 mainProcess->set_divide_function(divide_evenly);
                 break;
         }
-        mainProcess->set_add_instruction(add_instruction_density);
+        // mainProcess->set_add_instruction(add_instruction_density);
+        mainProcess->set_add_instruction(add_instruction_merging);
     }
     this->process_->process_information();
-    this->process_->set_function(calculate_true_density);
-    this->process_->set_serialize_function(serialize_true_density);
-    this->process_->set_deserialize_function(deserialize_true_density);
+    this->process_->set_function(execute_merging);
+    this->process_->set_serialize_function(serialize_merging);
+    this->process_->set_deserialize_function(deserialize_merging);
+    // this->process_->set_function(calculate_true_density);
+    // this->process_->set_serialize_function(serialize_true_density);
+    // this->process_->set_deserialize_function(deserialize_true_density);
     this->process_->process_instructions(state);
 
     if (timer_on) {
