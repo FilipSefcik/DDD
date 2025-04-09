@@ -56,16 +56,16 @@ void ddd::calculate_availability(int divider_flag, int state, bool timer_on) {
                 mainProcess->set_divide_function(divide_evenly);
                 break;
         }
-        // mainProcess->set_add_instruction(add_instruction_density);
-        mainProcess->set_add_instruction(add_instruction_merging);
+        mainProcess->set_add_instruction(add_instruction_density);
+        // mainProcess->set_add_instruction(add_instruction_merging);
     }
     this->process_->process_information();
-    this->process_->set_function(execute_merging);
-    this->process_->set_serialize_function(serialize_merging);
-    this->process_->set_deserialize_function(deserialize_merging);
-    // this->process_->set_function(calculate_true_density);
-    // this->process_->set_serialize_function(serialize_true_density);
-    // this->process_->set_deserialize_function(deserialize_true_density);
+    // this->process_->set_function(execute_merging);
+    // this->process_->set_serialize_function(serialize_merging);
+    // this->process_->set_deserialize_function(deserialize_merging);
+    this->process_->set_function(calculate_true_density);
+    this->process_->set_serialize_function(serialize_true_density);
+    this->process_->set_deserialize_function(deserialize_true_density);
     this->process_->process_instructions(state);
 
     if (timer_on) {
