@@ -70,6 +70,20 @@ void module::insert_function(pla_function* otherFunction, std::string sonName) {
     }
 }
 
+void module::insert_function(char*** additionalVars, int otherVarCount, const int* otherFunValCount,
+                             std::string sonName) {
+    if (this->function_) {
+        int sonPosition = this->sons_map_->at(sonName);
+        this->function_->input_variables(additionalVars, otherVarCount, otherFunValCount,
+                                         sonPosition);
+        for (auto& pair : *this->sons_map_) {
+            if (sonPosition < pair.second) {
+                pair.second += otherVarCount - 1;
+            }
+        }
+    }
+}
+
 void module::set_var_count(int paVarCount) {
     this->var_count_ = paVarCount;
 }
@@ -126,10 +140,10 @@ void module::print_all() {
     std::cout << "Var count: " << this->var_count_ << std::endl;
     std::cout << "Position: " << this->position_ << std::endl;
     std::cout << "Function column: " << this->function_column_ << std::endl;
-    //std::cout << "My reliabilities:\n";
-    //print_reliabilities();
-    //std::cout << "Sons reliabilities: \n";
-    //print_sons_reliabilities();
+    // std::cout << "My reliabilities:\n";
+    // print_reliabilities();
+    // std::cout << "Sons reliabilities: \n";
+    // print_sons_reliabilities();
 }
 
 void module::print_reliabilities() {

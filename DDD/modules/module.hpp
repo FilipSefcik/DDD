@@ -72,6 +72,8 @@ class module {
     void set_my_reliability(int state, double rel) { this->my_reliabilities_->at(state) = rel; }
 
     void insert_function(pla_function* otherFunction, std::string sonName);
+    void insert_function(char*** additionalVars, int otherVarCount, const int* otherFunValCount,
+                         std::string sonName);
 
     // prints used to get info
     // used only during troubleshooting

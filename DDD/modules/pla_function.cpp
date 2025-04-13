@@ -317,3 +317,51 @@ void pla_function::input_variables(pla_function* other, int position) {
     this->free_sort(myVars, 3);
     this->free_sort(additionalVars, 2);
 }
+
+void pla_function::input_variables(char*** additionalVars, int otherVarCount,
+                                   const int* otherFunValCount, int position) {
+    int* matchCount = (int*)calloc(3, sizeof(int));
+    char*** myVars = this->sort_by_position(position, matchCount);
+
+    char* whateverInput = new char[otherVarCount];
+    memset(whateverInput, '-', otherVarCount * sizeof(char));
+
+    int newVarCount = otherVarCount + this->var_count_ - 1;
+    int newLineCount =
+        matchCount[0] * otherFunValCount[0] + matchCount[1] * otherFunValCount[1] + matchCount[2];
+    char* newVars = new char[newVarCount];
+
+    pla_function newPla(newVarCount, newLineCount);
+
+    int lineNum = 0;
+    for (int group = 0; group < 3; group++) {
+        for (int i = 0; i < matchCount[group]; i++) {
+            char* tempLine = myVars[group][i];
+            char funValue = this->get_fun_value(tempLine);
+            if (group < 2) {
+                for (int j = 0; j < otherFunValCount[group]; j++) {
+                    char* inputLine = additionalVars[group][j];
+                    this->replace_char(tempLine, this->var_count_, position, inputLine,
+                                       otherVarCount, newVars);
+                    newPla.add_line(newVars, funValue, lineNum);
+                    lineNum++;
+                }
+            } else {
+                this->replace_char(tempLine, this->var_count_, position, whateverInput,
+                                   otherVarCount, newVars);
+                newPla.add_line(newVars, funValue, lineNum);
+                lineNum++;
+            }
+        }
+    }
+
+    this->assign(newPla);
+
+    newPla.~pla_function();
+    free(matchCount);
+    delete[] whateverInput;
+    delete[] newVars;
+
+    this->free_sort(myVars, 3);
+    // this->free_sort(additionalVars, 2);
+}

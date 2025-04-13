@@ -44,5 +44,7 @@ class pla_function {
     void input_variables(pla_function* other, int position);
     char get_fun_value(const char* indexedVariables);
 
+    void input_variables(char*** additionalVars, int otherVarCount, const int* otherFunValCount, int position);
+
     void print_function() const;
 };
