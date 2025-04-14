@@ -280,10 +280,10 @@ void add_instruction_merging(module_info* mod, std::string* instructions) {
     }
 }
 
-pla_function* help = nullptr;
-char*** additionalVars = nullptr;
-int otherVarCount = 0;
-const int* otherFunValCount = nullptr;
+// pla_function* help = nullptr;
+// char*** additionalVars = nullptr;
+// int otherVarCount = 0;
+// const int* otherFunValCount = nullptr;
 
 void execute_merging(mpi_manager* manager, const std::string& inputString) {
     std::string keyWord, paramFirst, paramSecond;
@@ -295,21 +295,21 @@ void execute_merging(mpi_manager* manager, const std::string& inputString) {
         module* parent = manager->get_my_modules().at(paramFirst);
         module* son = manager->get_my_modules().at(paramSecond);
         if (parent && son) {
-            // if (! son->get_function()) {
-            //     son->initialize_pla_function();
-            // }
-            if (! help) {
-                help = new pla_function(son->get_path());
-                additionalVars = help->sort_by_function();
-                otherVarCount = help->get_var_count();
-                otherFunValCount = help->get_fun_val_count();
+            if (! son->get_function()) {
+                son->initialize_pla_function();
             }
+            // if (! help) {
+            //     help = new pla_function(son->get_path());
+            //     additionalVars = help->sort_by_function();
+            //     otherVarCount = help->get_var_count();
+            //     otherFunValCount = help->get_fun_val_count();
+            // }
             if (! parent->get_function()) {
                 parent->initialize_pla_function();
             }
-            // parent->insert_function(son->get_function(), son->get_name());
-            parent->insert_function(additionalVars, otherVarCount, otherFunValCount,
-                                    son->get_name());
+            parent->insert_function(son->get_function(), son->get_name());
+            // parent->insert_function(additionalVars, otherVarCount, otherFunValCount,
+            //                         son->get_name());
 
         } else {
             std::cout << "No module found.\n";
@@ -320,8 +320,8 @@ void execute_merging(mpi_manager* manager, const std::string& inputString) {
             if (mod->get_function()) {
                 mod->set_path("../merged/" + mod->get_name() + ".pla");
                 mod->get_function()->write_to_pla(mod->get_path());
-                help->free_sort(additionalVars, 2);
-                help->~pla_function();
+                // help->free_sort(additionalVars, 2);
+                // help->~pla_function();
             }
             std::cout << "Merged module saved to: " << mod->get_path() << std::endl;
         } else {

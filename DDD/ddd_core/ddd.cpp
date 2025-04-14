@@ -38,7 +38,7 @@ void ddd::set_conf_path(const std::string& pa_conf_path) {
     }
 }
 
-void ddd::calculate_availability(int divider_flag, int state, bool timer_on) {
+void ddd::calculate_availability(int divider_flag, int state, int calculation, bool timer_on) {
     if (timer_on) {
         this->start_time = MPI_Wtime();
     }
@@ -56,16 +56,32 @@ void ddd::calculate_availability(int divider_flag, int state, bool timer_on) {
                 mainProcess->set_divide_function(divide_evenly);
                 break;
         }
-        mainProcess->set_add_instruction(add_instruction_density);
-        // mainProcess->set_add_instruction(add_instruction_merging);
+
+        if (calculation == 0) {
+            mainProcess->set_add_instruction(add_instruction_density);
+        } else if (calculation == 1) {
+            mainProcess->set_add_instruction(add_instruction_merging);
+        } else {
+            std::cerr << "Invalid calculation type" << std::endl;
+            return;
+        }
     }
+
     this->process_->process_information();
-    // this->process_->set_function(execute_merging);
-    // this->process_->set_serialize_function(serialize_merging);
-    // this->process_->set_deserialize_function(deserialize_merging);
-    this->process_->set_function(calculate_true_density);
-    this->process_->set_serialize_function(serialize_true_density);
-    this->process_->set_deserialize_function(deserialize_true_density);
+
+    if (calculation == 0) {
+        this->process_->set_function(calculate_true_density);
+        this->process_->set_serialize_function(serialize_true_density);
+        this->process_->set_deserialize_function(deserialize_true_density);
+    } else if (calculation == 1) {
+        this->process_->set_function(execute_merging);
+        this->process_->set_serialize_function(serialize_merging);
+        this->process_->set_deserialize_function(deserialize_merging);
+    } else {
+        std::cerr << "Invalid calculation type" << std::endl;
+        return;
+    }
+
     this->process_->process_instructions(state);
 
     if (timer_on) {
