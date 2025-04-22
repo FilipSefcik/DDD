@@ -1,0 +1,359 @@
+t481
+Cores used: 1
+Density of 0: 0.347173
+Time: 0.0226315
+Density of 0: 0.347173
+Time: 0.0245815
+Density of 0: 0.347173
+Time: 0.0225365
+Density of 0: 0.347173
+Time: 0.0213079
+Density of 0: 0.347173
+Time: 0.0252418
+Density of 0: 0.347173
+Time: 0.0228557
+Density of 0: 0.347173
+Time: 0.0228846
+Density of 0: 0.347173
+Time: 0.0242847
+Density of 0: 0.347173
+Time: 0.0215939
+Density of 0: 0.347173
+Time: 0.02145
+Cores used: 2
+Density of 0: 0.347173
+Time: 0.024008
+Density of 0: 0.347173
+Time: 0.0237153
+Density of 0: 0.347173
+Time: 0.0235401
+Density of 0: 0.347173
+Time: 0.0258697
+Density of 0: 0.347173
+Time: 0.0246532
+Density of 0: 0.347173
+Time: 0.0242305
+Density of 0: 0.347173
+Time: 0.0256913
+Density of 0: 0.347173
+Time: 0.0204879
+Density of 0: 0.347173
+Time: 0.0239003
+Density of 0: 0.347173
+Time: 0.0231682
+Cores used: 3
+Density of 0: 0.347173
+Time: 0.0237809
+Density of 0: 0.347173
+Time: 0.0243809
+Density of 0: 0.347173
+Time: 0.0244039
+Density of 0: 0.347173
+Time: 0.0242469
+Density of 0: 0.347173
+Time: 0.0251447
+Density of 0: 0.347173
+Time: 0.0207941
+Density of 0: 0.347173
+Time: 0.0256494
+Density of 0: 0.347173
+Time: 0.0242294
+Density of 0: 0.347173
+Time: 0.0251755
+Density of 0: 0.347173
+Time: 0.0244715
+Cores used: 4
+Density of 0: 0.347173
+Time: 0.0234668
+Density of 0: 0.347173
+Time: 0.0253953
+Density of 0: 0.347173
+Time: 0.0246317
+Density of 0: 0.347173
+Time: 0.0248685
+Density of 0: 0.347173
+Time: 0.0234907
+Density of 0: 0.347173
+Time: 0.0235791
+Density of 0: 0.347173
+Time: 0.0252803
+Density of 0: 0.347173
+Time: 0.0253162
+Density of 0: 0.347173
+Time: 0.0242976
+Density of 0: 0.347173
+Time: 0.0247762
+Cores used: 5
+Density of 0: 0.347173
+Time: 0.0239368
+Density of 0: 0.347173
+Time: 0.0209912
+Density of 0: 0.347173
+Time: 0.0255665
+Density of 0: 0.347173
+Time: 0.0251028
+Density of 0: 0.347173
+Time: 0.0235873
+Density of 0: 0.347173
+Time: 0.0247238
+Density of 0: 0.347173
+Time: 0.025606
+Density of 0: 0.347173
+Time: 0.0246677
+Density of 0: 0.347173
+Time: 0.0251271
+Density of 0: 0.347173
+Time: 0.024188
+Cores used: 6
+Density of 0: 0.347173
+Time: 0.0241508
+Density of 0: 0.347173
+Time: 0.0234261
+Density of 0: 0.347173
+Time: 0.0247949
+Density of 0: 0.347173
+Time: 0.0246568
+Density of 0: 0.347173
+Time: 0.024467
+Density of 0: 0.347173
+Time: 0.0249803
+Density of 0: 0.347173
+Time: 0.0244991
+Density of 0: 0.347173
+Time: 0.0246262
+Density of 0: 0.347173
+Time: 0.0250561
+Density of 0: 0.347173
+Time: 0.0220654
+Cores used: 7
+Density of 0: 0.347173
+Time: 0.0242515
+Density of 0: 0.347173
+Time: 0.0241405
+Density of 0: 0.347173
+Time: 0.0244922
+Density of 0: 0.347173
+Time: 0.0254285
+Density of 0: 0.347173
+Time: 0.0240514
+Density of 0: 0.347173
+Time: 0.0250244
+Density of 0: 0.347173
+Time: 0.02424
+Density of 0: 0.347173
+Time: 0.0236548
+Density of 0: 0.347173
+Time: 0.0237895
+Density of 0: 0.347173
+Time: 0.023794
+Cores used: 8
+Density of 0: 0.347173
+Time: 0.0243178
+Density of 0: 0.347173
+Time: 0.0247798
+Density of 0: 0.347173
+Time: 0.026865
+Density of 0: 0.347173
+Time: 0.0232558
+Density of 0: 0.347173
+Time: 0.0265287
+Density of 0: 0.347173
+Time: 0.0260034
+Density of 0: 0.347173
+Time: 0.0243218
+Density of 0: 0.347173
+Time: 0.0263253
+Density of 0: 0.347173
+Time: 0.026146
+Density of 0: 0.347173
+Time: 0.0229907
+Cores used: 9
+Density of 0: 0.347173
+Time: 0.0245887
+Density of 0: 0.347173
+Time: 0.0268623
+Density of 0: 0.347173
+Time: 0.0258007
+Density of 0: 0.347173
+Time: 0.0268073
+Density of 0: 0.347173
+Time: 0.0263767
+Density of 0: 0.347173
+Time: 0.0261905
+Density of 0: 0.347173
+Time: 0.0269985
+Density of 0: 0.347173
+Time: 0.0269183
+Density of 0: 0.347173
+Time: 0.0258139
+Density of 0: 0.347173
+Time: 0.025241
+Cores used: 10
+Density of 0: 0.347173
+Time: 0.0274441
+Density of 0: 0.347173
+Time: 0.0259207
+Density of 0: 0.347173
+Time: 0.0269699
+Density of 0: 0.347173
+Time: 0.0278177
+Density of 0: 0.347173
+Time: 0.0269043
+Density of 0: 0.347173
+Time: 0.0275164
+Density of 0: 0.347173
+Time: 0.0263982
+Density of 0: 0.347173
+Time: 0.026871
+Density of 0: 0.347173
+Time: 0.0277455
+Density of 0: 0.347173
+Time: 0.0265619
+Cores used: 11
+Density of 0: 0.347173
+Time: 0.0271942
+Density of 0: 0.347173
+Time: 0.0265874
+Density of 0: 0.347173
+Time: 0.027425
+Density of 0: 0.347173
+Time: 0.0267983
+Density of 0: 0.347173
+Time: 0.0260903
+Density of 0: 0.347173
+Time: 0.026708
+Density of 0: 0.347173
+Time: 0.0256016
+Density of 0: 0.347173
+Time: 0.0269629
+Density of 0: 0.347173
+Time: 0.0266161
+Density of 0: 0.347173
+Time: 0.0257749
+Cores used: 12
+Density of 0: 0.347173
+Time: 0.027199
+Density of 0: 0.347173
+Time: 0.0279611
+Density of 0: 0.347173
+Time: 0.0276116
+Density of 0: 0.347173
+Time: 0.029085
+Density of 0: 0.347173
+Time: 0.0264231
+Density of 0: 0.347173
+Time: 0.0274381
+Density of 0: 0.347173
+Time: 0.027189
+Density of 0: 0.347173
+Time: 0.0278907
+Density of 0: 0.347173
+Time: 0.028495
+Density of 0: 0.347173
+Time: 0.0268077
+Cores used: 13
+Density of 0: 0.347173
+Time: 0.0276868
+Density of 0: 0.347173
+Time: 0.0275599
+Density of 0: 0.347173
+Time: 0.0268375
+Density of 0: 0.347173
+Time: 0.0290433
+Density of 0: 0.347173
+Time: 0.0278823
+Density of 0: 0.347173
+Time: 0.0268398
+Density of 0: 0.347173
+Time: 0.0277525
+Density of 0: 0.347173
+Time: 0.0272876
+Density of 0: 0.347173
+Time: 0.0282061
+Density of 0: 0.347173
+Time: 0.026933
+Cores used: 14
+Density of 0: 0.347173
+Time: 0.0280808
+Density of 0: 0.347173
+Time: 0.0269229
+Density of 0: 0.347173
+Time: 0.0286757
+Density of 0: 0.347173
+Time: 0.0271521
+Density of 0: 0.347173
+Time: 0.0289492
+Density of 0: 0.347173
+Time: 0.0290821
+Density of 0: 0.347173
+Time: 0.0274444
+Density of 0: 0.347173
+Time: 0.0268675
+Density of 0: 0.347173
+Time: 0.0289167
+Density of 0: 0.347173
+Time: 0.0278091
+Cores used: 15
+Density of 0: 0.347173
+Time: 0.026921
+Density of 0: 0.347173
+Time: 0.0277831
+Density of 0: 0.347173
+Time: 0.0293315
+Density of 0: 0.347173
+Time: 0.0282321
+Density of 0: 0.347173
+Time: 0.0287926
+Density of 0: 0.347173
+Time: 0.0273767
+Density of 0: 0.347173
+Time: 0.0286626
+Density of 0: 0.347173
+Time: 0.0268912
+Density of 0: 0.347173
+Time: 0.0268194
+Density of 0: 0.347173
+Time: 0.0276655
+Cores used: 16
+Density of 0: 0.347173
+Time: 0.0285715
+Density of 0: 0.347173
+Time: 0.0269822
+Density of 0: 0.347173
+Time: 0.0268996
+Density of 0: 0.347173
+Time: 0.0289125
+Density of 0: 0.347173
+Time: 0.0286864
+Density of 0: 0.347173
+Time: 0.0284238
+Density of 0: 0.347173
+Time: 0.027031
+Density of 0: 0.347173
+Time: 0.0289516
+Density of 0: 0.347173
+Time: 0.0277617
+Density of 0: 0.347173
+Time: 0.0282886
+Merged module saved to: ../merged/M0.pla
+Merged t481
+Density of 0: 0.388354
+Time: 2.55276
+Density of 0: 0.388354
+Time: 2.54289
+Density of 0: 0.388354
+Time: 2.54843
+Density of 0: 0.388354
+Time: 2.54116
+Density of 0: 0.388354
+Time: 2.5545
+Density of 0: 0.388354
+Time: 2.5337
+Density of 0: 0.388354
+Time: 2.54919
+Density of 0: 0.388354
+Time: 2.5381
+Density of 0: 0.388354
+Time: 2.55604
+Density of 0: 0.388354
+Time: 2.53356

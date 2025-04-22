@@ -27,7 +27,7 @@ int main(int argc, char* argv[]) {
     bool timer = false;
     if (argc > 5) {
         std::string yes = "y";
-        if (yes == argv[4]) {
+        if (yes == argv[5]) {
             timer = true;
         }
     }
