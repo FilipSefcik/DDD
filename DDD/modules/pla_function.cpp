@@ -105,6 +105,10 @@ void pla_function::load_from_pla(const std::string& filePath) {
         iss >> variables >> value; // načítaj premenné
 
         // Pridaj načítaný riadok do PLA funkcie
+        if (value != '0' && value != '1') {
+            value = '0'; // ak je hodnota iná ako 0 alebo 1, nastav na 0
+        }
+
         this->add_line(variables.c_str(), value, lineIndex);
         lineIndex++;
     } while (std::getline(inputFile, line));
