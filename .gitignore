@@ -1,5 +1,5 @@
 .cache
 .vscode
 build
-merged
+merged/
 compile_commands.json
