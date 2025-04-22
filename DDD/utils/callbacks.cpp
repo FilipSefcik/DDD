@@ -151,14 +151,14 @@ void calculate_true_density(mpi_manager* manager, const std::string& inputString
             int pla_type = is_binary_pla(path, nullptr, nullptr);
             std::vector<double> ps;
             if (pla_type == 1) {
-                std::cout << mod->get_var_count() << std::endl;
+                // std::cout << mod->get_var_count() << std::endl;
                 std::optional<teddy::pla_file_binary> file = teddy::load_binary_pla(path, nullptr);
-                std::cout << file->input_count_ << std::endl;
+                // std::cout << file->input_count_ << std::endl;
                 teddy::bss_manager bssManager(file->input_count_, mod->get_var_count() * 100);
                 teddy::bdd_manager::diagram_t f =
                     teddy::io::from_pla(bssManager, *file)[mod->get_function_column()];
                 ps = bssManager.calculate_probabilities(*mod->get_sons_reliability(), f);
-                std::cout << "Done\n";
+                // std::cout << "Done\n";
             } else if (pla_type == 0) {
                 std::optional<teddy::pla_file_mvl> file = teddy::load_mvl_pla(path, nullptr);
                 teddy::imss_manager imssManager(file->input_count_, mod->get_var_count() * 100,
