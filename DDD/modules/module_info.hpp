@@ -16,8 +16,8 @@ class module_info {
     int assigned_process_ = 0;
     int position_ = 0;
     int son_count_ = 0;
-    std::vector<double>* my_reliabilities_;
-    std::vector<std::vector<double>>* sons_reliability_;
+    std::vector<double>* my_reliabilities_ = nullptr;
+    std::vector<std::vector<double>>* sons_reliability_ = nullptr;
 
   public:
     ~module_info() {

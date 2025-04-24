@@ -68,7 +68,7 @@ void module_info::set_sons_domains(std::vector<int>* domains) {
         this->sons_reliability_->push_back(std::vector<double>(2, 1.0 / 2));
     }
     for (size_t i = 1; i < domains->size(); i++) {
-        this->sons_reliability_->at(i).resize(domains->at(i), 1.0 / domains->at(i));
+        this->sons_reliability_->push_back(std::vector<double>(domains->at(i), 1.0 / domains->at(i)));
     }
 }
 
