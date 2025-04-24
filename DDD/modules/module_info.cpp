@@ -49,11 +49,46 @@ void module_info::print_sons() {
     }
 }
 
+void module_info::set_my_reliability(std::vector<double>* rel) {
+    this->my_reliabilities_->clear();
+    // std::cout << this->states_ << std::endl;
+    this->my_reliabilities_->resize(this->states_);
+    for (int i = 0; i < this->states_; i++) {
+        this->my_reliabilities_->at(i) = rel->at(i);
+    }
+}
+
 void module_info::set_sons_domains(std::vector<int>* domains) {
+    if (! this->sons_reliability_) {
+        this->sons_reliability_ = new std::vector<std::vector<double>>();
+    } else {
+        this->sons_reliability_->clear();
+    }
     for (int i = 0; i < domains->at(0); i++) {
-        this->sons_states_.push_back(2);
+        this->sons_reliability_->push_back(std::vector<double>(2, 1.0 / 2));
     }
     for (size_t i = 1; i < domains->size(); i++) {
-        this->sons_states_.push_back(domains->at(i));
+        this->sons_reliability_->at(i).resize(domains->at(i), 1.0 / domains->at(i));
+    }
+}
+
+void module_info::set_sons_reliability(size_t sonPosition, double sonRel, int state) {
+    if (sonPosition < this->sons_reliability_->size()) {
+        // std::cout << sonRel << std::endl;
+        this->sons_reliability_->at(sonPosition).at(state) = sonRel;
+        this->sons_reliability_->at(sonPosition).at((state + 1) % 2) = 1.0 - sonRel;
+    }
+}
+
+void module_info::set_sons_reliability(size_t sonPosition, std::vector<double>* sonRel) {
+    this->sons_reliability_->at(sonPosition) = *sonRel;
+}
+
+void module_info::set_sons_reliability(std::vector<int>* domains) {
+    this->sons_reliability_->clear();
+    this->sons_reliability_->resize(domains->size());
+    for (size_t i = 0; i < domains->size(); i++) {
+        // std::cout << domains->at(i) << std::endl;
+        this->sons_reliability_->at(i).resize(domains->at(i), 1.0 / domains->at(i));
     }
 }

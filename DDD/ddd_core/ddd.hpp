@@ -1,5 +1,7 @@
 #pragma once
-#include "../processing/process.hpp"
+#include "../modules/module_info.hpp"
+#include <chrono>
+#include <string>
 
 /*
  * @brief bdd_distributor is used as an interface to control processing of config file
@@ -10,14 +12,13 @@
  */
 class ddd {
   private:
-    int my_rank, process_count;
-    double start_time, end_time;
-    process* process_;
+    // int my_rank_, process_count_;
+    std::chrono::high_resolution_clock::time_point start_time_, end_time_;
+    std::string conf_path;
+    void use_teddy(module_info* mod);
 
   public:
-    ddd();
-    void set_conf_path(const std::string& pa_conf_path);
-    void calculate_availability(int divider_flag, int state, int calculation, bool timer_on);
+    void set_conf_path(const std::string& pa_conf_path) { this->conf_path = pa_conf_path; }
+    void calculate_availability(int state, bool timer_on);
     void get_max_time();
-    ~ddd();
 };
