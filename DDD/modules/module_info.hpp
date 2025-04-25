@@ -66,7 +66,7 @@ class module_info {
     std::string to_string() const;
 
     void print_reliability(int state) {
-        std::cout << "Module: " << this->name_ << std::endl;
+        // std::cout << "Module: " << this->name_ << std::endl;
         std::cout << "Density of " << state << ": " << this->my_reliabilities_->at(state)
                   << std::endl;
     };

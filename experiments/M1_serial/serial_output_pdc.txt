@@ -1,0 +1,21 @@
+pdc
+Density of 0: 0.974045
+Time: 1001
+Density of 0: 0.974045
+Time: 1003
+Density of 0: 0.974045
+Time: 1010
+Density of 0: 0.974045
+Time: 1000
+Density of 0: 0.974045
+Time: 996
+Density of 0: 0.974045
+Time: 998
+Density of 0: 0.974045
+Time: 985
+Density of 0: 0.974045
+Time: 1007
+Density of 0: 0.974045
+Time: 992
+Density of 0: 0.974045
+Time: 984

@@ -17,7 +17,7 @@ void ddd::calculate_availability(int state, bool timer_on) {
               [](module_info* a, module_info* b) { return a->get_priority() < b->get_priority(); });
 
     for (size_t i = 0; i < modules->size(); i++) {
-        std::cout << i << std::endl;
+        // std::cout << i << std::endl;
         this->use_teddy(modules->at(i));
     }
 
@@ -47,5 +47,5 @@ void ddd::use_teddy(module_info* mod) {
 void ddd::get_max_time() {
     auto duration =
         std::chrono::duration_cast<std::chrono::milliseconds>(this->end_time_ - this->start_time_);
-    std::cout << "Time: " << duration.count() << " ms" << std::endl;
+    std::cout << "Time: " << duration.count() << std::endl;
 }

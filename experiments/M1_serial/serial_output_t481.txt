@@ -1,0 +1,21 @@
+t481
+Density of 0: 0.347173
+Time: 27
+Density of 0: 0.347173
+Time: 27
+Density of 0: 0.347173
+Time: 26
+Density of 0: 0.347173
+Time: 25
+Density of 0: 0.347173
+Time: 25
+Density of 0: 0.347173
+Time: 23
+Density of 0: 0.347173
+Time: 23
+Density of 0: 0.347173
+Time: 26
+Density of 0: 0.347173
+Time: 19
+Density of 0: 0.347173
+Time: 25

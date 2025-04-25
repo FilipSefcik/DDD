@@ -1,0 +1,21 @@
+alu4
+Density of 0: 0.413414
+Time: 94
+Density of 0: 0.413414
+Time: 99
+Density of 0: 0.413414
+Time: 96
+Density of 0: 0.413414
+Time: 89
+Density of 0: 0.413414
+Time: 96
+Density of 0: 0.413414
+Time: 97
+Density of 0: 0.413414
+Time: 97
+Density of 0: 0.413414
+Time: 95
+Density of 0: 0.413414
+Time: 97
+Density of 0: 0.413414
+Time: 99

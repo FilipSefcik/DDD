@@ -1,0 +1,21 @@
+ex4
+Density of 0: 0.665321
+Time: 46
+Density of 0: 0.665321
+Time: 45
+Density of 0: 0.665321
+Time: 45
+Density of 0: 0.665321
+Time: 39
+Density of 0: 0.665321
+Time: 46
+Density of 0: 0.665321
+Time: 43
+Density of 0: 0.665321
+Time: 43
+Density of 0: 0.665321
+Time: 46
+Density of 0: 0.665321
+Time: 42
+Density of 0: 0.665321
+Time: 48

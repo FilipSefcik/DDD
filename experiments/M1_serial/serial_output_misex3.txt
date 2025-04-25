@@ -1,0 +1,21 @@
+misex3
+Density of 0: 0.90625
+Time: 160
+Density of 0: 0.90625
+Time: 160
+Density of 0: 0.90625
+Time: 151
+Density of 0: 0.90625
+Time: 154
+Density of 0: 0.90625
+Time: 160
+Density of 0: 0.90625
+Time: 157
+Density of 0: 0.90625
+Time: 157
+Density of 0: 0.90625
+Time: 157
+Density of 0: 0.90625
+Time: 158
+Density of 0: 0.90625
+Time: 158
