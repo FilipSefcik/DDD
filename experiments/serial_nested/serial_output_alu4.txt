@@ -1,0 +1,21 @@
+alu4
+Density of 0: 0.318658
+Time: 0.658
+Density of 0: 0.318658
+Time: 0.653
+Density of 0: 0.318658
+Time: 0.658
+Density of 0: 0.318658
+Time: 0.659
+Density of 0: 0.318658
+Time: 0.651
+Density of 0: 0.318658
+Time: 0.653
+Density of 0: 0.318658
+Time: 0.659
+Density of 0: 0.318658
+Time: 0.656
+Density of 0: 0.318658
+Time: 0.651
+Density of 0: 0.318658
+Time: 0.657

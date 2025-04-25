@@ -1,0 +1,21 @@
+t481
+Density of 0: 0.352868
+Time: 0.17
+Density of 0: 0.352868
+Time: 0.169
+Density of 0: 0.352868
+Time: 0.168
+Density of 0: 0.352868
+Time: 0.172
+Density of 0: 0.352868
+Time: 0.169
+Density of 0: 0.352868
+Time: 0.168
+Density of 0: 0.352868
+Time: 0.163
+Density of 0: 0.352868
+Time: 0.168
+Density of 0: 0.352868
+Time: 0.168
+Density of 0: 0.352868
+Time: 0.168

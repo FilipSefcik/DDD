@@ -1,0 +1,21 @@
+apex2
+Density of 0: 0.968965
+Time: 24.944
+Density of 0: 0.968965
+Time: 24.941
+Density of 0: 0.968965
+Time: 24.926
+Density of 0: 0.968965
+Time: 24.94
+Density of 0: 0.968965
+Time: 24.964
+Density of 0: 0.968965
+Time: 24.951
+Density of 0: 0.968965
+Time: 24.976
+Density of 0: 0.968965
+Time: 24.935
+Density of 0: 0.968965
+Time: 24.927
+Density of 0: 0.968965
+Time: 24.963

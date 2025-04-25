@@ -1,0 +1,21 @@
+ex1010
+Density of 0: 0.930728
+Time: 0.442
+Density of 0: 0.930728
+Time: 0.439
+Density of 0: 0.930728
+Time: 0.437
+Density of 0: 0.930728
+Time: 0.436
+Density of 0: 0.930728
+Time: 0.428
+Density of 0: 0.930728
+Time: 0.439
+Density of 0: 0.930728
+Time: 0.44
+Density of 0: 0.930728
+Time: 0.438
+Density of 0: 0.930728
+Time: 0.436
+Density of 0: 0.930728
+Time: 0.433
