@@ -1,0 +1,21 @@
+apex5
+Density of 0: 0.5
+Time: 0.559
+Density of 0: 0.5
+Time: 0.558
+Density of 0: 0.5
+Time: 0.56
+Density of 0: 0.5
+Time: 0.558
+Density of 0: 0.5
+Time: 0.56
+Density of 0: 0.5
+Time: 0.553
+Density of 0: 0.5
+Time: 0.558
+Density of 0: 0.5
+Time: 0.557
+Density of 0: 0.5
+Time: 0.549
+Density of 0: 0.5
+Time: 0.555

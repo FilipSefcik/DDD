@@ -1,0 +1,21 @@
+cordic
+Density of 0: 0.0687034
+Time: 4.759
+Density of 0: 0.0687034
+Time: 4.763
+Density of 0: 0.0687034
+Time: 4.742
+Density of 0: 0.0687034
+Time: 4.745
+Density of 0: 0.0687034
+Time: 4.744
+Density of 0: 0.0687034
+Time: 4.745
+Density of 0: 0.0687034
+Time: 4.742
+Density of 0: 0.0687034
+Time: 4.744
+Density of 0: 0.0687034
+Time: 4.741
+Density of 0: 0.0687034
+Time: 4.738

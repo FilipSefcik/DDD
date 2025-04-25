@@ -1,0 +1,21 @@
+apex4
+Density of 0: 1
+Time: 0.081
+Density of 0: 1
+Time: 0.081
+Density of 0: 1
+Time: 0.085
+Density of 0: 1
+Time: 0.084
+Density of 0: 1
+Time: 0.083
+Density of 0: 1
+Time: 0.074
+Density of 0: 1
+Time: 0.081
+Density of 0: 1
+Time: 0.082
+Density of 0: 1
+Time: 0.08
+Density of 0: 1
+Time: 0.078

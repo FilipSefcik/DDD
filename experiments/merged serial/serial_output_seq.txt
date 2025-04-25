@@ -1,0 +1,21 @@
+seq
+Density of 0: 0.986722
+Time: 24.794
+Density of 0: 0.986722
+Time: 24.722
+Density of 0: 0.986722
+Time: 24.778
+Density of 0: 0.986722
+Time: 24.75
+Density of 0: 0.986722
+Time: 24.875
+Density of 0: 0.986722
+Time: 24.728
+Density of 0: 0.986722
+Time: 24.83
+Density of 0: 0.986722
+Time: 24.721
+Density of 0: 0.986722
+Time: 24.695
+Density of 0: 0.986722
+Time: 24.783

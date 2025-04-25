@@ -47,5 +47,6 @@ void ddd::use_teddy(module_info* mod) {
 void ddd::get_max_time() {
     auto duration =
         std::chrono::duration_cast<std::chrono::milliseconds>(this->end_time_ - this->start_time_);
-    std::cout << "Time: " << duration.count() << std::endl;
+    double seconds = duration.count() / 1000.0;
+    std::cout << "Time: " << seconds << std::endl;
 }
