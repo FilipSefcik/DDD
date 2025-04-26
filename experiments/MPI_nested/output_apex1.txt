@@ -1,0 +1,337 @@
+apex1
+Cores used: 1
+Density of 0: 0.999986
+Time: 49.5415
+Density of 0: 0.999986
+Time: 49.4881
+Density of 0: 0.999986
+Time: 49.5024
+Density of 0: 0.999986
+Time: 49.5097
+Density of 0: 0.999986
+Time: 49.4991
+Density of 0: 0.999986
+Time: 49.5505
+Density of 0: 0.999986
+Time: 49.5462
+Density of 0: 0.999986
+Time: 49.5382
+Density of 0: 0.999986
+Time: 49.5508
+Density of 0: 0.999986
+Time: 49.4991
+Cores used: 2
+Density of 0: 0.999986
+Time: 27.0614
+Density of 0: 0.999986
+Time: 27.1589
+Density of 0: 0.999986
+Time: 27.1458
+Density of 0: 0.999986
+Time: 27.0858
+Density of 0: 0.999986
+Time: 27.1525
+Density of 0: 0.999986
+Time: 27.1006
+Density of 0: 0.999986
+Time: 27.1011
+Density of 0: 0.999986
+Time: 27.102
+Density of 0: 0.999986
+Time: 27.135
+Density of 0: 0.999986
+Time: 27.1478
+Cores used: 3
+Density of 0: 0.999986
+Time: 19.2441
+Density of 0: 0.999986
+Time: 19.2464
+Density of 0: 0.999986
+Time: 19.2557
+Density of 0: 0.999986
+Time: 19.2168
+Density of 0: 0.999986
+Time: 19.2032
+Density of 0: 0.999986
+Time: 19.2217
+Density of 0: 0.999986
+Time: 19.2296
+Density of 0: 0.999986
+Time: 19.2421
+Density of 0: 0.999986
+Time: 19.2536
+Density of 0: 0.999986
+Time: 19.2414
+Cores used: 4
+Density of 0: 0.999986
+Time: 14.8237
+Density of 0: 0.999986
+Time: 14.8153
+Density of 0: 0.999986
+Time: 14.8229
+Density of 0: 0.999986
+Time: 14.8207
+Density of 0: 0.999986
+Time: 14.7996
+Density of 0: 0.999986
+Time: 14.7986
+Density of 0: 0.999986
+Time: 14.8116
+Density of 0: 0.999986
+Time: 14.8149
+Density of 0: 0.999986
+Time: 14.8262
+Density of 0: 0.999986
+Time: 14.8104
+Cores used: 5
+Density of 0: 0.999986
+Time: 12.8051
+Density of 0: 0.999986
+Time: 12.8012
+Density of 0: 0.999986
+Time: 12.8049
+Density of 0: 0.999986
+Time: 12.7969
+Density of 0: 0.999986
+Time: 12.7967
+Density of 0: 0.999986
+Time: 12.8021
+Density of 0: 0.999986
+Time: 12.8037
+Density of 0: 0.999986
+Time: 12.7979
+Density of 0: 0.999986
+Time: 12.7903
+Density of 0: 0.999986
+Time: 12.7888
+Cores used: 6
+Density of 0: 0.999986
+Time: 10.5727
+Density of 0: 0.999986
+Time: 10.5766
+Density of 0: 0.999986
+Time: 10.5819
+Density of 0: 0.999986
+Time: 10.5768
+Density of 0: 0.999986
+Time: 10.5747
+Density of 0: 0.999986
+Time: 10.5808
+Density of 0: 0.999986
+Time: 10.5592
+Density of 0: 0.999986
+Time: 10.5796
+Density of 0: 0.999986
+Time: 10.5775
+Density of 0: 0.999986
+Time: 10.5812
+Cores used: 7
+Density of 0: 0.999986
+Time: 10.6852
+Density of 0: 0.999986
+Time: 10.6683
+Density of 0: 0.999986
+Time: 10.6714
+Density of 0: 0.999986
+Time: 10.6656
+Density of 0: 0.999986
+Time: 10.6814
+Density of 0: 0.999986
+Time: 10.6899
+Density of 0: 0.999986
+Time: 10.6897
+Density of 0: 0.999986
+Time: 10.6809
+Density of 0: 0.999986
+Time: 10.6685
+Density of 0: 0.999986
+Time: 10.6755
+Cores used: 8
+Density of 0: 0.999986
+Time: 9.70709
+Density of 0: 0.999986
+Time: 9.74226
+Density of 0: 0.999986
+Time: 9.73219
+Density of 0: 0.999986
+Time: 9.73083
+Density of 0: 0.999986
+Time: 9.71898
+Density of 0: 0.999986
+Time: 9.72802
+Density of 0: 0.999986
+Time: 9.76555
+Density of 0: 0.999986
+Time: 9.76293
+Density of 0: 0.999986
+Time: 9.75024
+Density of 0: 0.999986
+Time: 9.74269
+Cores used: 9
+Density of 0: 0.999986
+Time: 10.938
+Density of 0: 0.999986
+Time: 10.9381
+Density of 0: 0.999986
+Time: 10.935
+Density of 0: 0.999986
+Time: 10.9307
+Density of 0: 0.999986
+Time: 10.9352
+Density of 0: 0.999986
+Time: 10.9364
+Density of 0: 0.999986
+Time: 10.9259
+Density of 0: 0.999986
+Time: 10.9241
+Density of 0: 0.999986
+Time: 10.9282
+Density of 0: 0.999986
+Time: 10.9354
+Cores used: 10
+Density of 0: 0.999986
+Time: 9.62005
+Density of 0: 0.999986
+Time: 9.61745
+Density of 0: 0.999986
+Time: 9.62295
+Density of 0: 0.999986
+Time: 9.6134
+Density of 0: 0.999986
+Time: 9.61799
+Density of 0: 0.999986
+Time: 9.6217
+Density of 0: 0.999986
+Time: 9.61467
+Density of 0: 0.999986
+Time: 9.61907
+Density of 0: 0.999986
+Time: 9.62416
+Density of 0: 0.999986
+Time: 9.62315
+Cores used: 11
+Density of 0: 0.999986
+Time: 11.0108
+Density of 0: 0.999986
+Time: 11.0097
+Density of 0: 0.999986
+Time: 11.0022
+Density of 0: 0.999986
+Time: 11.0065
+Density of 0: 0.999986
+Time: 11.0042
+Density of 0: 0.999986
+Time: 11.0011
+Density of 0: 0.999986
+Time: 11.0176
+Density of 0: 0.999986
+Time: 10.9957
+Density of 0: 0.999986
+Time: 11.002
+Density of 0: 0.999986
+Time: 11.0047
+Cores used: 12
+Density of 0: 0.999986
+Time: 7.1752
+Density of 0: 0.999986
+Time: 7.17769
+Density of 0: 0.999986
+Time: 7.17708
+Density of 0: 0.999986
+Time: 7.15674
+Density of 0: 0.999986
+Time: 7.17012
+Density of 0: 0.999986
+Time: 7.1649
+Density of 0: 0.999986
+Time: 7.18438
+Density of 0: 0.999986
+Time: 7.165
+Density of 0: 0.999986
+Time: 7.18784
+Density of 0: 0.999986
+Time: 7.17604
+Cores used: 13
+Density of 0: 0.999986
+Time: 7.70167
+Density of 0: 0.999986
+Time: 7.70007
+Density of 0: 0.999986
+Time: 7.69765
+Density of 0: 0.999986
+Time: 7.69462
+Density of 0: 0.999986
+Time: 7.70583
+Density of 0: 0.999986
+Time: 7.70258
+Density of 0: 0.999986
+Time: 7.69646
+Density of 0: 0.999986
+Time: 7.70016
+Density of 0: 0.999986
+Time: 7.69035
+Density of 0: 0.999986
+Time: 7.70197
+Cores used: 14
+Density of 0: 0.999986
+Time: 7.69742
+Density of 0: 0.999986
+Time: 7.69822
+Density of 0: 0.999986
+Time: 7.68626
+Density of 0: 0.999986
+Time: 7.70086
+Density of 0: 0.999986
+Time: 7.69926
+Density of 0: 0.999986
+Time: 7.69957
+Density of 0: 0.999986
+Time: 7.6987
+Density of 0: 0.999986
+Time: 7.70354
+Density of 0: 0.999986
+Time: 7.70706
+Density of 0: 0.999986
+Time: 7.7003
+Cores used: 15
+Density of 0: 0.999986
+Time: 7.71999
+Density of 0: 0.999986
+Time: 7.7283
+Density of 0: 0.999986
+Time: 7.72719
+Density of 0: 0.999986
+Time: 7.73432
+Density of 0: 0.999986
+Time: 7.71714
+Density of 0: 0.999986
+Time: 7.7266
+Density of 0: 0.999986
+Time: 7.7228
+Density of 0: 0.999986
+Time: 7.72482
+Density of 0: 0.999986
+Time: 7.72505
+Density of 0: 0.999986
+Time: 7.72544
+Cores used: 16
+Density of 0: 0.999986
+Time: 7.72277
+Density of 0: 0.999986
+Time: 7.71575
+Density of 0: 0.999986
+Time: 7.71904
+Density of 0: 0.999986
+Time: 7.71148
+Density of 0: 0.999986
+Time: 7.71955
+Density of 0: 0.999986
+Time: 7.71662
+Density of 0: 0.999986
+Time: 7.71451
+Density of 0: 0.999986
+Time: 7.71711
+Density of 0: 0.999986
+Time: 7.71934
+Density of 0: 0.999986
+Time: 7.71833

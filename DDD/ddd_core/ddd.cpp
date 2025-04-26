@@ -22,7 +22,7 @@ ddd::ddd() {
     // char processorName[MPI_MAX_PROCESSOR_NAME];
     // int nameLength;
     // MPI_Get_processor_name(processorName, &nameLength); // Get the processor name
-    std::cout << "Rank " << this->my_rank << std::endl;
+    //std::cout << "Rank " << this->my_rank << std::endl;
 }
 
 ddd::~ddd() {

@@ -13,27 +13,19 @@ out="$2"
 
 awk -v OUTPUT="$out" '
 BEGIN {
-  FS=": ";
+  FS = ": "
 }
-# record cores
+# whenever we see "Cores used: X", start a new core bucket
 /^Cores used:/ {
   core = $2
   runs[core] = 0
   if (!(core in seen)) {
-    seen[core]=1; cores[++nc]=core
+    seen[core] = 1
+    cores[++nc] = core
   }
   next
 }
-# record merged section
-/^Merged/ {
-  core = "merged"
-  runs[core] = 0
-  if (!("merged" in seen)) {
-    seen["merged"]=1; cores[++nc]="merged"
-  }
-  next
-}
-# capture time values
+# whenever we see "Time: value", stash it
 /^Time:/ {
   val = $2
   runs[core]++
@@ -41,32 +33,28 @@ BEGIN {
   if (runs[core] > maxruns) maxruns = runs[core]
 }
 END {
-  # sort numeric cores (exclude merged)
-  for (i=1; i<=nc; i++) {
-    c=cores[i]
-    if (c!="merged") numcores[++cn]=c
+  # sort the numeric core list
+  for (i = 1; i <= nc; i++) {
+    numcores[++cn] = cores[i]
   }
-  n=asort(numcores)
+  n = asort(numcores)
 
-  # write header: cores then merged
-  header=""
-  for(i=1;i<=n;i++){
-    header = header numcores[i] ";"
+  # print header: "1;2;3;...;N"
+  header = numcores[1]
+  for (i = 2; i <= n; i++) {
+    header = header ";" numcores[i]
   }
-  header = header "merged"
   print header > OUTPUT
 
-  # write each run row
-  for(r=1; r<=maxruns; r++){
-    row=""
-    for(i=1;i<=n;i++){
-      c=numcores[i]
+  # print each run row
+  for (r = 1; r <= maxruns; r++) {
+    row = ""
+    for (i = 1; i <= n; i++) {
+      c = numcores[i]
       v = times[c, r]
       gsub(/\./, ",", v)
-      row = row v ";"
+      row = row (i>1 ? ";" : "") v
     }
-    row = row times["merged", r]
-    gsub(/\./, ",", row)
     print row > OUTPUT
   }
 }
