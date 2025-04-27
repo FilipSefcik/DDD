@@ -12,7 +12,14 @@ void ddd::calculate_availability(int state, bool timer_on) {
 
     module_manager moduleManager;
     moduleManager.load(this->conf_path);
-    std::vector<module_info*>* modules = moduleManager.get_modules();
+    this->get_overall_reliability(moduleManager.get_modules(), state);
+
+    if (timer_on) {
+        this->end_time_ = std::chrono::high_resolution_clock::now();
+    }
+}
+
+void ddd::get_overall_reliability(std::vector<module_info*>* modules, int state) {
     std::sort(modules->begin(), modules->end(),
               [](module_info* a, module_info* b) { return a->get_priority() < b->get_priority(); });
 
@@ -22,10 +29,6 @@ void ddd::calculate_availability(int state, bool timer_on) {
     }
 
     modules->at(modules->size() - 1)->print_reliability(state);
-
-    if (timer_on) {
-        this->end_time_ = std::chrono::high_resolution_clock::now();
-    }
 }
 
 void ddd::use_teddy(module_info* mod) {
