@@ -6,11 +6,11 @@
 #include <libteddy/inc/io.hpp>
 
 void ddd::calculate_availability(int state, bool timer_on) {
+    module_manager moduleManager;
     if (timer_on) {
         this->start_time_ = std::chrono::high_resolution_clock::now();
     }
 
-    module_manager moduleManager;
     moduleManager.load(this->conf_path);
     this->get_overall_reliability(moduleManager.get_modules(), state);
 
