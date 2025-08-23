@@ -8,9 +8,12 @@
  * mpiexec <0> -n <1> <2> <3> <4> <5>
  * example:
  * export PMIX_MCA_pcompress_base_silence_warning=1
- * mpirun -host kiscience:1,kiscience2:2 mpi_cloud/ddd_parallel mpi_cloud/modules/module_map.conf 0
- * 0 n \Where: \0 - usage of threads as process (optional, default are cores), if yes use
- * --use-hwthread-cpus \1 - number of processes \2 - path to this main \3 - path to config file
+ * mpirun -host kiscience:1,kiscience2:2 mpi_cloud/ddd_parallel mpi_cloud/modules/module_map.conf 0 0 n
+ * \Where:
+ * \0 - usage of threads as process (optional, default are cores), if yes use --use-hwthread-cpus
+ * \1 - number of processes
+ * \2 - path to this main
+ * \3 - path to config file
  * \4 - availability which state (0 or 1) should be calculated
  * \5 - usage of timer (y or n)
  */
