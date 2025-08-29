@@ -65,14 +65,14 @@ mpirun -host kiscience:1,kiscience2:2 mpi_cloud/ddd_parallel mpi_cloud/modules/m
 
 ### Arguments
 
-- **<hostlist>** – List of hosts with process counts (e.g., `kiscience:1,kiscience2:2`)  
-- **<processes>** – Number of MPI processes to spawn  
-- **<conf_file>** – Path to configuration file (default: `module_map.conf`)  
-- **<divider>** – Module division strategy:  
+- **hostlist** – List of hosts with process counts (e.g., `kiscience:1,kiscience2:2`)  
+- **processes** – Number of MPI processes to spawn  
+- **conf_file** – Path to configuration file (default: `module_map.conf`)  
+- **divider** – Module division strategy:  
   - `0` = var_count_divider  
   - `1` = node_divider  
-- **<state>** – Availability state to calculate (`0` or `1`)  
-- **<timer>** – Measure execution time (`y` or `n`)  
+- **state** – Availability state to calculate (`0` or `1`)  
+- **timer** – Measure execution time (`y` or `n`)  
 
 ### Notes
 
