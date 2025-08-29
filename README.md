@@ -53,36 +53,30 @@ Ensure the TeDDy library and Open MPI are installed and available in your system
 General Command
 
 ```bash
-mpirun -host <hostlist> -n <processes> ./ddd_parallel <conf_file> <divider> <state> <timer>
+mpirun <threads> -n <processes> <main> <conf_file> <divider> <state> <timer>
 ```
 
 ### Example
 
 ```bash
 export PMIX_MCA_pcompress_base_silence_warning=1
-mpirun -host kiscience:1,kiscience2:2 mpi_cloud/ddd_parallel mpi_cloud/modules/module_map.conf 0 0 n
+mpirun -n 2 mpi_cloud/ddd_parallel mpi_cloud/modules/module_map.conf 0 0 n
 ```
 
 ### Arguments
 
-- **hostlist** – List of hosts with process counts (e.g., `kiscience:1,kiscience2:2`)  
-- **processes** – Number of MPI processes to spawn  
+- **threads** – To use hardware threads instead of cores 
+```bash
+--use-hwthread-cpus
+``` 
+- **processes** – Number of MPI processes to spawn 
+- **main** - Path to main.exe 
 - **conf_file** – Path to configuration file (default: `module_map.conf`)  
 - **divider** – Module division strategy:  
   - `0` = var_count_divider  
   - `1` = node_divider  
 - **state** – Availability state to calculate (`0` or `1`)  
 - **timer** – Measure execution time (`y` or `n`)  
-
-### Notes
-
-To use hardware threads instead of cores, add the MPI flag:
-
-```bash
---use-hwthread-cpus
-```
-
-If argument timer is "y", the maximum execution time will be displayed at the end.
 
 ## Example workflow
 
@@ -145,13 +139,12 @@ M5 VVV
 ### Example of output
 
 ```bash
-mpirun -n 2 DDD/main ../load_files/modules/module_map.conf 0 1 0 y
+mpirun -n 2 DDD/main ../load_files/modules/module_map.conf 0 1 y
 Density of 1: 0.454834
 Time: 0.00101632
 ----------------
-mpirun -n 2 DDD/main ../load_files/modules/module_map.conf 0 0 0 y
+mpirun -n 2 DDD/main ../load_files/modules/module_map.conf 0 0 n
 Density of 0: 0.545166
-Time: 0.00230093
 ```
 
 ## Citation
