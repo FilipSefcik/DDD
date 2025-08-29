@@ -64,15 +64,15 @@ mpirun -host kiscience:1,kiscience2:2 mpi_cloud/ddd_parallel mpi_cloud/modules/m
 ```
 
 ### Arguments
-Argument	Description
-<hostlist>	List of hosts with process counts (e.g., kiscience:1,kiscience2:2)
-<processes>	Number of MPI processes to spawn
-<conf_file>	Path to configuration file (default: module_map.conf)
-<divider>	Module division strategy:
-• 0 = var_count_divider
-• 1 = node_divider
-<state>	Availability state to calculate (0 or 1)
-<timer>	Measure execution time (y or n)
+
+- **<hostlist>** – List of hosts with process counts (e.g., `kiscience:1,kiscience2:2`)  
+- **<processes>** – Number of MPI processes to spawn  
+- **<conf_file>** – Path to configuration file (default: `module_map.conf`)  
+- **<divider>** – Module division strategy:  
+  - `0` = var_count_divider  
+  - `1` = node_divider  
+- **<state>** – Availability state to calculate (`0` or `1`)  
+- **<timer>** – Measure execution time (`y` or `n`)  
 
 ### Notes
 
@@ -82,7 +82,7 @@ To use hardware threads instead of cores, add the MPI flag:
 --use-hwthread-cpus
 ```
 
-If <timer> = y, the maximum execution time will be displayed at the end.
+If argument timer is "y", the maximum execution time will be displayed at the end.
 
 ## Example Workflow
 
