@@ -3,13 +3,13 @@
 **DDD** is a C++20 application for **distributed topological reliability analysis** of complex systems.  
 It combines **modular decomposition**, **decision diagrams** (via the [TeDDy library](https://github.com/MichalMrena/DecisionDiagrams)), and **distributed computing with MPI**.
 
-The tool enables evaluation of large Boolean structure functions by splitting them into submodules, distributing the workload across multiple processes, and calculating reliability efficiently.
+The tool enables evaluation of large structure functions by splitting them into submodules, distributing the workload across multiple processes, and calculating reliability efficiently.
 
 ---
 
 ## Features
 
-- Representation of Boolean structure functions using **Binary Decision Diagrams (BDDs)**
+- Representation of Boolean and multivalued structure functions using **Decision Diagrams (DDs)**
 - **Modular decomposition** for efficient computation
 - **Distributed computation** with Open MPI
 - Support for **configuration files** to define modules and dependencies
@@ -65,7 +65,7 @@ mpirun -n 2 mpi_cloud/ddd_parallel mpi_cloud/modules/module_map.conf 0 0 n
 
 ### Arguments
 
-- **threads** – To use hardware threads instead of cores 
+- **threads** – To use hardware threads instead of cores (can be empty) 
 ```bash
 --use-hwthread-cpus
 ``` 
