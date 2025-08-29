@@ -34,25 +34,36 @@ Clone the repository:
 git clone https://github.com/FilipSefcik/DDD.git
 cd DDD
 ```
+---
 
-Build
+## Build
 
 Build with CMake or g++ directly:
 
+```bash
 mpicxx -std=c++20 -O3 -o ddd_parallel src/*.cpp -lteddy
-
+```
 
 Ensure the TeDDy library and Open MPI are installed and available in your system paths.
 
-Usage
-General Command
-mpirun -host <hostlist> -n <processes> ./ddd_parallel <conf_file> <divider> <state> <timer>
+---
 
-Example
+## Usage
+
+General Command
+
+```bash
+mpirun -host <hostlist> -n <processes> ./ddd_parallel <conf_file> <divider> <state> <timer>
+```
+
+### Example
+
+```bash
 export PMIX_MCA_pcompress_base_silence_warning=1
 mpirun -host kiscience:1,kiscience2:2 mpi_cloud/ddd_parallel mpi_cloud/modules/module_map.conf 0 0 n
+```
 
-Arguments
+### Arguments
 Argument	Description
 <hostlist>	List of hosts with process counts (e.g., kiscience:1,kiscience2:2)
 <processes>	Number of MPI processes to spawn
@@ -62,16 +73,18 @@ Argument	Description
 • 1 = node_divider
 <state>	Availability state to calculate (0 or 1)
 <timer>	Measure execution time (y or n)
-Notes
+
+### Notes
 
 To use hardware threads instead of cores, add the MPI flag:
 
+```bash
 --use-hwthread-cpus
-
+```
 
 If <timer> = y, the maximum execution time will be displayed at the end.
 
-Example Workflow
+## Example Workflow
 
 Prepare your Boolean structure function in a configuration file (e.g., module_map.conf).
 
@@ -87,7 +100,8 @@ Perform distributed computation with TeDDy
 
 Output the overall system reliability
 
-Citation
+
+## Citation
 
 If you use this tool in research, please cite:
 
