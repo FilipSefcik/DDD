@@ -84,21 +84,15 @@ To use hardware threads instead of cores, add the MPI flag:
 
 If argument timer is "y", the maximum execution time will be displayed at the end.
 
-## Example Workflow
+## Example workflow
 
-Prepare your Boolean structure function in a configuration file (e.g., module_map.conf).
-
-Run DDD with MPI using the configuration file and chosen divider.
-
-The tool will:
-
-Parse modules
-
-Assign them to processes
-
-Perform distributed computation with TeDDy
-
-Output the overall system reliability
+1. Prepare your structure function in a configuration file (e.g., `module_map.conf`).  
+2. Run DDD with MPI using the configuration file and chosen divider.  
+3. The tool will:  
+   1. Parse modules  
+   2. Assign them to processes  
+   3. Perform distributed computation with **TeDDy**  
+   4. Output the overall system reliability  
 
 
 ## Citation
