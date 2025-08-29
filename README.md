@@ -95,6 +95,65 @@ If argument timer is "y", the maximum execution time will be displayed at the en
    4. Output the overall system reliability  
 
 
+---
+
+### Example Configuration File (`module_map.conf`)
+
+```ini
+# This conf file contains mapping of modules containing .pla files in BDD
+
+# First, we tell where our modules are placed in directories
+# and which column of the PLA file should be considered as a function.
+# M{num} are the names of our module variables, where {num} distinguishes them.
+
+# Root module
+M0 ../load_files/modules/Root/A and B or C and D.pla 0
+
+# First level modules
+M1 ../load_files/modules/First_Level/A or B or C.pla 0
+M2 ../load_files/modules/First_Level/A and B and C.pla 0
+
+# Second level modules
+M3 ../load_files/modules/Second_Level/A and B.pla 0
+M4 ../load_files/modules/Second_Level/A or B.pla 0
+M5 ../load_files/modules/Second_Level/(A or B) and C.pla 0
+
+# Second, we specify which variable in modules is another module and which is a plain variable.
+# "V" means the position is a binary variable.
+# "M{num}" means the position links to another module.
+
+# Root module depends on M1 and M2
+M0 M1VVM2
+
+# M1 depends on M3
+M1 VVM3
+
+# M2 depends on M4
+M2 VM4V
+
+# M3 depends on M5
+M3 M5V
+
+# M4 is composed of two plain variables
+M4 VV
+
+# M5 is composed of three plain variables
+M5 VVV
+
+# End of configuration file
+```
+### Example of output
+
+```bash
+mpirun -n 2 DDD/main ../load_files/modules/module_map.conf 0 1 0 y
+Density of 1: 0.454834
+Time: 0.00101632
+----------------
+mpirun -n 2 DDD/main ../load_files/modules/module_map.conf 0 0 0 y
+Density of 0: 0.545166
+Time: 0.00230093
+```
+
 ## Citation
 
 If you use this tool in research, please cite:
