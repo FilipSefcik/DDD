@@ -7,6 +7,23 @@ The tool enables evaluation of large structure functions by splitting them into 
 
 ---
 
+## Contents
+
+1. [Features](#features)  
+2. [Requirements](#requirements)  
+3. [Installation](#installation)  
+4. [Build](#build)  
+5. [Usage](#usage)  
+   - [General Command](#usage)  
+   - [Example](#example)  
+   - [Arguments](#arguments)  
+6. [Example Workflow](#example-workflow)  
+7. [Example Configuration File](#example-configuration-file-module_mapconf)  
+8. [Example Output](#example-of-output)  
+9. [Citation](#citation)  
+
+---
+
 ## Features
 
 - Representation of Boolean and multivalued structure functions using **Decision Diagrams (DDs)**
