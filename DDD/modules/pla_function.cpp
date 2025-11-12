@@ -44,7 +44,8 @@ void pla_function::load_from_pla(const std::string& filePath) {
 
     std::ifstream inputFile(filePath);
     if (! inputFile.is_open()) {
-        throw std::runtime_error("Error opening file: " + filePath + "\n");
+        throw std::runtime_error("Error opening file: " + filePath +
+                                 "\nPlease, create the merged directory in a root directory.");
     }
 
     std::string line;

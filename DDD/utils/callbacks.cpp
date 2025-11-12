@@ -310,9 +310,18 @@ void execute_merging(mpi_manager* manager, const std::string& inputString) {
             if (! parent->get_function()) {
                 parent->initialize_pla_function();
             }
-            parent->insert_function(son->get_function(), son->get_name());
-            // parent->insert_function(additionalVars, otherVarCount, otherFunValCount,
-            //                         son->get_name());
+
+            if (manager->get_calculated_state() == 0) {
+                parent->insert_function(son->get_function(), son->get_name());
+            } else if (manager->get_calculated_state() == 1) {
+                parent->insert_function(son->get_function(), son->get_name());
+            } else {
+                throw std::runtime_error("Use 0 for normal merging, 1 for parallel merging.");
+            }
+
+            // parent->insert_function(son->get_function(), son->get_name());
+            //  parent->insert_function(additionalVars, otherVarCount, otherFunValCount,
+            //                          son->get_name());
 
         } else {
             std::cout << "No module found.\n";
