@@ -94,11 +94,12 @@ void module::insert_function_in_parallel(pla_function* otherFunction, std::strin
         std::cout << "Split function " << i << ":\n";
         splitFunctions[i]->print_function();
     }
+
     for (int i = 0; i < 2; i++) {
         splitFunctions[i]->~pla_function();
+        delete splitFunctions[i];
     }
-
-    delete[] splitFunctions;
+    free(splitFunctions);
 }
 
 void module::set_var_count(int paVarCount) {
