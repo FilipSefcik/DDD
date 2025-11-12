@@ -6,6 +6,8 @@
 #include <iostream>
 #include <sstream>
 #include <stdexcept>
+#include <thread>
+#include <vector>
 
 // Konštruktory a destruktor.
 pla_function::pla_function(int varCount, int lineCount) {
@@ -393,4 +395,104 @@ pla_function** pla_function::split_function(int numberOfParts) {
     }
 
     return parts;
+}
+
+pla_function** pla_function::multiply_function(int times, int sonPosition) {
+    if (times <= 0) {
+        return nullptr;
+    }
+
+    pla_function** multiples = (pla_function**)malloc(times * sizeof(pla_function*));
+    int whateverCharCount = 0;
+    for (int i = 0; i < times; i++) {
+        if (i == 0) {
+            multiples[i] = new pla_function(this->var_count_, this->num_lines_);
+            for (int j = 0; j < this->num_lines_; j++) {
+                printf("%c\n", this->variables_[j][sonPosition]);
+                if (this->variables_[j][sonPosition] == '-') {
+                    std::cout << "HERE" << std::endl;
+                    whateverCharCount++;
+                }
+                multiples[i]->add_line(this->variables_[j], this->fun_values_[j], j);
+            }
+        } else {
+            multiples[i] = new pla_function(this->var_count_, this->num_lines_ - whateverCharCount);
+            int stepBack = 0;
+            for (int j = 0; j < this->num_lines_; j++) {
+                printf("%c\n", this->variables_[j][sonPosition]);
+                if (this->variables_[j][sonPosition] == '-') {
+                    std::cout << "HERE" << std::endl;
+                    stepBack++;
+                    continue;
+                }
+                multiples[i]->add_line(this->variables_[j], this->fun_values_[j], j - stepBack);
+            }
+        }
+    }
+
+    return multiples;
+}
+
+void pla_function::merge_into_main(pla_function** parts, int numberOfParts) {
+    if (numberOfParts <= 0 || ! parts) {
+        return;
+    }
+
+    int totalLines = 0;
+    for (int i = 0; i < numberOfParts; i++) {
+        totalLines += parts[i]->get_num_lines();
+    }
+
+    pla_function newPla(parts[0]->get_var_count(), totalLines);
+
+    int lineNum = 0;
+    for (int i = 0; i < numberOfParts; i++) {
+        pla_function* part = parts[i];
+        for (int j = 0; j < part->get_num_lines(); j++) {
+            newPla.add_line(part->get_variables()[j], part->get_function_values()[j], lineNum);
+            lineNum++;
+        }
+    }
+
+    this->assign(newPla);
+    newPla.~pla_function();
+}
+
+void pla_function::input_variables_in_parallel(pla_function* other, int position,
+                                               int numberOfParts) {
+    pla_function** otherParts = other->split_function(numberOfParts);
+    pla_function** myMultiples = this->multiply_function(numberOfParts, position);
+
+    std::vector<std::thread> threads;
+    threads.reserve(numberOfParts);
+
+    std::cout << "Before inputing: " << std::endl;
+    this->print_function();
+
+    // Launch parallel threads
+    for (int i = 0; i < numberOfParts; ++i) {
+        std::cout << "Processing part " << i << std::endl;
+        myMultiples[i]->print_function();
+        threads.emplace_back(
+            [&, i]() { myMultiples[i]->input_variables(otherParts[i], position); });
+    }
+
+    // Wait for all threads to complete
+    for (auto& t : threads) {
+        t.join();
+    }
+
+    // Merge results once all threads finish
+    this->merge_into_main(myMultiples, numberOfParts);
+
+    std::cout << "After inputing: " << std::endl;
+    this->print_function();
+
+    // Cleanup
+    for (int i = 0; i < numberOfParts; ++i) {
+        delete otherParts[i];
+        delete myMultiples[i];
+    }
+    free(otherParts);
+    free(myMultiples);
 }

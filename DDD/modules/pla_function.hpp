@@ -13,9 +13,7 @@ class pla_function {
     // Konštruktory a destruktor.
     pla_function() = default;
     pla_function(int varCount, int lineCount);
-    pla_function(const std::string& filePath) {
-        this->load_from_pla(filePath);
-    }
+    pla_function(const std::string& filePath) { this->load_from_pla(filePath); }
     ~pla_function();
 
     void assign(const pla_function& other);
@@ -44,9 +42,13 @@ class pla_function {
     void input_variables(pla_function* other, int position);
     char get_fun_value(const char* indexedVariables);
 
-    void input_variables(char*** additionalVars, int otherVarCount, const int* otherFunValCount, int position);
+    void input_variables(char*** additionalVars, int otherVarCount, const int* otherFunValCount,
+                         int position);
 
     pla_function** split_function(int numberOfParts);
+    pla_function** multiply_function(int times, int sonPosition);
+    void merge_into_main(pla_function** parts, int numberOfParts);
+    void input_variables_in_parallel(pla_function* other, int position, int numberOfParts);
 
     void print_function() const;
 };

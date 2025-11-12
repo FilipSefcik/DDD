@@ -314,7 +314,7 @@ void execute_merging(mpi_manager* manager, const std::string& inputString) {
             if (manager->get_calculated_state() == 0) {
                 parent->insert_function(son->get_function(), son->get_name());
             } else if (manager->get_calculated_state() == 1) {
-                parent->insert_function_in_parallel(son->get_function(), son->get_name());
+                parent->insert_function_in_parallel(son->get_function(), son->get_name(), 2);
             } else {
                 throw std::runtime_error("Use 0 for normal merging, 1 for parallel merging.");
             }

@@ -85,21 +85,16 @@ void module::insert_function(char*** additionalVars, int otherVarCount, const in
     }
 }
 
-void module::insert_function_in_parallel(pla_function* otherFunction, std::string sonName) {
-    pla_function** splitFunctions = otherFunction->split_function(2);
-    std::cout << "Inserting function in parallel for son: " << sonName << std::endl;
-    std::cout << "Function before insertion:\n";
-    otherFunction->print_function();
-    for (int i = 0; i < 2; i++) {
-        std::cout << "Split function " << i << ":\n";
-        splitFunctions[i]->print_function();
+void module::insert_function_in_parallel(pla_function* otherFunction, std::string sonName, int numOfParts) {
+    if (this->function_ && otherFunction) {
+        int sonPosition = this->sons_map_->at(sonName);
+        this->function_->input_variables_in_parallel(otherFunction, sonPosition, numOfParts);
+        for (auto& pair : *this->sons_map_) {
+            if (sonPosition < pair.second) {
+                pair.second += otherFunction->get_var_count() - 1;
+            }
+        }
     }
-
-    for (int i = 0; i < 2; i++) {
-        splitFunctions[i]->~pla_function();
-        delete splitFunctions[i];
-    }
-    free(splitFunctions);
 }
 
 void module::set_var_count(int paVarCount) {

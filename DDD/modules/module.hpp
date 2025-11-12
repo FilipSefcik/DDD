@@ -74,7 +74,8 @@ class module {
     void insert_function(pla_function* otherFunction, std::string sonName);
     void insert_function(char*** additionalVars, int otherVarCount, const int* otherFunValCount,
                          std::string sonName);
-    void insert_function_in_parallel(pla_function* otherFunction, std::string sonName);
+    void insert_function_in_parallel(pla_function* otherFunction, std::string sonName,
+                                     int numOfParts);
 
     // prints used to get info
     // used only during troubleshooting
