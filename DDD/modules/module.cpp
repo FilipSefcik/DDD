@@ -1,4 +1,5 @@
 #include "module.hpp"
+#include "pla_function.hpp"
 #include <cstdio>
 #include <iostream>
 #include <ostream>
@@ -82,6 +83,22 @@ void module::insert_function(char*** additionalVars, int otherVarCount, const in
             }
         }
     }
+}
+
+void module::insert_function_in_parallel(pla_function* otherFunction, std::string sonName) {
+    pla_function** splitFunctions = otherFunction->split_function(2);
+    std::cout << "Inserting function in parallel for son: " << sonName << std::endl;
+    std::cout << "Function before insertion:\n";
+    otherFunction->print_function();
+    for (int i = 0; i < 2; i++) {
+        std::cout << "Split function " << i << ":\n";
+        splitFunctions[i]->print_function();
+    }
+    for (int i = 0; i < 2; i++) {
+        splitFunctions[i]->~pla_function();
+    }
+
+    delete[] splitFunctions;
 }
 
 void module::set_var_count(int paVarCount) {

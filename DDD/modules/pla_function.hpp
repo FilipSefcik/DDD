@@ -46,5 +46,7 @@ class pla_function {
 
     void input_variables(char*** additionalVars, int otherVarCount, const int* otherFunValCount, int position);
 
+    pla_function** split_function(int numberOfParts);
+
     void print_function() const;
 };

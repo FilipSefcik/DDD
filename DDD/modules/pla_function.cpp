@@ -370,3 +370,27 @@ void pla_function::input_variables(char*** additionalVars, int otherVarCount,
     this->free_sort(myVars, 3);
     // this->free_sort(additionalVars, 2);
 }
+
+pla_function** pla_function::split_function(int numberOfParts) {
+    if (numberOfParts <= 0) {
+        return nullptr;
+    }
+
+    pla_function** parts = (pla_function**)malloc(numberOfParts * sizeof(pla_function*));
+
+    int baseLineCount = this->num_lines_ / numberOfParts;
+    int remainingLines = this->num_lines_ % numberOfParts;
+    int currentLineIndex = 0;
+    for (int i = 0; i < numberOfParts; i++) {
+        int linesForThisPart = baseLineCount + (i < remainingLines ? 1 : 0);
+        parts[i] = new pla_function(this->var_count_, linesForThisPart);
+
+        for (int j = 0; j < linesForThisPart; j++) {
+            parts[i]->add_line(this->variables_[currentLineIndex],
+                               this->fun_values_[currentLineIndex], j);
+            currentLineIndex++;
+        }
+    }
+
+    return parts;
+}
