@@ -18,6 +18,10 @@ class module {
     int function_column_ = 0;
     int states_ = 0;
     int son_count_ = 0;
+    int start_index_ = 0;
+    int end_index_ = 0;
+    double derivative_ = -1.0;
+    double son_derivative_ = -1.0;
     std::vector<double>* my_reliabilities_ = nullptr;
     std::vector<std::vector<double>>* sons_reliability_ = nullptr;
     std::vector<int>* sons_rel_count_ = nullptr;
@@ -49,6 +53,10 @@ class module {
     int get_function_column() { return this->function_column_; }
     int get_states() { return this->states_; }
     int get_son_count() { return this->son_count_; }
+    int get_start_index() { return this->start_index_; }
+    int get_end_index() { return this->end_index_; }
+    double get_derivative() { return this->derivative_; }
+    double get_son_derivative() { return this->son_derivative_; }
 
     double get_reliability(int state) { return this->my_reliabilities_->at(state); }
     std::vector<double>* get_my_reliabilities() { return this->my_reliabilities_; }
@@ -65,6 +73,8 @@ class module {
     void set_position(int paPosition) { this->position_ = paPosition; }
     void set_var_count(int paVarCount);
     void set_function_column(int paColumn) { this->function_column_ = paColumn; }
+    void set_derivative(double paDeriv) { this->derivative_ = paDeriv; }
+    void set_son_derivative(double paDeriv) { this->son_derivative_ = paDeriv; }
 
     void set_sons_reliability(size_t sonPosition, std::vector<double>* sonRel);
     void set_sons_reliability(std::vector<int>* domains);

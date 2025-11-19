@@ -28,6 +28,7 @@ void deserialize_merging(mpi_manager* manager, const std::string& parameter,
 // --------Logical derivatives---------
 
 void add_instruction_derivatives(module_info* mod, std::string* instructions, int condition = 0);
+void calculate_logical_derivative(mpi_manager* manager, const std::string& inputString);
 std::string serialize_derivatives(mpi_manager* manager, const std::string& inputString);
 void deserialize_derivatives(mpi_manager* manager, const std::string& parameter,
                              const std::string& inputString);

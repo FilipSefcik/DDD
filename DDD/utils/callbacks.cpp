@@ -2,6 +2,7 @@
 #include "libteddy/inc/reliability.hpp"
 #include <cstddef>
 #include <cstdio>
+#include <cstdlib>
 #include <iostream>
 #include <libteddy/inc/io.hpp>
 #include <mpi.h>
@@ -384,8 +385,22 @@ void deserialize_merging(mpi_manager* manager, const std::string& parameter,
 void add_instruction_derivatives(module_info* mod, std::string* instructions, int condition) {
     module_info* parent = mod->get_parent();
 
-    // EXEC - module name - position of the module in parent
-    *instructions += "EXEC " + mod->get_name() + " " + std::to_string(mod->get_position()) + "\n";
+    if (condition >= mod->get_offset_start() && condition <= mod->get_offset_end()) {
+        // DERI - module name - derivative to calculate
+        *instructions += "DERI " + mod->get_name() + "\n";
+    } else {
+        if (parent) {
+            if (condition >= parent->get_offset_start() && condition <= parent->get_offset_end()) {
+                if (condition < mod->get_offset_start()) {
+                    mod->set_position(mod->get_position() - 1);
+                }
+            }
+        }
+        // EXEC - module name - position of the module in parent
+        *instructions +=
+            "EXEC " + mod->get_name() + " " + std::to_string(mod->get_position()) + "\n";
+    }
+
     if (parent) {
         if (mod->get_assigned_process() == parent->get_assigned_process()) {
             // LINK - name of parent module - name of son module
@@ -400,7 +415,66 @@ void add_instruction_derivatives(module_info* mod, std::string* instructions, in
                                    std::to_string(mod->get_assigned_process()) + "\n";
         }
     } else {
-        // END - module which gives answer
-        *instructions += "END " + mod->get_name() + "\n";
+        if (condition < mod->get_offset_start() && condition > mod->get_offset_end()) {
+            std::cerr << "Derivate to calculate is not within module variable range.\n";
+            exit(5);
+        } else {
+            // END - module which gives answer
+            *instructions += "END " + mod->get_name() + "\n";
+        }
+    }
+}
+
+void calculate_logical_derivative(mpi_manager* manager, const std::string& inputString) {}
+
+std::string serialize_derivatives(mpi_manager* manager, const std::string& inputString) {
+    module* mod = manager->get_my_modules().at(inputString);
+    std::string result;
+
+    if (mod) {
+        if (mod->get_derivative() < 0.0) {
+            result = "A ";
+            result += std::to_string(mod->get_position());
+            for (double rel : *mod->get_my_reliabilities()) {
+                result += " " + std::to_string(rel);
+            }
+        } else {
+            result = "D ";
+            result += std::to_string(mod->get_derivative());
+        }
+    } else {
+        std::cout << "Module not found.\n";
+        result = "ABORT";
+    }
+
+    return result;
+}
+
+void deserialize_derivatives(mpi_manager* manager, const std::string& parameter,
+                             const std::string& inputString) {
+    module* mod = manager->get_my_modules().at(parameter);
+
+    if (! mod) {
+        std::cout << "Module not found.\n";
+        return;
+    }
+
+    std::istringstream line(inputString);
+    std::string resultType;
+    line >> resultType;
+
+    if (resultType == "A") {
+        int sonPosition;
+        line >> sonPosition;
+        std::vector<double> sonRels;
+        double temp;
+        while (line >> temp) {
+            sonRels.push_back(temp);
+        }
+        mod->set_sons_reliability(sonPosition, &sonRels);
+    } else if (resultType == "D") {
+        double deriv;
+        line >> deriv;
+        mod->set_son_derivative(deriv);
     }
 }

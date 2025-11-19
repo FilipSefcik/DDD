@@ -5,6 +5,7 @@
 
 void process::process_instructions(int state) {
     if (this->mpi_manager_) {
+        // this->mpi_manager_->print_my_modules(this->my_rank_);
         this->mpi_manager_->complete_instructions(this->my_instructions_, state);
     }
 }
@@ -38,7 +39,7 @@ void main_process::process_information() {
         return;
     }
 
-    this->module_manager_.print_modules();
+    // this->module_manager_.print_modules();
 
     this->module_manager_.get_instructions(this->process_count_, this->add_instruction_,
                                            this->calculated_derivative_);

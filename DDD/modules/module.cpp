@@ -31,7 +31,8 @@ module::module(std::string infoToString) {
     // Move to the fields after the path
     size_t afterPathIndex = plaIndex + 5; // ".pla" + space
     std::stringstream fields(infoToString.substr(afterPathIndex));
-    fields >> this->function_column_ >> this->position_ >> this->states_ >> this->var_count_;
+    fields >> this->function_column_ >> this->position_ >> this->states_ >> this->var_count_ >>
+        this->start_index_ >> this->end_index_;
 
     // Initialize reliabilities
     this->my_reliabilities_ =
@@ -85,7 +86,8 @@ void module::insert_function(char*** additionalVars, int otherVarCount, const in
     }
 }
 
-void module::insert_function_in_parallel(pla_function* otherFunction, std::string sonName, int numOfParts) {
+void module::insert_function_in_parallel(pla_function* otherFunction, std::string sonName,
+                                         int numOfParts) {
     if (this->function_ && otherFunction) {
         int sonPosition = this->sons_map_->at(sonName);
         this->function_->input_variables_in_parallel(otherFunction, sonPosition, numOfParts);
@@ -153,6 +155,8 @@ void module::print_all() {
     std::cout << "Var count: " << this->var_count_ << std::endl;
     std::cout << "Position: " << this->position_ << std::endl;
     std::cout << "Function column: " << this->function_column_ << std::endl;
+    std::cout << "Start index: " << this->start_index_ << std::endl;
+    std::cout << "End index: " << this->end_index_ << std::endl;
     // std::cout << "My reliabilities:\n";
     // print_reliabilities();
     // std::cout << "Sons reliabilities: \n";
