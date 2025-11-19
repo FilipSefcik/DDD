@@ -38,9 +38,10 @@ void main_process::process_information() {
         return;
     }
 
-    this->module_manager_.get_instructions(this->process_count_, this->add_instruction_);
+    this->module_manager_.get_instructions(this->process_count_, this->add_instruction_,
+                                           this->calculated_derivative_);
 
-    //this->module_manager_.print_separate_instructions();
+    // this->module_manager_.print_separate_instructions();
 
     std::vector<mpi_communicator::mpi_message> messages;
     this->module_manager_.create_messages(this->process_count_, messages);

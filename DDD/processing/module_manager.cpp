@@ -159,7 +159,9 @@ void module_manager::load_modules(const std::string& confPath) {
  */
 void module_manager::get_instructions(size_t processCount,
                                       void (*addInstruction)(module_info* mod,
-                                                             std::string* instructions)) {
+                                                             std::string* instructions,
+                                                             int condition),
+                                      int condition) {
     this->separate_instructions_->resize(
         processCount > this->modules_->size() ? this->modules_->size() : processCount);
 
@@ -169,7 +171,7 @@ void module_manager::get_instructions(size_t processCount,
     for (size_t i = 0; i < this->modules_->size(); i++) {
         module_info* mod = this->modules_->at(i);
         std::string instructions[2] = {"", ""};
-        addInstruction(mod, instructions);
+        addInstruction(mod, instructions, condition);
         this->separate_instructions_->at(mod->get_assigned_process()) += instructions[0];
         if (mod->get_parent()) {
             this->separate_instructions_->at(mod->get_parent()->get_assigned_process()) +=

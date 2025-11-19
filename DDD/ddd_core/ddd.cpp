@@ -22,7 +22,7 @@ ddd::ddd() {
     // char processorName[MPI_MAX_PROCESSOR_NAME];
     // int nameLength;
     // MPI_Get_processor_name(processorName, &nameLength); // Get the processor name
-    //std::cout << "Rank " << this->my_rank << std::endl;
+    // std::cout << "Rank " << this->my_rank << std::endl;
 }
 
 ddd::~ddd() {
@@ -61,6 +61,9 @@ void ddd::calculate_availability(int divider_flag, int state, int calculation, b
             mainProcess->set_add_instruction(add_instruction_density);
         } else if (calculation == 1) {
             mainProcess->set_add_instruction(add_instruction_merging);
+        } else if (calculation == 2) {
+            mainProcess->set_calculated_derivative(state);
+            mainProcess->set_add_instruction(add_instruction_derivatives);
         } else {
             std::cerr << "Invalid calculation type" << std::endl;
             return;
