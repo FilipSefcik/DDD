@@ -38,6 +38,8 @@ void main_process::process_information() {
         return;
     }
 
+    this->module_manager_.print_modules();
+
     this->module_manager_.get_instructions(this->process_count_, this->add_instruction_,
                                            this->calculated_derivative_);
 

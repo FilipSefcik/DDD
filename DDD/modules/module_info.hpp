@@ -15,6 +15,8 @@ class module_info {
     int assigned_process_ = 0;
     int position_ = 0;
     int son_count_ = 0;
+    int offset_start_ = 0;
+    int offset_end_ = 0;
 
   public:
     // Getters
@@ -28,6 +30,8 @@ class module_info {
     int get_assigned_process() const { return this->assigned_process_; }
     int get_position() const { return this->position_; }
     int get_son_count() const { return this->son_count_; }
+    int get_offset_start() const { return this->offset_start_; }
+    int get_offset_end() const { return this->offset_end_; }
 
     // Setters
     void set_parent(module_info* parent) { this->parent_ = parent; }
@@ -39,10 +43,14 @@ class module_info {
     void set_assigned_process(int assignedProcess) { this->assigned_process_ = assignedProcess; }
     void set_position(int position) { this->position_ = position; }
     void set_sons_domains(std::vector<int>* domains);
+    void set_offset_start(int offsetStart) { this->offset_start_ = offsetStart; }
+    void set_offset_end(int offsetEnd) { this->offset_end_ = offsetEnd; }
 
     void add_son(int sonStates) { this->sons_states_.push_back(sonStates); }
     void add_module(module_info* newModule);
     void add_priority(int sonPriority);
+    void add_offset_end(module_info* newModule, int additionalVars);
+    void add_offset_start_and_end(int additionalVars);
     std::string to_string() const;
 
     void print_sons();

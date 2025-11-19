@@ -115,6 +115,7 @@ bool divide_by_var_count(std::vector<module_info*>* modules, int nodeCount) {
 
 void add_instruction_density(module_info* mod, std::string* instructions, int condition) {
     module_info* parent = mod->get_parent();
+    (void)condition;
 
     // EXEC - module name - position of the module in parent
     *instructions += "EXEC " + mod->get_name() + " " + std::to_string(mod->get_position()) + "\n";
@@ -262,6 +263,7 @@ bool divide_for_merging(std::vector<module_info*>* modules, int nodeCount) {
 
 void add_instruction_merging(module_info* mod, std::string* instructions, int condition) {
     module_info* parent = mod->get_parent();
+    (void)condition;
 
     if (parent) {
         if (parent->get_assigned_process() != mod->get_assigned_process()) {
