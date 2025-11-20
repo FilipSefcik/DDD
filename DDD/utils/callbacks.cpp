@@ -1,4 +1,5 @@
 #include "callbacks.hpp"
+#include "libteddy/impl/dplds.hpp"
 #include "libteddy/inc/reliability.hpp"
 #include <cstddef>
 #include <cstdio>
@@ -415,7 +416,7 @@ void add_instruction_derivatives(module_info* mod, std::string* instructions, in
                                    std::to_string(mod->get_assigned_process()) + "\n";
         }
     } else {
-        if (condition < mod->get_offset_start() && condition > mod->get_offset_end()) {
+        if (condition < mod->get_offset_start() || condition > mod->get_offset_end()) {
             std::cerr << "Derivate to calculate is not within module variable range.\n";
             exit(5);
         } else {
@@ -425,7 +426,107 @@ void add_instruction_derivatives(module_info* mod, std::string* instructions, in
     }
 }
 
-void calculate_logical_derivative(mpi_manager* manager, const std::string& inputString) {}
+void calculate_logical_derivative(mpi_manager* manager, const std::string& inputString) {
+    std::string keyWord, paramFirst, paramSecond;
+    std::istringstream inputStream(inputString);
+    inputStream >> keyWord >> paramFirst;
+
+    if (keyWord == "EXEC") {
+        inputStream >> paramSecond;
+        module* mod = manager->get_my_modules().at(paramFirst);
+        if (mod) {
+            mod->set_position(std::stoi(paramSecond));
+            std::string const& path = mod->get_path();
+            int pla_type = is_binary_pla(path, nullptr, nullptr);
+            std::vector<double> ps;
+            if (pla_type == 1) {
+                // std::cout << mod->get_var_count() << std::endl;
+                std::optional<teddy::pla_file_binary> file = teddy::load_binary_pla(path, nullptr);
+                // std::cout << file->input_count_ << std::endl;
+                teddy::bss_manager bssManager(file->input_count_, mod->get_var_count() * 100);
+                teddy::bdd_manager::diagram_t f =
+                    teddy::io::from_pla(bssManager, *file)[mod->get_function_column()];
+                ps = bssManager.calculate_probabilities(*mod->get_sons_reliability(), f);
+                // std::cout << "Done\n";
+            } else if (pla_type == 0) {
+                std::optional<teddy::pla_file_mvl> file = teddy::load_mvl_pla(path, nullptr);
+                teddy::imss_manager imssManager(file->input_count_, mod->get_var_count() * 100,
+                                                file->domains_);
+                teddy::imss_manager::diagram_t f = teddy::io::from_pla(imssManager, *file);
+                ps = imssManager.calculate_probabilities(*mod->get_sons_reliability(), f);
+            } else {
+                std::cout << "Invalid PLA file.\n";
+                return;
+            }
+
+            mod->set_my_reliability(&ps);
+
+        } else {
+            std::cout << "Module not found.\n";
+        }
+    } else if (keyWord == "DERI") {
+        module* mod = manager->get_my_modules().at(paramFirst);
+        if (mod) {
+            double deriv = -1.0;
+            int variable = manager->get_calculated_state() - mod->get_start_index() + 1;
+            std::string const& path = mod->get_path();
+            int pla_type = is_binary_pla(path, nullptr, nullptr);
+            std::vector<double> ps;
+            if (pla_type == 1) {
+                std::optional<teddy::pla_file_binary> file = teddy::load_binary_pla(path, nullptr);
+                teddy::bss_manager bssManager(file->input_count_, mod->get_var_count() * 100);
+                teddy::bdd_manager::diagram_t f =
+                    teddy::io::from_pla(bssManager, *file)[mod->get_function_column()];
+
+                teddy::bdd_manager::diagram_t df =
+                    bssManager.dpld({variable, 1, 0}, teddy::dpld::type_1_decrease(1), f);
+
+                mod->get_sons_reliability()->erase(mod->get_sons_reliability()->begin() + variable -
+                                                   1);
+                ps = bssManager.calculate_probabilities(*mod->get_sons_reliability(), f);
+                deriv = ps.at(1);
+            } else {
+                std::cout << "Invalid PLA file.\n";
+                return;
+            }
+
+            if (deriv < 0) {
+                std::cout << "Error calculating derivative.\n";
+                return;
+            }
+
+            if (mod->get_son_derivative() >= 0) {
+                deriv *= mod->get_son_derivative();
+            }
+            mod->set_derivative(deriv);
+        } else {
+            std::cout << "Module not found.\n";
+        }
+
+    } else if (keyWord == "LINK") {
+        inputStream >> paramSecond;
+        module* parent = manager->get_my_modules().at(paramFirst);
+        module* son = manager->get_my_modules().at(paramSecond);
+        if (son->get_derivative() < 0) {
+            parent->set_sons_reliability(son->get_position(), son->get_my_reliabilities());
+        } else {
+            parent->set_son_derivative(son->get_derivative());
+        }
+    } else if (keyWord == "END") {
+        module* mod = manager->get_my_modules().at(paramFirst);
+        if (mod) {
+            int state = manager->get_calculated_state();
+            if (state < mod->get_start_index() || state >= mod->get_end_index()) {
+                std::cout << "Invalid variable index\n";
+                return;
+            }
+            std::cout << "Structural importance of variable " << state << ": "
+                      << mod->get_derivative() << std::endl;
+        } else {
+            std::cout << "Module not found.\n";
+        }
+    }
+}
 
 std::string serialize_derivatives(mpi_manager* manager, const std::string& inputString) {
     module* mod = manager->get_my_modules().at(inputString);

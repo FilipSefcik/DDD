@@ -80,6 +80,10 @@ void ddd::calculate_availability(int divider_flag, int state, int calculation, b
         this->process_->set_function(execute_merging);
         this->process_->set_serialize_function(serialize_merging);
         this->process_->set_deserialize_function(deserialize_merging);
+    } else if (calculation == 2) {
+        this->process_->set_function(calculate_logical_derivative);
+        this->process_->set_serialize_function(serialize_derivatives);
+        this->process_->set_deserialize_function(deserialize_derivatives);
     } else {
         std::cerr << "Invalid calculation type" << std::endl;
         return;
