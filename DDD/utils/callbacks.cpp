@@ -472,8 +472,6 @@ void calculate_logical_derivative(mpi_manager* manager, const std::string& input
         if (mod) {
             double deriv = -1.0;
             int variable = std::stoi(paramSecond);
-            std::cout << "Calculating derivative for variable " << variable << " in module "
-                      << mod->get_name() << "\n";
             std::string const& path = mod->get_path();
             int pla_type = is_binary_pla(path, nullptr, nullptr);
             std::vector<double> ps;
@@ -484,47 +482,8 @@ void calculate_logical_derivative(mpi_manager* manager, const std::string& input
                     teddy::io::from_pla(bssManager, *file)[mod->get_function_column()];
                 teddy::bdd_manager::diagram_t df =
                     bssManager.dpld({variable, 0, 1}, teddy::dpld::basic(0, 1), f);
-                // mod->get_sons_reliability()->at(mod->get_sons_reliability()->size() - 1) = {0.0,
-                //                                                                           0.0};
-
-                // mod->print_sons_reliabilities();
-                // mod->get_sons_reliability()->at(variable) = {0.0, 0.0};
-                mod->get_sons_reliability()->erase(mod->get_sons_reliability()->begin() + variable);
-                mod->set_var_count(mod->get_var_count() - 1);
-
-                // mod->print_sons_reliabilities();
-
-                // std::cout << "Calculating strucutral importance of derivative of "
-                //           << mod->get_name() << "\n";
-                // double si = bssManager.structural_importance(df);
-                // double SI =
-                //     bssManager.calculate_probability(variable, *mod->get_sons_reliability(), df);
-
-                // std::cout << "Calculated SI for module " << mod->get_name() << ": " << SI
-                //           << std::endl;
-                // std::cout << "Structural importance of derivative: " << si << std::endl;
-
-                teddy::bss_manager dfBssManager(mod->get_var_count(), mod->get_var_count() * 100);
-
-                std::cout << "Calculating importance probabilities for variable " << variable
-                          << " in module " << mod->get_name() << "...\n";
-                // std::cout << "Variable count: " << mod->get_var_count() << std::endl;
-                // std::cout << "Reliability size: " << mod->get_sons_reliability()->size()
-                //           << std::endl;
-
-                ps = dfBssManager.calculate_probabilities(*mod->get_sons_reliability(), df);
+                ps = bssManager.calculate_probabilities(*mod->get_sons_reliability(), df);
                 deriv = ps.at(1);
-
-                // for (size_t i = 0; i < ps.size(); i++) {
-                //     std::cout << "State " << i << ": " << ps.at(i) << std::endl;
-                // }
-
-                // double avail =
-                //     dfBssManager.calculate_probability(1, *mod->get_sons_reliability(), df);
-                // deriv = avail;
-
-                std::cout << "Calculated importance for module " << mod->get_name() << ": " << deriv
-                          << std::endl;
             } else {
                 std::cout << "Invalid PLA file.\n";
                 return;
@@ -538,7 +497,7 @@ void calculate_logical_derivative(mpi_manager* manager, const std::string& input
             if (mod->get_son_derivative() >= 0) {
                 deriv *= mod->get_son_derivative();
             }
-            std::cout << "Final derivative: " << deriv << std::endl;
+
             mod->set_derivative(deriv);
         } else {
             std::cout << "Module not found.\n";
