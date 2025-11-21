@@ -18,6 +18,7 @@ parent_count=$(calculate_polynomial $(($1 - 1)) "$2")
 # echo "$module_count"
 # echo "$parent_count"
 
+#remove ../ when working in build/ directory
 output_file="../../load_files/conf_files/experiment_map.conf"
 
 # Truncate the file
