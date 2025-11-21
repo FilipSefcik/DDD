@@ -397,18 +397,7 @@ void add_instruction_derivatives(module_info* mod, std::string* instructions, in
         // DERI - module name - derivative to calculate
         *instructions += "DERI " + mod->get_name() + " " + std::to_string(variable) + "\n";
     } else {
-        // if (parent) {
-        //     std::cout << "changing positions of " << mod->get_name() << " from "
-        //               << mod->get_position() << "\n";
-        //     if (condition >= parent->get_offset_start() && condition <= parent->get_offset_end())
-        //     {
-        //         if (condition < mod->get_offset_start()) {
-        //             mod->set_position(mod->get_position() - 1);
-        //             std::cout << "new position of " << mod->get_name() << ": "
-        //                       << mod->get_position() << "\n";
-        //         }
-        //     }
-        // }
+
         // EXEC - module name - position of the module in parent
         *instructions +=
             "EXEC " + mod->get_name() + " " + std::to_string(mod->get_position()) + "\n";
@@ -455,12 +444,6 @@ void calculate_logical_derivative(mpi_manager* manager, const std::string& input
                 // std::cout << mod->get_var_count() << std::endl;
                 std::optional<teddy::pla_file_binary> file = teddy::load_binary_pla(path, nullptr);
                 // std::cout << file->input_count_ << std::endl;
-
-                // if (file->input_count_ == 2) {
-                //     std::cout << "Input is 2\n";
-                //     std::cout << "FILE " << file->input_count_ << std::endl;
-                //     std::cout << "MOD" << mod->get_var_count() << std::endl;
-                // }
 
                 teddy::bss_manager bssManager(file->input_count_, mod->get_var_count() * 100);
                 teddy::bdd_manager::diagram_t f =
