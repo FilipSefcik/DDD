@@ -51,6 +51,8 @@ class module_info {
     void add_priority(int sonPriority);
     void add_offset_end(module_info* newModule, int additionalVars);
     void add_offset_start_and_end(int additionalVars);
+    int get_offset_surplus(int variableIndex);
+
     std::string to_string() const;
 
     void print_sons();

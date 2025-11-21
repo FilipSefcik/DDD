@@ -101,3 +101,25 @@ void module_info::set_sons_domains(std::vector<int>* domains) {
         this->sons_states_.push_back(domains->at(i));
     }
 }
+
+int module_info::get_offset_surplus(int variableIndex) {
+    int sonPosition = 0;
+    int maxPosition = this->sons_.size();
+    int index = 0;
+    module_info* son;
+    for (int i = this->offset_start_; i < variableIndex; i++) {
+        son = this->sons_.at(sonPosition);
+        if (variableIndex >= son->get_offset_start() && variableIndex <= son->get_offset_end()) {
+            return son->get_position();
+        }
+        if (i >= son->get_offset_start() && i < son->get_offset_end()) {
+            i = son->get_offset_end();
+            if (sonPosition + 1 < maxPosition) {
+                sonPosition++;
+            }
+        }
+        index++;
+    }
+
+    return index;
+}

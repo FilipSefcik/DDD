@@ -20,6 +20,7 @@ class module {
     int son_count_ = 0;
     int start_index_ = 0;
     int end_index_ = 0;
+    int son_position_ = -1;
     double derivative_ = -1.0;
     double son_derivative_ = -1.0;
     std::vector<double>* my_reliabilities_ = nullptr;
@@ -57,6 +58,7 @@ class module {
     int get_end_index() { return this->end_index_; }
     double get_derivative() { return this->derivative_; }
     double get_son_derivative() { return this->son_derivative_; }
+    int get_son_position() { return this->son_position_; }
 
     double get_reliability(int state) { return this->my_reliabilities_->at(state); }
     std::vector<double>* get_my_reliabilities() { return this->my_reliabilities_; }
@@ -80,6 +82,7 @@ class module {
     void set_sons_reliability(std::vector<int>* domains);
     void set_my_reliability(std::vector<double>* rel);
     void set_my_reliability(int state, double rel) { this->my_reliabilities_->at(state) = rel; }
+    void set_son_position(int position) { this->son_position_ = position; }
 
     void insert_function(pla_function* otherFunction, std::string sonName);
     void insert_function(char*** additionalVars, int otherVarCount, const int* otherFunValCount,

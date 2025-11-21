@@ -387,16 +387,28 @@ void add_instruction_derivatives(module_info* mod, std::string* instructions, in
     module_info* parent = mod->get_parent();
 
     if (condition >= mod->get_offset_start() && condition <= mod->get_offset_end()) {
-        // DERI - module name - derivative to calculate
-        *instructions += "DERI " + mod->get_name() + "\n";
-    } else {
-        if (parent) {
-            if (condition >= parent->get_offset_start() && condition <= parent->get_offset_end()) {
-                if (condition < mod->get_offset_start()) {
-                    mod->set_position(mod->get_position() - 1);
-                }
-            }
+        int variable = 0;
+        if (mod->get_son_count() > 0) {
+            variable = mod->get_offset_surplus(condition);
+        } else {
+            variable = condition - mod->get_offset_start();
         }
+
+        // DERI - module name - derivative to calculate
+        *instructions += "DERI " + mod->get_name() + " " + std::to_string(variable) + "\n";
+    } else {
+        // if (parent) {
+        //     std::cout << "changing positions of " << mod->get_name() << " from "
+        //               << mod->get_position() << "\n";
+        //     if (condition >= parent->get_offset_start() && condition <= parent->get_offset_end())
+        //     {
+        //         if (condition < mod->get_offset_start()) {
+        //             mod->set_position(mod->get_position() - 1);
+        //             std::cout << "new position of " << mod->get_name() << ": "
+        //                       << mod->get_position() << "\n";
+        //         }
+        //     }
+        // }
         // EXEC - module name - position of the module in parent
         *instructions +=
             "EXEC " + mod->get_name() + " " + std::to_string(mod->get_position()) + "\n";
@@ -472,10 +484,13 @@ void calculate_logical_derivative(mpi_manager* manager, const std::string& input
             std::cout << "Module not found.\n";
         }
     } else if (keyWord == "DERI") {
+        inputStream >> paramSecond;
         module* mod = manager->get_my_modules().at(paramFirst);
         if (mod) {
             double deriv = -1.0;
-            int variable = manager->get_calculated_state() - mod->get_start_index();
+            int variable = std::stoi(paramSecond);
+            std::cout << "Calculating derivative for variable " << variable << " in module "
+                      << mod->get_name() << "\n";
             std::string const& path = mod->get_path();
             int pla_type = is_binary_pla(path, nullptr, nullptr);
             std::vector<double> ps;
@@ -486,12 +501,18 @@ void calculate_logical_derivative(mpi_manager* manager, const std::string& input
                     teddy::io::from_pla(bssManager, *file)[mod->get_function_column()];
                 teddy::bdd_manager::diagram_t df =
                     bssManager.dpld({variable, 0, 1}, teddy::dpld::basic(0, 1), f);
+                // mod->get_sons_reliability()->at(mod->get_sons_reliability()->size() - 1) = {0.0,
+                //                                                                           0.0};
 
+                // mod->print_sons_reliabilities();
+                // mod->get_sons_reliability()->at(variable) = {0.0, 0.0};
                 mod->get_sons_reliability()->erase(mod->get_sons_reliability()->begin() + variable);
                 mod->set_var_count(mod->get_var_count() - 1);
 
-                std::cout << "Calculating strucutral importance of derivative of "
-                          << mod->get_name() << "\n";
+                // mod->print_sons_reliabilities();
+
+                // std::cout << "Calculating strucutral importance of derivative of "
+                //           << mod->get_name() << "\n";
                 // double si = bssManager.structural_importance(df);
                 // double SI =
                 //     bssManager.calculate_probability(variable, *mod->get_sons_reliability(), df);
@@ -502,10 +523,11 @@ void calculate_logical_derivative(mpi_manager* manager, const std::string& input
 
                 teddy::bss_manager dfBssManager(mod->get_var_count(), mod->get_var_count() * 100);
 
-                std::cout << "Calculating importance probabilities...\n";
-                std::cout << "Variable count: " << mod->get_var_count() << std::endl;
-                std::cout << "Reliability size: " << mod->get_sons_reliability()->size()
-                          << std::endl;
+                std::cout << "Calculating importance probabilities for variable " << variable
+                          << " in module " << mod->get_name() << "...\n";
+                // std::cout << "Variable count: " << mod->get_var_count() << std::endl;
+                // std::cout << "Reliability size: " << mod->get_sons_reliability()->size()
+                //           << std::endl;
 
                 ps = dfBssManager.calculate_probabilities(*mod->get_sons_reliability(), df);
                 deriv = ps.at(1);
@@ -524,7 +546,6 @@ void calculate_logical_derivative(mpi_manager* manager, const std::string& input
                 std::cout << "Invalid PLA file.\n";
                 return;
             }
-            std::cout << "After teddy\n";
 
             if (deriv < 0) {
                 std::cout << "Error calculating derivative.\n";
@@ -547,6 +568,7 @@ void calculate_logical_derivative(mpi_manager* manager, const std::string& input
         if (son->get_derivative() < 0) {
             parent->set_sons_reliability(son->get_position(), son->get_my_reliabilities());
         } else {
+            parent->set_son_position(son->get_position());
             parent->set_son_derivative(son->get_derivative());
         }
     } else if (keyWord == "END") {
@@ -578,6 +600,7 @@ std::string serialize_derivatives(mpi_manager* manager, const std::string& input
             }
         } else {
             result = "D ";
+            result += std::to_string(mod->get_position()) + " ";
             result += std::to_string(mod->get_derivative());
         }
     } else {
@@ -611,6 +634,9 @@ void deserialize_derivatives(mpi_manager* manager, const std::string& parameter,
         }
         mod->set_sons_reliability(sonPosition, &sonRels);
     } else if (resultType == "D") {
+        int sonPosition;
+        line >> sonPosition;
+        mod->set_son_position(sonPosition);
         double deriv;
         line >> deriv;
         mod->set_son_derivative(deriv);
