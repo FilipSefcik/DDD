@@ -183,7 +183,8 @@ void calculate_true_density(mpi_manager* manager, const std::string& inputString
         module* parent = manager->get_my_modules().at(paramFirst);
         module* son = manager->get_my_modules().at(paramSecond);
         if (parent && son) {
-            parent->set_sons_reliability(son->get_position(), son->get_my_reliabilities());
+            parent->set_sons_reliability(son->get_position(),
+                                         std::move(*son->get_my_reliabilities()));
         } else {
             std::cout << "No module found.\n";
         }
@@ -236,7 +237,7 @@ void deserialize_true_density(mpi_manager* manager, const std::string& parameter
     while (line >> temp) {
         sonRels.push_back(temp);
     }
-    mod->set_sons_reliability(sonPosition, &sonRels);
+    mod->set_sons_reliability(sonPosition, std::move(sonRels));
 }
 
 // ----------Merging-----------
@@ -427,6 +428,8 @@ void add_instruction_derivatives(module_info* mod, std::string* instructions, in
     }
 }
 
+std::vector<double> linkExecutionTimes;
+
 void calculate_logical_derivative(mpi_manager* manager, const std::string& inputString) {
     std::string keyWord, paramFirst, paramSecond;
     std::istringstream inputStream(inputString);
@@ -505,10 +508,16 @@ void calculate_logical_derivative(mpi_manager* manager, const std::string& input
 
     } else if (keyWord == "LINK") {
         inputStream >> paramSecond;
+
+        // double instructionStartTime = MPI_Wtime(); // Start time
         module* parent = manager->get_my_modules().at(paramFirst);
         module* son = manager->get_my_modules().at(paramSecond);
+        // double instructionEndTime = MPI_Wtime() - instructionStartTime; // End time
+        // linkExecutionTimes.push_back(instructionEndTime); // Store the time
+
         if (son->get_derivative() < 0) {
-            parent->set_sons_reliability(son->get_position(), son->get_my_reliabilities());
+            parent->set_sons_reliability(son->get_position(),
+                                         std::move(*son->get_my_reliabilities()));
         } else {
             parent->set_son_position(son->get_position());
             parent->set_son_derivative(son->get_derivative());
@@ -517,6 +526,15 @@ void calculate_logical_derivative(mpi_manager* manager, const std::string& input
         module* mod = manager->get_my_modules().at(paramFirst);
         if (mod) {
             int state = manager->get_calculated_state();
+            // double totalLinkTime = 0.0;
+            // for (double time : linkExecutionTimes) {
+            //     totalLinkTime += time;
+            // }
+            // double averageLinkTime =
+            //     (linkExecutionTimes.empty()) ? 0.0 : totalLinkTime / linkExecutionTimes.size();
+            // std::cout << "Average time to get module: " << averageLinkTime << " seconds."
+            //   << std::endl;
+
             if (state < mod->get_start_index() || state > mod->get_end_index()) {
                 std::cout << "Invalid variable index\n";
                 return;
@@ -574,7 +592,7 @@ void deserialize_derivatives(mpi_manager* manager, const std::string& parameter,
         while (line >> temp) {
             sonRels.push_back(temp);
         }
-        mod->set_sons_reliability(sonPosition, &sonRels);
+        mod->set_sons_reliability(sonPosition, std::move(sonRels));
     } else if (resultType == "D") {
         int sonPosition;
         line >> sonPosition;

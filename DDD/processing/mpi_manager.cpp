@@ -5,6 +5,7 @@
 #include <ostream>
 #include <sstream>
 #include <string>
+// #include <vector>
 
 mpi_manager::mpi_manager(std::string moduleData) {
     std::istringstream input(moduleData);
@@ -54,10 +55,16 @@ void mpi_manager::complete_instructions(const std::string& instructions, int sta
     std::istringstream inputString(instructions);
     std::string line, keyWord, paramFirst, paramSecond;
 
+    // int myRank;
+    // MPI_Comm_rank(MPI_COMM_WORLD, &myRank);
+
+    // double instructionStartTime, instructionEndTime;
+    // std::vector<std::vector<double>> times = std::vector<std::vector<double>>(6);
     while (std::getline(inputString, line)) {
         std::istringstream inputLine(line);
 
         inputLine >> keyWord;
+        // instructionStartTime = MPI_Wtime();
 
         if (keyWord == "SEND") {
             inputLine >> paramFirst >> paramSecond;
@@ -68,7 +75,64 @@ void mpi_manager::complete_instructions(const std::string& instructions, int sta
         } else {
             this->execute_module_(this, line);
         }
+
+        // instructionEndTime = MPI_Wtime() - instructionStartTime;
+
+        // if (keyWord == "SEND") {
+        //     times.at(0).push_back(instructionEndTime);
+        // } else if (keyWord == "RECV") {
+        //     times.at(1).push_back(instructionEndTime);
+        // } else if (keyWord == "EXEC") {
+        //     times.at(2).push_back(instructionEndTime);
+        // } else if (keyWord == "DERI") {
+        //     times.at(3).push_back(instructionEndTime);
+        // } else if (keyWord == "LINK") {
+        //     times.at(4).push_back(instructionEndTime);
+        // } else if (keyWord == "END") {
+        //     times.at(5).push_back(instructionEndTime);
+        // } else {
+        //     std::cout << "INVALID INSTRUCTION\n";
+        // }
     }
+
+    // if (myRank != 0) {
+    //     return;
+    // }
+
+    // for (size_t i = 0; i < times.size(); i++) {
+    //     double sum = 0.0;
+    //     for (double time : times.at(i)) {
+    //         sum += time;
+    //     }
+    //     std::string instructionType;
+    //     switch (i) {
+    //         case 0:
+    //             instructionType = "SEND";
+    //             break;
+    //         case 1:
+    //             instructionType = "RECV";
+    //             break;
+    //         case 2:
+    //             instructionType = "EXEC";
+    //             break;
+    //         case 3:
+    //             instructionType = "DERI";
+    //             break;
+    //         case 4:
+    //             instructionType = "LINK";
+    //             break;
+    //         case 5:
+    //             instructionType = "END";
+    //             break;
+    //         default:
+    //             instructionType = "UNKNOWN";
+    //     }
+    //     std::cout << "Average time for rank " << myRank << " instruction " << instructionType
+    //               << ": " << sum / times.at(i).size() << " seconds\n";
+    // std::cout << "Time it took for rank " << myRank << " to do all instruction " <<
+    // instructionType
+    //           << ": " << sum << " seconds\n";
+    // }
 }
 
 void mpi_manager::print_my_modules(int myRank) {

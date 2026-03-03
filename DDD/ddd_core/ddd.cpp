@@ -2,6 +2,7 @@
 #include "../utils/callbacks.hpp"
 #include "../utils/mpi_communicator.hpp"
 #include <iostream>
+#include <mpi.h>
 
 ddd::ddd() {
     // Initialize the MPI environment
@@ -41,6 +42,7 @@ void ddd::set_conf_path(const std::string& pa_conf_path) {
 void ddd::calculate_availability(int divider_flag, int state, int calculation, bool timer_on) {
     if (timer_on) {
         this->start_time = MPI_Wtime();
+        // std::cout << "Process " << this->my_rank << " started at " << this->start_time << std::endl;
     }
 
     if (this->my_rank == 0 && this->process_) {
@@ -71,6 +73,11 @@ void ddd::calculate_availability(int divider_flag, int state, int calculation, b
     }
 
     this->process_->process_information();
+    // if (timer_on) {
+    //     double process_time = MPI_Wtime();
+    //     std::cout << "Processing info on " << this->my_rank << " took " << process_time
+    //               << " seconds" << std::endl;
+    // }
 
     if (calculation == 0) {
         this->process_->set_function(calculate_true_density);
@@ -93,6 +100,7 @@ void ddd::calculate_availability(int divider_flag, int state, int calculation, b
 
     if (timer_on) {
         this->end_time = MPI_Wtime();
+        // std::cout << "Process " << this->my_rank << " ended at " << this->end_time << std::endl;
     }
 }
 

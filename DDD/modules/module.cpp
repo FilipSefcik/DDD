@@ -111,8 +111,8 @@ void module::set_sons_reliability(size_t sonPosition, double sonRel, int state) 
     }
 }
 
-void module::set_sons_reliability(size_t sonPosition, std::vector<double>* sonRel) {
-    this->sons_reliability_->at(sonPosition) = *sonRel;
+void module::set_sons_reliability(size_t sonPosition, std::vector<double>&& sonRel) {
+    (*sons_reliability_)[sonPosition] = sonRel;
 }
 
 void module::set_sons_reliability(std::vector<int>* domains) {

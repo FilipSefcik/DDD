@@ -78,7 +78,7 @@ class module {
     void set_derivative(double paDeriv) { this->derivative_ = paDeriv; }
     void set_son_derivative(double paDeriv) { this->son_derivative_ = paDeriv; }
 
-    void set_sons_reliability(size_t sonPosition, std::vector<double>* sonRel);
+    void set_sons_reliability(size_t sonPosition, std::vector<double>&& sonRel);
     void set_sons_reliability(std::vector<int>* domains);
     void set_my_reliability(std::vector<double>* rel);
     void set_my_reliability(int state, double rel) { this->my_reliabilities_->at(state) = rel; }
