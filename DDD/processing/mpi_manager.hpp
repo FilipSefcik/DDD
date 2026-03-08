@@ -2,15 +2,15 @@
 #include "../modules/module.hpp"
 #include <libteddy/impl/diagram_manager.hpp>
 #include <libteddy/inc/reliability.hpp>
-// #include <map>
+#include <map>
 
 /**
  * @brief Completes instructions from the mpi_manager class and communicates using mpi_communicator.
  */
 class mpi_manager {
   private:
-    std::unordered_map<std::string, module*> my_modules_;
-    // std::map<std::string, module*> my_modules_;
+    // std::unordered_map<std::string, module*> my_modules_;
+    std::map<std::string, module*> my_modules_;
     int calculated_state_ = 0;
     void (*execute_module_)(mpi_manager* manager, const std::string& inputString);
     std::string (*serialize_module_)(mpi_manager* manager, const std::string& inputString);
@@ -36,8 +36,8 @@ class mpi_manager {
         this->deserialize_module_ = deserializeModule;
     }
 
-    std::unordered_map<std::string, module*> get_my_modules() { return this->my_modules_; }
-    // std::map<std::string, module*> get_my_modules() { return this->my_modules_; }
+    // std::unordered_map<std::string, module*> get_my_modules() { return this->my_modules_; }
+    std::map<std::string, module*> get_my_modules() { return this->my_modules_; }
     void add_module(module* mod) { this->my_modules_.insert({mod->get_name(), mod}); }
     int get_calculated_state() const { return this->calculated_state_; }
 

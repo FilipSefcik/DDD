@@ -428,7 +428,7 @@ void add_instruction_derivatives(module_info* mod, std::string* instructions, in
     }
 }
 
-std::vector<double> linkExecutionTimes;
+// std::vector<double> linkExecutionTimes;
 
 void calculate_logical_derivative(mpi_manager* manager, const std::string& inputString) {
     std::string keyWord, paramFirst, paramSecond;
@@ -533,7 +533,7 @@ void calculate_logical_derivative(mpi_manager* manager, const std::string& input
             // double averageLinkTime =
             //     (linkExecutionTimes.empty()) ? 0.0 : totalLinkTime / linkExecutionTimes.size();
             // std::cout << "Average time to get module: " << averageLinkTime << " seconds."
-            //   << std::endl;
+            //           << std::endl;
 
             if (state < mod->get_start_index() || state > mod->get_end_index()) {
                 std::cout << "Invalid variable index\n";
