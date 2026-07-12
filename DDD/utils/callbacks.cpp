@@ -487,6 +487,16 @@ void calculate_logical_derivative(mpi_manager* manager, const std::string& input
                     bssManager.dpld({variable, 0, 1}, teddy::dpld::basic(0, 1), f);
                 ps = bssManager.calculate_probabilities(*mod->get_sons_reliability(), df);
                 deriv = ps.at(1);
+            } else if (pla_type == 0) {
+                std::cout << "Calculating derivative for multi-valued PLA is not supported yet.\n";
+                std::optional<teddy::pla_file_mvl> file = teddy::load_mvl_pla(path, nullptr);
+                teddy::imss_manager imssManager(file->input_count_, mod->get_var_count() * 1000,
+                                                file->domains_);
+                teddy::imss_manager::diagram_t f = teddy::io::from_pla(imssManager, *file);
+                teddy::imss_manager::diagram_t df =
+                    imssManager.dpld({variable, 0, 1}, teddy::dpld::basic(0, 1), f);
+                ps = imssManager.calculate_probabilities(*mod->get_sons_reliability(), df);
+                deriv = ps.at(1);
             } else {
                 std::cout << "Invalid PLA file.\n";
                 return;
