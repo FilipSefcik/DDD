@@ -21,8 +21,8 @@ class module {
     int start_index_ = 0;
     int end_index_ = 0;
     int son_position_ = -1;
-    double derivative_ = -1.0;
-    double son_derivative_ = -1.0;
+    std::vector<std::vector<double>>* derivatives_ = nullptr;
+    std::vector<std::vector<double>>* son_derivatives_ = nullptr;
     std::vector<double>* my_reliabilities_ = nullptr;
     std::vector<std::vector<double>>* sons_reliability_ = nullptr;
     std::vector<int>* sons_rel_count_ = nullptr;
@@ -56,9 +56,11 @@ class module {
     int get_son_count() { return this->son_count_; }
     int get_start_index() { return this->start_index_; }
     int get_end_index() { return this->end_index_; }
-    double get_derivative() { return this->derivative_; }
-    double get_son_derivative() { return this->son_derivative_; }
+    std::vector<std::vector<double>>* get_derivatives() { return this->derivatives_; }
+    std::vector<std::vector<double>>* get_son_derivatives() { return this->son_derivatives_; }
     int get_son_position() { return this->son_position_; }
+    std::string get_derivatives_as_string();
+    std::string get_son_derivatives_as_string();
 
     double get_reliability(int state) { return this->my_reliabilities_->at(state); }
     std::vector<double>* get_my_reliabilities() { return this->my_reliabilities_; }
@@ -75,8 +77,12 @@ class module {
     void set_position(int paPosition) { this->position_ = paPosition; }
     void set_var_count(int paVarCount);
     void set_function_column(int paColumn) { this->function_column_ = paColumn; }
-    void set_derivative(double paDeriv) { this->derivative_ = paDeriv; }
-    void set_son_derivative(double paDeriv) { this->son_derivative_ = paDeriv; }
+    void set_derivatives(std::vector<std::vector<double>>* paDeriv) {
+        *this->derivatives_ = *paDeriv;
+    }
+    void set_son_derivatives(std::vector<std::vector<double>>* paDeriv) {
+        *this->son_derivatives_ = *paDeriv;
+    }
 
     void set_sons_reliability(size_t sonPosition, std::vector<double>&& sonRel);
     void set_sons_reliability(std::vector<int>* domains);

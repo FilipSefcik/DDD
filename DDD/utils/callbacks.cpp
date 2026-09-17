@@ -513,16 +513,18 @@ void calculate_logical_derivative(mpi_manager* manager, const std::string& input
                 return;
             }
 
-            if (deriv < 0) {
-                std::cout << "Error calculating derivative.\n";
-                return;
-            }
+            std::cout << "Derivatives are not yet implemented.\n";
 
-            if (mod->get_son_derivative() >= 0) {
-                deriv *= mod->get_son_derivative();
-            }
+            // if (deriv < 0) {
+            //     std::cout << "Error calculating derivative.\n";
+            //     return;
+            // }
 
-            mod->set_derivative(deriv);
+            // if (mod->get_son_derivative() >= 0) {
+            //     deriv *= mod->get_son_derivative();
+            // }
+
+            // mod->set_derivative(deriv);
         } else {
             std::cout << "Module not found.\n";
         }
@@ -536,12 +538,12 @@ void calculate_logical_derivative(mpi_manager* manager, const std::string& input
         // double instructionEndTime = MPI_Wtime() - instructionStartTime; // End time
         // linkExecutionTimes.push_back(instructionEndTime); // Store the time
 
-        if (son->get_derivative() < 0) {
+        if (son->get_derivatives() == nullptr) {
             parent->set_sons_reliability(son->get_position(),
                                          std::move(*son->get_my_reliabilities()));
         } else {
             parent->set_son_position(son->get_position());
-            parent->set_son_derivative(son->get_derivative());
+            parent->set_son_derivatives(son->get_derivatives());
         }
     } else if (keyWord == "END") {
         module* mod = manager->get_my_modules().at(paramFirst);
@@ -560,8 +562,8 @@ void calculate_logical_derivative(mpi_manager* manager, const std::string& input
                 std::cout << "Invalid variable index\n";
                 return;
             }
-            std::cout << "Structural importance of variable " << state << ": "
-                      << mod->get_derivative() << std::endl;
+            // std::cout << "Structural importance of variable " << state << ": "
+            //           << mod->get_derivative() << std::endl;
         } else {
             std::cout << "Module not found.\n";
         }
@@ -572,22 +574,22 @@ std::string serialize_derivatives(mpi_manager* manager, const std::string& input
     module* mod = manager->get_my_modules().at(inputString);
     std::string result;
 
-    if (mod) {
-        if (mod->get_derivative() < 0.0) {
-            result = "A ";
-            result += std::to_string(mod->get_position());
-            for (double rel : *mod->get_my_reliabilities()) {
-                result += " " + std::to_string(rel);
-            }
-        } else {
-            result = "D ";
-            result += std::to_string(mod->get_position()) + " ";
-            result += std::to_string(mod->get_derivative());
-        }
-    } else {
-        std::cout << "Module not found.\n";
-        result = "ABORT";
-    }
+    // if (mod) {
+    //     if (mod->get_derivative() < 0.0) {
+    //         result = "A ";
+    //         result += std::to_string(mod->get_position());
+    //         for (double rel : *mod->get_my_reliabilities()) {
+    //             result += " " + std::to_string(rel);
+    //         }
+    //     } else {
+    //         result = "D ";
+    //         result += std::to_string(mod->get_position()) + " ";
+    //         result += std::to_string(mod->get_derivative());
+    //     }
+    // } else {
+    //     std::cout << "Module not found.\n";
+    //     result = "ABORT";
+    // }
 
     return result;
 }
@@ -596,30 +598,30 @@ void deserialize_derivatives(mpi_manager* manager, const std::string& parameter,
                              const std::string& inputString) {
     module* mod = manager->get_my_modules().at(parameter);
 
-    if (! mod) {
-        std::cout << "Module not found.\n";
-        return;
-    }
+    // if (! mod) {
+    //     std::cout << "Module not found.\n";
+    //     return;
+    // }
 
-    std::istringstream line(inputString);
-    std::string resultType;
-    line >> resultType;
+    // std::istringstream line(inputString);
+    // std::string resultType;
+    // line >> resultType;
 
-    if (resultType == "A") {
-        int sonPosition;
-        line >> sonPosition;
-        std::vector<double> sonRels;
-        double temp;
-        while (line >> temp) {
-            sonRels.push_back(temp);
-        }
-        mod->set_sons_reliability(sonPosition, std::move(sonRels));
-    } else if (resultType == "D") {
-        int sonPosition;
-        line >> sonPosition;
-        mod->set_son_position(sonPosition);
-        double deriv;
-        line >> deriv;
-        mod->set_son_derivative(deriv);
-    }
+    // if (resultType == "A") {
+    //     int sonPosition;
+    //     line >> sonPosition;
+    //     std::vector<double> sonRels;
+    //     double temp;
+    //     while (line >> temp) {
+    //         sonRels.push_back(temp);
+    //     }
+    //     mod->set_sons_reliability(sonPosition, std::move(sonRels));
+    // } else if (resultType == "D") {
+    //     int sonPosition;
+    //     line >> sonPosition;
+    //     mod->set_son_position(sonPosition);
+    //     double deriv;
+    //     line >> deriv;
+    //     mod->set_son_derivative(deriv);
+    // }
 }

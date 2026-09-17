@@ -135,6 +135,28 @@ void module::set_my_reliability(std::vector<double>* rel) {
     }
 }
 
+std::string module::get_derivatives_as_string() {
+    std::string result;
+    for (const auto& deriv : *this->derivatives_) {
+        for (double val : deriv) {
+            result += std::to_string(val) + " ";
+        }
+        result += "\n";
+    }
+    return result;
+}
+
+std::string module::get_son_derivatives_as_string() {
+    std::string result;
+    for (const auto& deriv : *this->son_derivatives_) {
+        for (double val : deriv) {
+            result += std::to_string(val) + " ";
+        }
+        result += "\n";
+    }
+    return result;
+}
+
 void module::print_sons_reliabilities() {
     std::cout << "-------------------------\n";
     std::cout << this->get_name() << " Sons reliabilities: \n";
