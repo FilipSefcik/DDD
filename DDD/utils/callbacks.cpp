@@ -488,10 +488,21 @@ void calculate_logical_derivative(mpi_manager* manager, const std::string& input
                 ps = bssManager.calculate_probabilities(*mod->get_sons_reliability(), df);
                 deriv = ps.at(1);
             } else if (pla_type == 0) {
-                std::cout << "Calculating derivative for multi-valued PLA is not supported yet.\n";
                 std::optional<teddy::pla_file_mvl> file = teddy::load_mvl_pla(path, nullptr);
+
+                // std::cout << "Loaded " << path << " successfully.\n";
+                // std::cout << "File info: input_count = " << file->input_count_
+                //           << ", product_count = " << file->product_count_ << ", domains = ";
+                // for (const auto& domain : file->domains_) {
+                //     std::cout << domain << " ";
+                // }
+                // std::cout << std::endl;
+
                 teddy::imss_manager imssManager(file->input_count_, mod->get_var_count() * 1000,
                                                 file->domains_);
+                // for (unsigned int i = 0; i < file->domains_.size(); i++) {
+                //     std::cout << "Domain " << i << ": " << file->domains_.at(i) << std::endl;
+                // }
                 teddy::imss_manager::diagram_t f = teddy::io::from_pla(imssManager, *file);
                 teddy::imss_manager::diagram_t df =
                     imssManager.dpld({variable, 0, 1}, teddy::dpld::basic(0, 1), f);

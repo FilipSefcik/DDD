@@ -58,6 +58,9 @@ void mpi_manager::complete_instructions(const std::string& instructions, int sta
     // int myRank;
     // MPI_Comm_rank(MPI_COMM_WORLD, &myRank);
 
+    // std::cout << "Process " << myRank << " received instructions:\n";
+    // std::cout << instructions << std::endl;
+
     // double instructionStartTime, instructionEndTime;
     // std::vector<std::vector<double>> times = std::vector<std::vector<double>>(6);
     while (std::getline(inputString, line)) {
