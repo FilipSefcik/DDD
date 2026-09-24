@@ -1,4 +1,5 @@
 #include "module.hpp"
+#include "pla_function.hpp"
 #include <cstdio>
 #include <iostream>
 #include <ostream>
@@ -30,7 +31,8 @@ module::module(std::string infoToString) {
     // Move to the fields after the path
     size_t afterPathIndex = plaIndex + 5; // ".pla" + space
     std::stringstream fields(infoToString.substr(afterPathIndex));
-    fields >> this->function_column_ >> this->position_ >> this->states_ >> this->var_count_;
+    fields >> this->function_column_ >> this->position_ >> this->states_ >> this->var_count_ >>
+        this->start_index_ >> this->end_index_;
 
     // Initialize reliabilities
     this->my_reliabilities_ =
@@ -70,6 +72,33 @@ void module::insert_function(pla_function* otherFunction, std::string sonName) {
     }
 }
 
+void module::insert_function(char*** additionalVars, int otherVarCount, const int* otherFunValCount,
+                             std::string sonName) {
+    if (this->function_) {
+        int sonPosition = this->sons_map_->at(sonName);
+        this->function_->input_variables(additionalVars, otherVarCount, otherFunValCount,
+                                         sonPosition);
+        for (auto& pair : *this->sons_map_) {
+            if (sonPosition < pair.second) {
+                pair.second += otherVarCount - 1;
+            }
+        }
+    }
+}
+
+void module::insert_function_in_parallel(pla_function* otherFunction, std::string sonName,
+                                         int numOfParts) {
+    if (this->function_ && otherFunction) {
+        int sonPosition = this->sons_map_->at(sonName);
+        this->function_->input_variables_in_parallel(otherFunction, sonPosition, numOfParts);
+        for (auto& pair : *this->sons_map_) {
+            if (sonPosition < pair.second) {
+                pair.second += otherFunction->get_var_count() - 1;
+            }
+        }
+    }
+}
+
 void module::set_var_count(int paVarCount) {
     this->var_count_ = paVarCount;
 }
@@ -82,8 +111,8 @@ void module::set_sons_reliability(size_t sonPosition, double sonRel, int state) 
     }
 }
 
-void module::set_sons_reliability(size_t sonPosition, std::vector<double>* sonRel) {
-    this->sons_reliability_->at(sonPosition) = *sonRel;
+void module::set_sons_reliability(size_t sonPosition, std::vector<double>&& sonRel) {
+    (*sons_reliability_)[sonPosition] = sonRel;
 }
 
 void module::set_sons_reliability(std::vector<int>* domains) {
@@ -106,6 +135,28 @@ void module::set_my_reliability(std::vector<double>* rel) {
     }
 }
 
+std::string module::get_derivatives_as_string() {
+    std::string result;
+    for (const auto& deriv : *this->derivatives_) {
+        for (double val : deriv) {
+            result += std::to_string(val) + " ";
+        }
+        result += "\n";
+    }
+    return result;
+}
+
+std::string module::get_son_derivatives_as_string() {
+    std::string result;
+    for (const auto& deriv : *this->son_derivatives_) {
+        for (double val : deriv) {
+            result += std::to_string(val) + " ";
+        }
+        result += "\n";
+    }
+    return result;
+}
+
 void module::print_sons_reliabilities() {
     std::cout << "-------------------------\n";
     std::cout << this->get_name() << " Sons reliabilities: \n";
@@ -126,10 +177,12 @@ void module::print_all() {
     std::cout << "Var count: " << this->var_count_ << std::endl;
     std::cout << "Position: " << this->position_ << std::endl;
     std::cout << "Function column: " << this->function_column_ << std::endl;
-    //std::cout << "My reliabilities:\n";
-    //print_reliabilities();
-    //std::cout << "Sons reliabilities: \n";
-    //print_sons_reliabilities();
+    std::cout << "Start index: " << this->start_index_ << std::endl;
+    std::cout << "End index: " << this->end_index_ << std::endl;
+    // std::cout << "My reliabilities:\n";
+    // print_reliabilities();
+    // std::cout << "Sons reliabilities: \n";
+    // print_sons_reliabilities();
 }
 
 void module::print_reliabilities() {

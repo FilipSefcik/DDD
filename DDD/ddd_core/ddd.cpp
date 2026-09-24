@@ -2,6 +2,7 @@
 #include "../utils/callbacks.hpp"
 #include "../utils/mpi_communicator.hpp"
 #include <iostream>
+#include <mpi.h>
 
 ddd::ddd() {
     // Initialize the MPI environment
@@ -22,7 +23,7 @@ ddd::ddd() {
     // char processorName[MPI_MAX_PROCESSOR_NAME];
     // int nameLength;
     // MPI_Get_processor_name(processorName, &nameLength); // Get the processor name
-    // std::cout << "Rank " << this->my_rank << " runs on " << processorName << std::endl;
+    // std::cout << "Rank " << this->my_rank << std::endl;
 }
 
 ddd::~ddd() {
@@ -38,9 +39,10 @@ void ddd::set_conf_path(const std::string& pa_conf_path) {
     }
 }
 
-void ddd::calculate_availability(int divider_flag, int state, bool timer_on) {
+void ddd::calculate_availability(int divider_flag, int state, int calculation, bool timer_on) {
     if (timer_on) {
         this->start_time = MPI_Wtime();
+        // std::cout << "Process " << this->my_rank << " started at " << this->start_time << std::endl;
     }
 
     if (this->my_rank == 0 && this->process_) {
@@ -56,20 +58,49 @@ void ddd::calculate_availability(int divider_flag, int state, bool timer_on) {
                 mainProcess->set_divide_function(divide_evenly);
                 break;
         }
-        // mainProcess->set_add_instruction(add_instruction_density);
-        mainProcess->set_add_instruction(add_instruction_merging);
+
+        if (calculation == 0) {
+            mainProcess->set_add_instruction(add_instruction_density);
+        } else if (calculation == 1) {
+            mainProcess->set_add_instruction(add_instruction_merging);
+        } else if (calculation == 2) {
+            mainProcess->set_calculated_derivative(state);
+            mainProcess->set_add_instruction(add_instruction_derivatives);
+        } else {
+            std::cerr << "Invalid calculation type" << std::endl;
+            return;
+        }
     }
+
     this->process_->process_information();
-    this->process_->set_function(execute_merging);
-    this->process_->set_serialize_function(serialize_merging);
-    this->process_->set_deserialize_function(deserialize_merging);
-    // this->process_->set_function(calculate_true_density);
-    // this->process_->set_serialize_function(serialize_true_density);
-    // this->process_->set_deserialize_function(deserialize_true_density);
+    // if (timer_on) {
+    //     double process_time = MPI_Wtime();
+    //     std::cout << "Processing info on " << this->my_rank << " took " << process_time
+    //               << " seconds" << std::endl;
+    // }
+
+    if (calculation == 0) {
+        this->process_->set_function(calculate_true_density);
+        this->process_->set_serialize_function(serialize_true_density);
+        this->process_->set_deserialize_function(deserialize_true_density);
+    } else if (calculation == 1) {
+        this->process_->set_function(execute_merging);
+        this->process_->set_serialize_function(serialize_merging);
+        this->process_->set_deserialize_function(deserialize_merging);
+    } else if (calculation == 2) {
+        this->process_->set_function(calculate_logical_derivative);
+        this->process_->set_serialize_function(serialize_derivatives);
+        this->process_->set_deserialize_function(deserialize_derivatives);
+    } else {
+        std::cerr << "Invalid calculation type" << std::endl;
+        return;
+    }
+
     this->process_->process_instructions(state);
 
     if (timer_on) {
         this->end_time = MPI_Wtime();
+        // std::cout << "Process " << this->my_rank << " ended at " << this->end_time << std::endl;
     }
 }
 

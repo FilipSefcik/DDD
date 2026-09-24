@@ -1,7 +1,9 @@
 #include "callbacks.hpp"
+#include "libteddy/impl/dplds.hpp"
 #include "libteddy/inc/reliability.hpp"
 #include <cstddef>
 #include <cstdio>
+#include <cstdlib>
 #include <iostream>
 #include <libteddy/inc/io.hpp>
 #include <mpi.h>
@@ -113,8 +115,9 @@ bool divide_by_var_count(std::vector<module_info*>* modules, int nodeCount) {
 
 //--------True density---------
 
-void add_instruction_density(module_info* mod, std::string* instructions) {
+void add_instruction_density(module_info* mod, std::string* instructions, int condition) {
     module_info* parent = mod->get_parent();
+    (void)condition;
 
     // EXEC - module name - position of the module in parent
     *instructions += "EXEC " + mod->get_name() + " " + std::to_string(mod->get_position()) + "\n";
@@ -151,11 +154,14 @@ void calculate_true_density(mpi_manager* manager, const std::string& inputString
             int pla_type = is_binary_pla(path, nullptr, nullptr);
             std::vector<double> ps;
             if (pla_type == 1) {
+                // std::cout << mod->get_var_count() << std::endl;
                 std::optional<teddy::pla_file_binary> file = teddy::load_binary_pla(path, nullptr);
+                // std::cout << file->input_count_ << std::endl;
                 teddy::bss_manager bssManager(file->input_count_, mod->get_var_count() * 100);
                 teddy::bdd_manager::diagram_t f =
                     teddy::io::from_pla(bssManager, *file)[mod->get_function_column()];
                 ps = bssManager.calculate_probabilities(*mod->get_sons_reliability(), f);
+                // std::cout << "Done\n";
             } else if (pla_type == 0) {
                 std::optional<teddy::pla_file_mvl> file = teddy::load_mvl_pla(path, nullptr);
                 teddy::imss_manager imssManager(file->input_count_, mod->get_var_count() * 100,
@@ -177,7 +183,8 @@ void calculate_true_density(mpi_manager* manager, const std::string& inputString
         module* parent = manager->get_my_modules().at(paramFirst);
         module* son = manager->get_my_modules().at(paramSecond);
         if (parent && son) {
-            parent->set_sons_reliability(son->get_position(), son->get_my_reliabilities());
+            parent->set_sons_reliability(son->get_position(),
+                                         std::move(*son->get_my_reliabilities()));
         } else {
             std::cout << "No module found.\n";
         }
@@ -230,7 +237,7 @@ void deserialize_true_density(mpi_manager* manager, const std::string& parameter
     while (line >> temp) {
         sonRels.push_back(temp);
     }
-    mod->set_sons_reliability(sonPosition, &sonRels);
+    mod->set_sons_reliability(sonPosition, std::move(sonRels));
 }
 
 // ----------Merging-----------
@@ -246,7 +253,7 @@ bool divide_for_merging(std::vector<module_info*>* modules, int nodeCount) {
     int nodeUsed = 0;
 
     for (module_info* mod : *modules) {
-        if (mod->get_son_count() == 0) {
+        if (mod->get_son_count() == 0 && mod->get_parent()) {
             mod->set_assigned_process(mod->get_parent()->get_assigned_process());
             continue;
         }
@@ -257,8 +264,9 @@ bool divide_for_merging(std::vector<module_info*>* modules, int nodeCount) {
     return true;
 }
 
-void add_instruction_merging(module_info* mod, std::string* instructions) {
+void add_instruction_merging(module_info* mod, std::string* instructions, int condition) {
     module_info* parent = mod->get_parent();
+    (void)condition;
 
     if (parent) {
         if (parent->get_assigned_process() != mod->get_assigned_process()) {
@@ -280,6 +288,11 @@ void add_instruction_merging(module_info* mod, std::string* instructions) {
     }
 }
 
+// pla_function* help = nullptr;
+// char*** additionalVars = nullptr;
+// int otherVarCount = 0;
+// const int* otherFunValCount = nullptr;
+
 void execute_merging(mpi_manager* manager, const std::string& inputString) {
     std::string keyWord, paramFirst, paramSecond;
     std::istringstream inputStream(inputString);
@@ -293,10 +306,28 @@ void execute_merging(mpi_manager* manager, const std::string& inputString) {
             if (! son->get_function()) {
                 son->initialize_pla_function();
             }
+            // if (! help) {
+            //     help = new pla_function(son->get_path());
+            //     additionalVars = help->sort_by_function();
+            //     otherVarCount = help->get_var_count();
+            //     otherFunValCount = help->get_fun_val_count();
+            // }
             if (! parent->get_function()) {
                 parent->initialize_pla_function();
             }
-            parent->insert_function(son->get_function(), son->get_name());
+
+            if (manager->get_calculated_state() == 0) {
+                parent->insert_function(son->get_function(), son->get_name());
+            } else if (manager->get_calculated_state() == 1) {
+                parent->insert_function_in_parallel(son->get_function(), son->get_name(), 2);
+            } else {
+                throw std::runtime_error("Use 0 for normal merging, 1 for parallel merging.");
+            }
+
+            // parent->insert_function(son->get_function(), son->get_name());
+            //  parent->insert_function(additionalVars, otherVarCount, otherFunValCount,
+            //                          son->get_name());
+
         } else {
             std::cout << "No module found.\n";
         }
@@ -306,6 +337,8 @@ void execute_merging(mpi_manager* manager, const std::string& inputString) {
             if (mod->get_function()) {
                 mod->set_path("../merged/" + mod->get_name() + ".pla");
                 mod->get_function()->write_to_pla(mod->get_path());
+                // help->free_sort(additionalVars, 2);
+                // help->~pla_function();
             }
             std::cout << "Merged module saved to: " << mod->get_path() << std::endl;
         } else {
@@ -347,4 +380,248 @@ void deserialize_merging(mpi_manager* manager, const std::string& parameter,
     module* son = new module(sonName, 0);
     son->set_path(sonPath);
     manager->add_module(son);
+}
+
+// --------Logical derivatives---------
+
+void add_instruction_derivatives(module_info* mod, std::string* instructions, int condition) {
+    module_info* parent = mod->get_parent();
+
+    if (condition >= mod->get_offset_start() && condition <= mod->get_offset_end()) {
+        int variable = 0;
+        if (mod->get_son_count() > 0) {
+            variable = mod->get_offset_surplus(condition);
+        } else {
+            variable = condition - mod->get_offset_start();
+        }
+
+        // DERI - module name - derivative to calculate
+        *instructions += "DERI " + mod->get_name() + " " + std::to_string(variable) + "\n";
+    } else {
+
+        // EXEC - module name - position of the module in parent
+        *instructions +=
+            "EXEC " + mod->get_name() + " " + std::to_string(mod->get_position()) + "\n";
+    }
+
+    if (parent) {
+        if (mod->get_assigned_process() == parent->get_assigned_process()) {
+            // LINK - name of parent module - name of son module
+            *instructions += "LINK " + parent->get_name() + " " + mod->get_name() + "\n";
+        } else {
+            // SEND - name of module - rank of the process to send
+            *instructions += "SEND " + mod->get_name() + " " +
+                             std::to_string(parent->get_assigned_process()) + "\n";
+
+            // RECV - parent module name - rank of the process received from
+            *(instructions + 1) += "RECV " + parent->get_name() + " " +
+                                   std::to_string(mod->get_assigned_process()) + "\n";
+        }
+    } else {
+        if (condition < mod->get_offset_start() || condition > mod->get_offset_end()) {
+            std::cerr << "Derivate to calculate is not within module variable range.\n";
+            exit(5);
+        } else {
+            // END - module which gives answer
+            *instructions += "END " + mod->get_name() + "\n";
+        }
+    }
+}
+
+// std::vector<double> linkExecutionTimes;
+
+void calculate_logical_derivative(mpi_manager* manager, const std::string& inputString) {
+    std::string keyWord, paramFirst, paramSecond;
+    std::istringstream inputStream(inputString);
+    inputStream >> keyWord >> paramFirst;
+
+    if (keyWord == "EXEC") {
+        inputStream >> paramSecond;
+        module* mod = manager->get_my_modules().at(paramFirst);
+        if (mod) {
+            mod->set_position(std::stoi(paramSecond));
+            std::string const& path = mod->get_path();
+            int pla_type = is_binary_pla(path, nullptr, nullptr);
+            std::vector<double> ps;
+            if (pla_type == 1) {
+                // std::cout << mod->get_var_count() << std::endl;
+                std::optional<teddy::pla_file_binary> file = teddy::load_binary_pla(path, nullptr);
+                // std::cout << file->input_count_ << std::endl;
+
+                teddy::bss_manager bssManager(file->input_count_, mod->get_var_count() * 100);
+                teddy::bdd_manager::diagram_t f =
+                    teddy::io::from_pla(bssManager, *file)[mod->get_function_column()];
+                ps = bssManager.calculate_probabilities(*mod->get_sons_reliability(), f);
+                // std::cout << "Done\n";
+            } else if (pla_type == 0) {
+                std::optional<teddy::pla_file_mvl> file = teddy::load_mvl_pla(path, nullptr);
+                teddy::imss_manager imssManager(file->input_count_, mod->get_var_count() * 100,
+                                                file->domains_);
+                teddy::imss_manager::diagram_t f = teddy::io::from_pla(imssManager, *file);
+                ps = imssManager.calculate_probabilities(*mod->get_sons_reliability(), f);
+            } else {
+                std::cout << "Invalid PLA file.\n";
+                return;
+            }
+
+            mod->set_my_reliability(&ps);
+
+        } else {
+            std::cout << "Module not found.\n";
+        }
+    } else if (keyWord == "DERI") {
+        inputStream >> paramSecond;
+        module* mod = manager->get_my_modules().at(paramFirst);
+        if (mod) {
+            double deriv = -1.0;
+            int variable = std::stoi(paramSecond);
+            std::string const& path = mod->get_path();
+            int pla_type = is_binary_pla(path, nullptr, nullptr);
+            std::vector<double> ps;
+            if (pla_type == 1) {
+                std::optional<teddy::pla_file_binary> file = teddy::load_binary_pla(path, nullptr);
+                teddy::bss_manager bssManager(file->input_count_, mod->get_var_count() * 1000);
+                teddy::bdd_manager::diagram_t f =
+                    teddy::io::from_pla(bssManager, *file)[mod->get_function_column()];
+                teddy::bdd_manager::diagram_t df =
+                    bssManager.dpld({variable, 0, 1}, teddy::dpld::basic(0, 1), f);
+                ps = bssManager.calculate_probabilities(*mod->get_sons_reliability(), df);
+                deriv = ps.at(1);
+            } else if (pla_type == 0) {
+                std::optional<teddy::pla_file_mvl> file = teddy::load_mvl_pla(path, nullptr);
+
+                // std::cout << "Loaded " << path << " successfully.\n";
+                // std::cout << "File info: input_count = " << file->input_count_
+                //           << ", product_count = " << file->product_count_ << ", domains = ";
+                // for (const auto& domain : file->domains_) {
+                //     std::cout << domain << " ";
+                // }
+                // std::cout << std::endl;
+
+                teddy::imss_manager imssManager(file->input_count_, mod->get_var_count() * 1000,
+                                                file->domains_);
+                // for (unsigned int i = 0; i < file->domains_.size(); i++) {
+                //     std::cout << "Domain " << i << ": " << file->domains_.at(i) << std::endl;
+                // }
+                teddy::imss_manager::diagram_t f = teddy::io::from_pla(imssManager, *file);
+                teddy::imss_manager::diagram_t df =
+                    imssManager.dpld({variable, 0, 1}, teddy::dpld::basic(0, 1), f);
+                ps = imssManager.calculate_probabilities(*mod->get_sons_reliability(), df);
+                deriv = ps.at(1);
+            } else {
+                std::cout << "Invalid PLA file.\n";
+                return;
+            }
+
+            std::cout << "Derivatives are not yet implemented.\n";
+
+            // if (deriv < 0) {
+            //     std::cout << "Error calculating derivative.\n";
+            //     return;
+            // }
+
+            // if (mod->get_son_derivative() >= 0) {
+            //     deriv *= mod->get_son_derivative();
+            // }
+
+            // mod->set_derivative(deriv);
+        } else {
+            std::cout << "Module not found.\n";
+        }
+
+    } else if (keyWord == "LINK") {
+        inputStream >> paramSecond;
+
+        // double instructionStartTime = MPI_Wtime(); // Start time
+        module* parent = manager->get_my_modules().at(paramFirst);
+        module* son = manager->get_my_modules().at(paramSecond);
+        // double instructionEndTime = MPI_Wtime() - instructionStartTime; // End time
+        // linkExecutionTimes.push_back(instructionEndTime); // Store the time
+
+        if (son->get_derivatives() == nullptr) {
+            parent->set_sons_reliability(son->get_position(),
+                                         std::move(*son->get_my_reliabilities()));
+        } else {
+            parent->set_son_position(son->get_position());
+            parent->set_son_derivatives(son->get_derivatives());
+        }
+    } else if (keyWord == "END") {
+        module* mod = manager->get_my_modules().at(paramFirst);
+        if (mod) {
+            int state = manager->get_calculated_state();
+            // double totalLinkTime = 0.0;
+            // for (double time : linkExecutionTimes) {
+            //     totalLinkTime += time;
+            // }
+            // double averageLinkTime =
+            //     (linkExecutionTimes.empty()) ? 0.0 : totalLinkTime / linkExecutionTimes.size();
+            // std::cout << "Average time to get module: " << averageLinkTime << " seconds."
+            //           << std::endl;
+
+            if (state < mod->get_start_index() || state > mod->get_end_index()) {
+                std::cout << "Invalid variable index\n";
+                return;
+            }
+            // std::cout << "Structural importance of variable " << state << ": "
+            //           << mod->get_derivative() << std::endl;
+        } else {
+            std::cout << "Module not found.\n";
+        }
+    }
+}
+
+std::string serialize_derivatives(mpi_manager* manager, const std::string& inputString) {
+    module* mod = manager->get_my_modules().at(inputString);
+    std::string result;
+
+    // if (mod) {
+    //     if (mod->get_derivative() < 0.0) {
+    //         result = "A ";
+    //         result += std::to_string(mod->get_position());
+    //         for (double rel : *mod->get_my_reliabilities()) {
+    //             result += " " + std::to_string(rel);
+    //         }
+    //     } else {
+    //         result = "D ";
+    //         result += std::to_string(mod->get_position()) + " ";
+    //         result += std::to_string(mod->get_derivative());
+    //     }
+    // } else {
+    //     std::cout << "Module not found.\n";
+    //     result = "ABORT";
+    // }
+
+    return result;
+}
+
+void deserialize_derivatives(mpi_manager* manager, const std::string& parameter,
+                             const std::string& inputString) {
+    module* mod = manager->get_my_modules().at(parameter);
+
+    // if (! mod) {
+    //     std::cout << "Module not found.\n";
+    //     return;
+    // }
+
+    // std::istringstream line(inputString);
+    // std::string resultType;
+    // line >> resultType;
+
+    // if (resultType == "A") {
+    //     int sonPosition;
+    //     line >> sonPosition;
+    //     std::vector<double> sonRels;
+    //     double temp;
+    //     while (line >> temp) {
+    //         sonRels.push_back(temp);
+    //     }
+    //     mod->set_sons_reliability(sonPosition, std::move(sonRels));
+    // } else if (resultType == "D") {
+    //     int sonPosition;
+    //     line >> sonPosition;
+    //     mod->set_son_position(sonPosition);
+    //     double deriv;
+    //     line >> deriv;
+    //     mod->set_son_derivative(deriv);
+    // }
 }

@@ -1,4 +1,9 @@
 .cache
 .vscode
 build
+build_old
+build_debug
+build_release
+merged/
 compile_commands.json
+load_files/divider_test/

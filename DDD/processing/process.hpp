@@ -46,20 +46,23 @@ class process {
 class main_process : public process {
   private:
     int process_count_ = 0;
+    int calculated_derivative_ = 0;
     module_manager module_manager_;
     std::string conf_path_;
     bool (*divide_function_)(std::vector<module_info*>* modules, int nodeCount);
-    void (*add_instruction_)(module_info* mod, std::string* instructions);
+    void (*add_instruction_)(module_info* mod, std::string* instructions, int condition);
 
   public:
     // main_process class implementation
     main_process(int rank, int process_count) : process(rank), process_count_(process_count){};
 
     void set_conf_path(const std::string& path) { this->conf_path_ = path; };
+    void set_calculated_derivative(int derivative) { this->calculated_derivative_ = derivative; };
     void set_divide_function(bool (*divide)(std::vector<module_info*>* modules, int nodeCount)) {
         this->divide_function_ = divide;
     };
-    void set_add_instruction(void (*addInstruction)(module_info* mod, std::string* instructions)) {
+    void set_add_instruction(void (*addInstruction)(module_info* mod, std::string* instructions,
+                                                    int condition)) {
         this->add_instruction_ = addInstruction;
     };
     void process_information() override;

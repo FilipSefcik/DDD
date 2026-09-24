@@ -98,6 +98,8 @@ void module_manager::load_modules(const std::string& confPath) {
         mod->set_states(states); // Nastavenie počtu stavov
         mod->set_function_column(column);
         mod->set_sons_domains(&domains);
+        mod->set_offset_start(0);
+        mod->set_offset_end(mod->get_var_count() - 1);
 
         // Uloženie modulu
         moduleMapping[name] = this->modules_->size();
@@ -134,6 +136,9 @@ void module_manager::load_modules(const std::string& confPath) {
                 // Pridaj syna so stavmi modulu
                 auto childModule = this->modules_->at(moduleMapping.at(moduleName));
                 childModule->set_position(son_position);
+                childModule->set_offset_start(parentModule->get_offset_start() + son_position);
+                childModule->set_offset_end(childModule->get_offset_start() +
+                                            childModule->get_var_count() - 1);
                 parentModule->add_module(childModule);
                 son_position++;
             } else if (val[i] == 'V') {
@@ -159,7 +164,9 @@ void module_manager::load_modules(const std::string& confPath) {
  */
 void module_manager::get_instructions(size_t processCount,
                                       void (*addInstruction)(module_info* mod,
-                                                             std::string* instructions)) {
+                                                             std::string* instructions,
+                                                             int condition),
+                                      int condition) {
     this->separate_instructions_->resize(
         processCount > this->modules_->size() ? this->modules_->size() : processCount);
 
@@ -169,7 +176,7 @@ void module_manager::get_instructions(size_t processCount,
     for (size_t i = 0; i < this->modules_->size(); i++) {
         module_info* mod = this->modules_->at(i);
         std::string instructions[2] = {"", ""};
-        addInstruction(mod, instructions);
+        addInstruction(mod, instructions, condition);
         this->separate_instructions_->at(mod->get_assigned_process()) += instructions[0];
         if (mod->get_parent()) {
             this->separate_instructions_->at(mod->get_parent()->get_assigned_process()) +=
@@ -229,8 +236,10 @@ void module_manager::print_modules() {
     for (module_info* mod : *this->modules_) {
         std::cout << mod->get_name() << " " << mod->get_pla_path() << "\n";
         std::cout << "My position: " << mod->get_position() << "\n";
+        std::cout << "Offset start: " << mod->get_offset_start() << "\n";
+        std::cout << "Offset end: " << mod->get_offset_end() << "\n";
         mod->print_sons();
-        std::cout << "\n";
+        std::cout << "\n-------------------------------------\n";
     }
 }
 
