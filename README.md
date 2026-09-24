@@ -70,7 +70,7 @@ Ensure the TeDDy library and Open MPI are installed and available in your system
 General Command
 
 ```bash
-mpirun <threads> -n <processes> <main> <conf_file> <divider> <state> <timer>
+mpirun <threads> -n <processes> <main> <conf_file> <divider> <specification> <calculation> <timer>
 ```
 
 ### Example
@@ -91,8 +91,15 @@ mpirun -n 2 mpi_cloud/ddd_parallel mpi_cloud/modules/module_map.conf 0 0 n
 - **conf_file** – Path to configuration file (default: `module_map.conf`)  
 - **divider** – Module division strategy:  
   - `0` = var_count_divider  
-  - `1` = node_divider  
-- **state** – Availability state to calculate (`0` or `1`)  
+  - `1` = relations_divider
+  - `2` = node_divider
+- **specification** - Define what exactly should be calculated, could mean different things depending on **calculation**
+  - **state** – availability state to calculate (`0, 1, ...`)
+  - **variable** - define an index of the variable you want to calculate structure index
+- **calculation** - Define what should be calculated:
+  - `0` = calculate True density of the state for the defined **specification**
+  - `1` = merge modules into one function
+  - `2` = calculate Strucutre index for variable defined by **specification** 
 - **timer** – Measure execution time (`y` or `n`)  
 
 ## Example workflow
@@ -156,11 +163,11 @@ M5 VVV
 ### Example of output
 
 ```bash
-mpirun -n 2 DDD/main ../load_files/modules/module_map.conf 0 1 y
+mpirun -n 2 DDD/main ../load_files/modules/module_map.conf 0 0 1 y
 Density of 1: 0.454834
 Time: 0.00101632
 ----------------
-mpirun -n 2 DDD/main ../load_files/modules/module_map.conf 0 0 n
+mpirun -n 2 DDD/main ../load_files/modules/module_map.conf 0 0 0 n
 Density of 0: 0.545166
 ```
 
