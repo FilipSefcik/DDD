@@ -45,6 +45,7 @@ void main_process::process_information() {
                                            this->calculated_derivative_);
 
     // this->module_manager_.print_separate_instructions();
+    this->module_manager_.print_assigned_processes();
 
     std::vector<mpi_communicator::mpi_message> messages;
     this->module_manager_.create_messages(this->process_count_, messages);

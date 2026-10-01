@@ -32,16 +32,7 @@ class module {
   public:
     module(const std::string& paName, int paStates);
     module(std::string infoToString);
-    ~module() {
-        delete this->sons_reliability_;
-        delete this->my_reliabilities_;
-        delete this->sons_rel_count_;
-        delete this->function_;
-        delete this->sons_map_;
-        this->sons_reliability_ = nullptr;
-        this->my_reliabilities_ = nullptr;
-        this->sons_rel_count_ = nullptr;
-    }
+    ~module();
 
     // getters
     std::string get_name() { return this->name_; }
@@ -61,6 +52,7 @@ class module {
     int get_son_position() { return this->son_position_; }
     std::string get_derivatives_as_string();
     std::string get_son_derivatives_as_string();
+    std::string get_derivative_matrix();
 
     double get_reliability(int state) { return this->my_reliabilities_->at(state); }
     std::vector<double>* get_my_reliabilities() { return this->my_reliabilities_; }
@@ -77,12 +69,8 @@ class module {
     void set_position(int paPosition) { this->position_ = paPosition; }
     void set_var_count(int paVarCount);
     void set_function_column(int paColumn) { this->function_column_ = paColumn; }
-    void set_derivatives(std::vector<std::vector<double>>* paDeriv) {
-        *this->derivatives_ = *paDeriv;
-    }
-    void set_son_derivatives(std::vector<std::vector<double>>* paDeriv) {
-        *this->son_derivatives_ = *paDeriv;
-    }
+    void set_derivatives(const std::vector<std::vector<double>>* paDeriv);
+    void set_son_derivatives(const std::vector<std::vector<double>>* paDeriv);
 
     void set_sons_reliability(size_t sonPosition, std::vector<double>&& sonRel);
     void set_sons_reliability(std::vector<int>* domains);

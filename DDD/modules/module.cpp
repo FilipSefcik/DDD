@@ -1,9 +1,12 @@
 #include "module.hpp"
 #include "pla_function.hpp"
 #include <cstdio>
+#include <iomanip>
 #include <iostream>
+#include <limits>
 #include <ostream>
 #include <sstream>
+#include <stdexcept>
 
 module::module(const std::string& paName, int paStates) {
     this->name_ = paName;
@@ -11,6 +14,18 @@ module::module(const std::string& paName, int paStates) {
     this->sons_reliability_ = new std::vector<std::vector<double>>();
     this->my_reliabilities_ = new std::vector<double>(this->states_);
     this->sons_map_ = new std::unordered_map<std::string, int>();
+    this->derivatives_ = new std::vector<std::vector<double>>(this->states_ - 1);
+    this->son_derivatives_ = new std::vector<std::vector<double>>();
+}
+
+module::~module() {
+    delete this->derivatives_;
+    delete this->son_derivatives_;
+    delete this->sons_reliability_;
+    delete this->my_reliabilities_;
+    delete this->sons_rel_count_;
+    delete this->function_;
+    delete this->sons_map_;
 }
 
 module::module(std::string infoToString) {
@@ -39,6 +54,8 @@ module::module(std::string infoToString) {
         new std::vector<double>(this->states_, 1.0 / this->states_); // Default reliability
     this->sons_reliability_ = new std::vector<std::vector<double>>(this->var_count_);
     this->sons_rel_count_ = new std::vector<int>(this->var_count_);
+    this->derivatives_ = new std::vector<std::vector<double>>(this->states_ - 1);
+    this->son_derivatives_ = new std::vector<std::vector<double>>();
 
     // Reading son states into sons_reliability_
     for (int i = 0; i < this->var_count_; ++i) {
@@ -103,6 +120,26 @@ void module::set_var_count(int paVarCount) {
     this->var_count_ = paVarCount;
 }
 
+void module::set_derivatives(const std::vector<std::vector<double>>* paDeriv) {
+    if (paDeriv == nullptr) {
+        throw std::invalid_argument("Cannot set derivatives from a null pointer");
+    }
+    if (this->derivatives_ == nullptr) {
+        this->derivatives_ = new std::vector<std::vector<double>>();
+    }
+    *this->derivatives_ = *paDeriv;
+}
+
+void module::set_son_derivatives(const std::vector<std::vector<double>>* paDeriv) {
+    if (paDeriv == nullptr) {
+        throw std::invalid_argument("Cannot set son derivatives from a null pointer");
+    }
+    if (this->son_derivatives_ == nullptr) {
+        this->son_derivatives_ = new std::vector<std::vector<double>>();
+    }
+    *this->son_derivatives_ = *paDeriv;
+}
+
 void module::set_sons_reliability(size_t sonPosition, double sonRel, int state) {
     if (sonPosition < this->sons_reliability_->size()) {
         // std::cout << sonRel << std::endl;
@@ -137,6 +174,9 @@ void module::set_my_reliability(std::vector<double>* rel) {
 
 std::string module::get_derivatives_as_string() {
     std::string result;
+    if (this->derivatives_ == nullptr) {
+        return result;
+    }
     for (const auto& deriv : *this->derivatives_) {
         for (double val : deriv) {
             result += std::to_string(val) + " ";
@@ -148,6 +188,9 @@ std::string module::get_derivatives_as_string() {
 
 std::string module::get_son_derivatives_as_string() {
     std::string result;
+    if (this->son_derivatives_ == nullptr) {
+        return result;
+    }
     for (const auto& deriv : *this->son_derivatives_) {
         for (double val : deriv) {
             result += std::to_string(val) + " ";
@@ -155,6 +198,56 @@ std::string module::get_son_derivatives_as_string() {
         result += "\n";
     }
     return result;
+}
+
+std::string module::get_derivative_matrix() {
+    std::ostringstream result;
+    if (this->derivatives_ == nullptr) {
+        return result.str();
+    }
+
+    size_t column_count = 0;
+    for (const auto& row : *this->derivatives_) {
+        if (row.size() > column_count) {
+            column_count = row.size();
+        }
+    }
+
+    const auto format_value = [](double value) {
+        std::ostringstream value_stream;
+        value_stream << std::setprecision(std::numeric_limits<double>::max_digits10) << value;
+        return value_stream.str();
+    };
+
+    size_t cell_width = std::string("S/C").size();
+    for (size_t j = 0; j < column_count; ++j) {
+        cell_width = std::max(cell_width, std::to_string(j).size());
+    }
+    for (size_t i = 0; i < this->derivatives_->size(); ++i) {
+        cell_width = std::max(cell_width, std::to_string(i).size());
+        for (const double value : this->derivatives_->at(i)) {
+            cell_width = std::max(cell_width, format_value(value).size());
+        }
+    }
+
+    result << "S: " << this->derivatives_->size() << ", C: " << column_count << "\n";
+    result << std::setw(cell_width) << "S/C";
+    for (size_t j = 0; j < column_count; ++j) {
+        result << " | " << std::setw(cell_width) << j;
+    }
+    result << "\n";
+
+    for (size_t i = 0; i < this->derivatives_->size(); ++i) {
+        result << std::setw(cell_width) << i;
+        for (size_t j = 0; j < column_count; ++j) {
+            result << " | " << std::setw(cell_width);
+            if (j < this->derivatives_->at(i).size()) {
+                result << format_value(this->derivatives_->at(i).at(j));
+            }
+        }
+        result << "\n";
+    }
+    return result.str();
 }
 
 void module::print_sons_reliabilities() {
@@ -179,10 +272,17 @@ void module::print_all() {
     std::cout << "Function column: " << this->function_column_ << std::endl;
     std::cout << "Start index: " << this->start_index_ << std::endl;
     std::cout << "End index: " << this->end_index_ << std::endl;
-    // std::cout << "My reliabilities:\n";
-    // print_reliabilities();
-    // std::cout << "Sons reliabilities: \n";
-    // print_sons_reliabilities();
+    std::cout << "States: " << this->states_ << std::endl;
+    std::cout << "My reliabilities:\n";
+    print_reliabilities();
+    std::cout << "Sons reliabilities: \n";
+    print_sons_reliabilities();
+    std::cout << "Sons map: \n";
+    print_son_map();
+    std::cout << "Derivatives: \n";
+    std::cout << get_derivatives_as_string() << std::endl;
+    std::cout << "Son derivatives: \n";
+    std::cout << get_son_derivatives_as_string() << std::endl;
 }
 
 void module::print_reliabilities() {

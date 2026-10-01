@@ -4,11 +4,16 @@
 #include <cstddef>
 #include <cstdio>
 #include <cstdlib>
+#include <iomanip>
 #include <iostream>
 #include <libteddy/inc/io.hpp>
+#include <limits>
 #include <mpi.h>
+#include <numeric>
 #include <ostream>
 #include <sstream>
+#include <stdexcept>
+#include <vector>
 
 int is_binary_pla(const std::string& path, int* states, std::vector<int>* domains) {
     std::ifstream file(path);
@@ -73,6 +78,8 @@ bool divide_evenly(std::vector<module_info*>* modules, int nodeCount) {
     int nodeUsed = 0;
 
     for (module_info* mod : *modules) {
+        std::cout << "Assigning module " << mod->get_name() << " to process " << nodeUsed
+                  << std::endl;
         mod->set_assigned_process(nodeUsed);
         nodeUsed = (nodeUsed + 1) % nodeCount;
     }
@@ -107,6 +114,8 @@ bool divide_by_var_count(std::vector<module_info*>* modules, int nodeCount) {
             }
         }
         nodeVarCount.at(nodeUsed) += modVarCount;
+        std::cout << "Assigning module " << mod->get_name() << " with " << modVarCount
+                  << " variables to process " << nodeUsed << std::endl;
         mod->set_assigned_process(nodeUsed);
     }
 
@@ -257,6 +266,8 @@ bool divide_for_merging(std::vector<module_info*>* modules, int nodeCount) {
             mod->set_assigned_process(mod->get_parent()->get_assigned_process());
             continue;
         }
+        std::cout << "Assigning module " << mod->get_name() << " to process " << nodeUsed
+                  << std::endl;
         mod->set_assigned_process(nodeUsed);
         nodeUsed = (nodeUsed + 1) % nodeCount;
     }
@@ -478,15 +489,58 @@ void calculate_logical_derivative(mpi_manager* manager, const std::string& input
             std::string const& path = mod->get_path();
             int pla_type = is_binary_pla(path, nullptr, nullptr);
             std::vector<double> ps;
+            int states = mod->get_states();
+            int sonStates = mod->get_son_rel_count()->at(variable);
+            std::vector<std::vector<double>>* mod_derivatives = mod->get_derivatives();
+            std::vector<double> son_derivatives_averages;
+            std::cout << "Calculating derivative for module " << mod->get_name() << " variable "
+                      << variable << std::endl;
+
+            if (mod->get_son_derivatives() && ! mod->get_son_derivatives()->empty()) {
+                for (int componentState = 0; componentState < sonStates - 1; componentState++) {
+                    son_derivatives_averages.push_back(
+                        accumulate(mod->get_son_derivatives()->at(componentState).begin(),
+                                   mod->get_son_derivatives()->at(componentState).end(), 0.0) /
+                        mod->get_son_derivatives()->at(componentState).size());
+                }
+            }
+
             if (pla_type == 1) {
                 std::optional<teddy::pla_file_binary> file = teddy::load_binary_pla(path, nullptr);
                 teddy::bss_manager bssManager(file->input_count_, mod->get_var_count() * 1000);
                 teddy::bdd_manager::diagram_t f =
                     teddy::io::from_pla(bssManager, *file)[mod->get_function_column()];
-                teddy::bdd_manager::diagram_t df =
-                    bssManager.dpld({variable, 0, 1}, teddy::dpld::basic(0, 1), f);
-                ps = bssManager.calculate_probabilities(*mod->get_sons_reliability(), df);
-                deriv = ps.at(1);
+                for (int systemState = 0; systemState < states - 1; systemState++) {
+                    std::cout << "Calculating derivative for system state " << systemState
+                              << std::endl;
+                    mod_derivatives->at(systemState) = std::vector<double>(sonStates - 1);
+                    for (int componentState = 0; componentState < sonStates - 1; componentState++) {
+                        std::cout << "Calculating derivative for component state " << componentState
+                                  << std::endl;
+                        teddy::bdd_manager::diagram_t df =
+                            bssManager.dpld({variable, componentState, componentState + 1},
+                                            teddy::dpld::basic(systemState, systemState + 1), f);
+                        ps = bssManager.calculate_probabilities(*mod->get_sons_reliability(), df);
+                        std::cout << "Derivative for system state " << systemState
+                                  << " component state " << componentState << ": " << ps.at(1)
+                                  << std::endl;
+                        deriv = ps.at(1);
+                        std::cout << "vector size: " << mod_derivatives->size() << " x "
+                                  << mod_derivatives->at(systemState).size() << std::endl;
+                        mod_derivatives->at(systemState).at(componentState) = deriv;
+                    }
+                    std::cout << "got out of derivative for system state " << systemState
+                              << std::endl;
+                    if (mod->get_son_derivatives() && ! mod->get_son_derivatives()->empty()) {
+                        std::cout << "Averaging derivatives for system state " << systemState
+                                  << std::endl;
+                        for (int componentState = 0; componentState < sonStates - 1;
+                             componentState++) {
+                            mod_derivatives->at(systemState).at(componentState) *=
+                                son_derivatives_averages.at(componentState);
+                        }
+                    }
+                }
             } else if (pla_type == 0) {
                 std::optional<teddy::pla_file_mvl> file = teddy::load_mvl_pla(path, nullptr);
 
@@ -515,10 +569,12 @@ void calculate_logical_derivative(mpi_manager* manager, const std::string& input
 
             std::cout << "Derivatives are not yet implemented.\n";
 
-            // if (deriv < 0) {
-            //     std::cout << "Error calculating derivative.\n";
-            //     return;
-            // }
+            if (deriv < 0) {
+                std::cout << "Error calculating derivative.\n";
+                return;
+            }
+
+            mod->print_all();
 
             // if (mod->get_son_derivative() >= 0) {
             //     deriv *= mod->get_son_derivative();
@@ -562,8 +618,8 @@ void calculate_logical_derivative(mpi_manager* manager, const std::string& input
                 std::cout << "Invalid variable index\n";
                 return;
             }
-            // std::cout << "Structural importance of variable " << state << ": "
-            //           << mod->get_derivative() << std::endl;
+            std::cout << "Structural importances of variable " << state << ": "
+                      << mod->get_derivative_matrix() << std::endl;
         } else {
             std::cout << "Module not found.\n";
         }
@@ -572,56 +628,89 @@ void calculate_logical_derivative(mpi_manager* manager, const std::string& input
 
 std::string serialize_derivatives(mpi_manager* manager, const std::string& inputString) {
     module* mod = manager->get_my_modules().at(inputString);
-    std::string result;
+    if (! mod) {
+        std::cout << "Module not found.\n";
+        return "ABORT";
+    }
 
-    // if (mod) {
-    //     if (mod->get_derivative() < 0.0) {
-    //         result = "A ";
-    //         result += std::to_string(mod->get_position());
-    //         for (double rel : *mod->get_my_reliabilities()) {
-    //             result += " " + std::to_string(rel);
-    //         }
-    //     } else {
-    //         result = "D ";
-    //         result += std::to_string(mod->get_position()) + " ";
-    //         result += std::to_string(mod->get_derivative());
-    //     }
-    // } else {
-    //     std::cout << "Module not found.\n";
-    //     result = "ABORT";
-    // }
+    std::ostringstream result;
+    if (mod->get_derivatives() == nullptr) {
+        result << "A " << mod->get_position();
+        for (double rel : *mod->get_my_reliabilities()) {
+            result << ' ' << std::setprecision(std::numeric_limits<double>::max_digits10) << rel;
+        }
+        return result.str();
+    }
 
-    return result;
+    result << "D " << mod->get_position() << ' ' << mod->get_derivatives()->size();
+    result << std::setprecision(std::numeric_limits<double>::max_digits10);
+    for (const auto& row : *mod->get_derivatives()) {
+        result << ' ' << row.size();
+        for (double value : row) {
+            result << ' ' << value;
+        }
+    }
+    return result.str();
 }
 
 void deserialize_derivatives(mpi_manager* manager, const std::string& parameter,
                              const std::string& inputString) {
     module* mod = manager->get_my_modules().at(parameter);
 
-    // if (! mod) {
-    //     std::cout << "Module not found.\n";
-    //     return;
-    // }
+    if (! mod) {
+        std::cout << "Module not found.\n";
+        return;
+    }
 
-    // std::istringstream line(inputString);
-    // std::string resultType;
-    // line >> resultType;
+    std::istringstream line(inputString);
+    std::string resultType;
+    int sonPosition;
+    if (! (line >> resultType >> sonPosition)) {
+        throw std::invalid_argument("Invalid serialized derivatives: missing type or position");
+    }
 
-    // if (resultType == "A") {
-    //     int sonPosition;
-    //     line >> sonPosition;
-    //     std::vector<double> sonRels;
-    //     double temp;
-    //     while (line >> temp) {
-    //         sonRels.push_back(temp);
-    //     }
-    //     mod->set_sons_reliability(sonPosition, std::move(sonRels));
-    // } else if (resultType == "D") {
-    //     int sonPosition;
-    //     line >> sonPosition;
-    //     mod->set_son_position(sonPosition);
-    //     double deriv;
-    //     line >> deriv;
-    //     mod->set_son_derivative(deriv);
-    // }
+    if (resultType == "A") {
+        std::vector<double> sonRels;
+        double temp;
+        while (line >> temp) {
+            sonRels.push_back(temp);
+        }
+        if (! line.eof()) {
+            throw std::invalid_argument("Invalid serialized reliabilities");
+        }
+        mod->set_sons_reliability(sonPosition, std::move(sonRels));
+    } else if (resultType == "D") {
+        size_t rowCount;
+        if (! (line >> rowCount)) {
+            throw std::invalid_argument("Invalid serialized derivatives: missing row count");
+        }
+
+        std::vector<std::vector<double>> derivatives;
+        derivatives.reserve(rowCount);
+        for (size_t i = 0; i < rowCount; ++i) {
+            size_t columnCount;
+            if (! (line >> columnCount)) {
+                throw std::invalid_argument("Invalid serialized derivatives: missing row size");
+            }
+            std::vector<double> row;
+            row.reserve(columnCount);
+            for (size_t j = 0; j < columnCount; ++j) {
+                double value;
+                if (! (line >> value)) {
+                    throw std::invalid_argument("Invalid serialized derivatives: missing value");
+                }
+                row.push_back(value);
+            }
+            derivatives.push_back(std::move(row));
+        }
+        std::string trailingData;
+        if (line >> trailingData) {
+            throw std::invalid_argument("Invalid serialized derivatives: unexpected trailing data");
+        }
+
+        mod->set_son_position(sonPosition);
+        mod->set_son_derivatives(&derivatives);
+    } else {
+        throw std::invalid_argument("Invalid serialized derivatives: unknown data type");
+    }
 }
