@@ -4,6 +4,27 @@
 #include <unordered_map>
 #include <vector>
 
+using Transition = std::pair<int, int>; // (from, to), from > to
+
+struct DerivativeTable {
+    std::vector<Transition> rows; // system transitions (structure 1)
+    std::vector<Transition> cols; // component transitions (structure 2)
+    std::vector<std::vector<double>> values; // values[r][c]
+
+    void init(std::vector<Transition> r, std::vector<Transition> c) {
+        rows = std::move(r);
+        cols = std::move(c);
+        values.assign(rows.size(), std::vector<double>(cols.size(), 0.0));
+    }
+
+    // lookup by the actual pair, e.g. get({1,0}, {2,0})
+    double& at(Transition r, Transition c) {
+        size_t ri = std::find(rows.begin(), rows.end(), r) - rows.begin();
+        size_t ci = std::find(cols.begin(), cols.end(), c) - cols.begin();
+        return values.at(ri).at(ci); // .at() throws if the pair doesn't exist
+    }
+};
+
 /**
  * @brief Class module describes a module in config file
  *
@@ -21,8 +42,9 @@ class module {
     int start_index_ = 0;
     int end_index_ = 0;
     int son_position_ = -1;
-    std::vector<std::vector<double>>* derivatives_ = nullptr;
-    std::vector<std::vector<double>>* son_derivatives_ = nullptr;
+    bool is_root_ = false;
+    DerivativeTable* derivatives_ = nullptr;
+    DerivativeTable* son_derivatives_ = nullptr;
     std::vector<double>* my_reliabilities_ = nullptr;
     std::vector<std::vector<double>>* sons_reliability_ = nullptr;
     std::vector<int>* sons_rel_count_ = nullptr;
@@ -47,9 +69,10 @@ class module {
     int get_son_count() { return this->son_count_; }
     int get_start_index() { return this->start_index_; }
     int get_end_index() { return this->end_index_; }
-    std::vector<std::vector<double>>* get_derivatives() { return this->derivatives_; }
-    std::vector<std::vector<double>>* get_son_derivatives() { return this->son_derivatives_; }
+    DerivativeTable* get_derivatives() { return this->derivatives_; }
+    DerivativeTable* get_son_derivatives() { return this->son_derivatives_; }
     int get_son_position() { return this->son_position_; }
+    bool get_is_root() { return this->is_root_; }
     std::string get_derivatives_as_string();
     std::string get_son_derivatives_as_string();
     std::string get_derivative_matrix();
@@ -69,8 +92,8 @@ class module {
     void set_position(int paPosition) { this->position_ = paPosition; }
     void set_var_count(int paVarCount);
     void set_function_column(int paColumn) { this->function_column_ = paColumn; }
-    void set_derivatives(const std::vector<std::vector<double>>* paDeriv);
-    void set_son_derivatives(const std::vector<std::vector<double>>* paDeriv);
+    void set_derivatives(const DerivativeTable* paDeriv);
+    void set_son_derivatives(const DerivativeTable* paDeriv);
 
     void set_sons_reliability(size_t sonPosition, std::vector<double>&& sonRel);
     void set_sons_reliability(std::vector<int>* domains);

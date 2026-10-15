@@ -58,9 +58,10 @@ void module_info::add_offset_start_and_end(int additionalVars) {
 
 std::string module_info::to_string() const {
     std::stringstream data;
+    int isRoot = ! this->parent_ ? 1 : 0;
     data << this->name_ << " " << this->pla_path_ << " " << this->function_column_ << " "
          << this->position_ << " " << this->states_ << " " << this->get_var_count() << " "
-         << this->offset_start_ << " " << this->offset_end_;
+         << this->offset_start_ << " " << this->offset_end_ << " " << isRoot;
     for (int state : this->sons_states_) {
         data << " ";
         data << state;

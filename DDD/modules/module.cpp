@@ -14,8 +14,8 @@ module::module(const std::string& paName, int paStates) {
     this->sons_reliability_ = new std::vector<std::vector<double>>();
     this->my_reliabilities_ = new std::vector<double>(this->states_);
     this->sons_map_ = new std::unordered_map<std::string, int>();
-    this->derivatives_ = new std::vector<std::vector<double>>(this->states_ - 1);
-    this->son_derivatives_ = new std::vector<std::vector<double>>();
+    this->derivatives_ = new DerivativeTable();
+    this->son_derivatives_ = new DerivativeTable();
 }
 
 module::~module() {
@@ -47,15 +47,15 @@ module::module(std::string infoToString) {
     size_t afterPathIndex = plaIndex + 5; // ".pla" + space
     std::stringstream fields(infoToString.substr(afterPathIndex));
     fields >> this->function_column_ >> this->position_ >> this->states_ >> this->var_count_ >>
-        this->start_index_ >> this->end_index_;
+        this->start_index_ >> this->end_index_ >> this->is_root_;
 
     // Initialize reliabilities
     this->my_reliabilities_ =
         new std::vector<double>(this->states_, 1.0 / this->states_); // Default reliability
     this->sons_reliability_ = new std::vector<std::vector<double>>(this->var_count_);
     this->sons_rel_count_ = new std::vector<int>(this->var_count_);
-    this->derivatives_ = new std::vector<std::vector<double>>(this->states_ - 1);
-    this->son_derivatives_ = new std::vector<std::vector<double>>();
+    this->derivatives_ = new DerivativeTable();
+    this->son_derivatives_ = new DerivativeTable();
 
     // Reading son states into sons_reliability_
     for (int i = 0; i < this->var_count_; ++i) {
@@ -120,22 +120,22 @@ void module::set_var_count(int paVarCount) {
     this->var_count_ = paVarCount;
 }
 
-void module::set_derivatives(const std::vector<std::vector<double>>* paDeriv) {
+void module::set_derivatives(const DerivativeTable* paDeriv) {
     if (paDeriv == nullptr) {
         throw std::invalid_argument("Cannot set derivatives from a null pointer");
     }
     if (this->derivatives_ == nullptr) {
-        this->derivatives_ = new std::vector<std::vector<double>>();
+        this->derivatives_ = new DerivativeTable();
     }
     *this->derivatives_ = *paDeriv;
 }
 
-void module::set_son_derivatives(const std::vector<std::vector<double>>* paDeriv) {
+void module::set_son_derivatives(const DerivativeTable* paDeriv) {
     if (paDeriv == nullptr) {
         throw std::invalid_argument("Cannot set son derivatives from a null pointer");
     }
     if (this->son_derivatives_ == nullptr) {
-        this->son_derivatives_ = new std::vector<std::vector<double>>();
+        this->son_derivatives_ = new DerivativeTable();
     }
     *this->son_derivatives_ = *paDeriv;
 }
@@ -172,13 +172,17 @@ void module::set_my_reliability(std::vector<double>* rel) {
     }
 }
 
-std::string module::get_derivatives_as_string() {
+static std::string transition_label(const Transition& t) {
+    return std::to_string(t.first) + "->" + std::to_string(t.second);
+}
+
+static std::string table_values_as_string(const DerivativeTable* table) {
     std::string result;
-    if (this->derivatives_ == nullptr) {
+    if (table == nullptr) {
         return result;
     }
-    for (const auto& deriv : *this->derivatives_) {
-        for (double val : deriv) {
+    for (const auto& row : table->values) {
+        for (double val : row) {
             result += std::to_string(val) + " ";
         }
         result += "\n";
@@ -186,31 +190,19 @@ std::string module::get_derivatives_as_string() {
     return result;
 }
 
+std::string module::get_derivatives_as_string() {
+    return table_values_as_string(this->derivatives_);
+}
+
 std::string module::get_son_derivatives_as_string() {
-    std::string result;
-    if (this->son_derivatives_ == nullptr) {
-        return result;
-    }
-    for (const auto& deriv : *this->son_derivatives_) {
-        for (double val : deriv) {
-            result += std::to_string(val) + " ";
-        }
-        result += "\n";
-    }
-    return result;
+    return table_values_as_string(this->son_derivatives_);
 }
 
 std::string module::get_derivative_matrix() {
     std::ostringstream result;
-    if (this->derivatives_ == nullptr) {
+    const DerivativeTable* t = this->derivatives_;
+    if (t == nullptr) {
         return result.str();
-    }
-
-    size_t column_count = 0;
-    for (const auto& row : *this->derivatives_) {
-        if (row.size() > column_count) {
-            column_count = row.size();
-        }
     }
 
     const auto format_value = [](double value) {
@@ -219,31 +211,32 @@ std::string module::get_derivative_matrix() {
         return value_stream.str();
     };
 
+    // column width = widest label or value
     size_t cell_width = std::string("S/C").size();
-    for (size_t j = 0; j < column_count; ++j) {
-        cell_width = std::max(cell_width, std::to_string(j).size());
+    for (const auto& c : t->cols) {
+        cell_width = std::max(cell_width, transition_label(c).size());
     }
-    for (size_t i = 0; i < this->derivatives_->size(); ++i) {
-        cell_width = std::max(cell_width, std::to_string(i).size());
-        for (const double value : this->derivatives_->at(i)) {
+    for (size_t i = 0; i < t->rows.size(); ++i) {
+        cell_width = std::max(cell_width, transition_label(t->rows[i]).size());
+        for (double value : t->values.at(i)) {
             cell_width = std::max(cell_width, format_value(value).size());
         }
     }
 
-    result << "S: " << this->derivatives_->size() << ", C: " << column_count << "\n";
+    result << "S: " << t->rows.size() << ", C: " << t->cols.size() << "\n";
+
+    // header row: component transitions
     result << std::setw(cell_width) << "S/C";
-    for (size_t j = 0; j < column_count; ++j) {
-        result << " | " << std::setw(cell_width) << j;
+    for (const auto& c : t->cols) {
+        result << " | " << std::setw(cell_width) << transition_label(c);
     }
     result << "\n";
 
-    for (size_t i = 0; i < this->derivatives_->size(); ++i) {
-        result << std::setw(cell_width) << i;
-        for (size_t j = 0; j < column_count; ++j) {
-            result << " | " << std::setw(cell_width);
-            if (j < this->derivatives_->at(i).size()) {
-                result << format_value(this->derivatives_->at(i).at(j));
-            }
+    // body: system transition label + values
+    for (size_t i = 0; i < t->rows.size(); ++i) {
+        result << std::setw(cell_width) << transition_label(t->rows[i]);
+        for (size_t j = 0; j < t->cols.size(); ++j) {
+            result << " | " << std::setw(cell_width) << format_value(t->values.at(i).at(j));
         }
         result << "\n";
     }
@@ -270,6 +263,8 @@ void module::print_all() {
     std::cout << "Var count: " << this->var_count_ << std::endl;
     std::cout << "Position: " << this->position_ << std::endl;
     std::cout << "Function column: " << this->function_column_ << std::endl;
+    std::cout << "Son count: " << this->son_count_ << std::endl;
+    std::cout << "Is root: " << (this->is_root_ ? "Yes" : "No") << std::endl;
     std::cout << "Start index: " << this->start_index_ << std::endl;
     std::cout << "End index: " << this->end_index_ << std::endl;
     std::cout << "States: " << this->states_ << std::endl;

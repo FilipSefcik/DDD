@@ -491,19 +491,9 @@ void calculate_logical_derivative(mpi_manager* manager, const std::string& input
             std::vector<double> ps;
             int states = mod->get_states();
             int sonStates = mod->get_son_rel_count()->at(variable);
-            std::vector<std::vector<double>>* mod_derivatives = mod->get_derivatives();
-            std::vector<double> son_derivatives_averages;
+            DerivativeTable* mod_derivatives = mod->get_derivatives();
             std::cout << "Calculating derivative for module " << mod->get_name() << " variable "
                       << variable << std::endl;
-
-            if (mod->get_son_derivatives() && ! mod->get_son_derivatives()->empty()) {
-                for (int componentState = 0; componentState < sonStates - 1; componentState++) {
-                    son_derivatives_averages.push_back(
-                        accumulate(mod->get_son_derivatives()->at(componentState).begin(),
-                                   mod->get_son_derivatives()->at(componentState).end(), 0.0) /
-                        mod->get_son_derivatives()->at(componentState).size());
-                }
-            }
 
             if (pla_type == 1) {
                 std::optional<teddy::pla_file_binary> file = teddy::load_binary_pla(path, nullptr);
@@ -531,15 +521,6 @@ void calculate_logical_derivative(mpi_manager* manager, const std::string& input
                     }
                     std::cout << "got out of derivative for system state " << systemState
                               << std::endl;
-                    if (mod->get_son_derivatives() && ! mod->get_son_derivatives()->empty()) {
-                        std::cout << "Averaging derivatives for system state " << systemState
-                                  << std::endl;
-                        for (int componentState = 0; componentState < sonStates - 1;
-                             componentState++) {
-                            mod_derivatives->at(systemState).at(componentState) *=
-                                son_derivatives_averages.at(componentState);
-                        }
-                    }
                 }
             } else if (pla_type == 0) {
                 std::optional<teddy::pla_file_mvl> file = teddy::load_mvl_pla(path, nullptr);
@@ -634,18 +615,25 @@ std::string serialize_derivatives(mpi_manager* manager, const std::string& input
     }
 
     std::ostringstream result;
-    if (mod->get_derivatives() == nullptr) {
+    result << std::setprecision(std::numeric_limits<double>::max_digits10);
+
+    const DerivativeTable* table = mod->get_derivatives();
+    if (table == nullptr) {
         result << "A " << mod->get_position();
         for (double rel : *mod->get_my_reliabilities()) {
-            result << ' ' << std::setprecision(std::numeric_limits<double>::max_digits10) << rel;
+            result << ' ' << rel;
         }
         return result.str();
     }
 
-    result << "D " << mod->get_position() << ' ' << mod->get_derivatives()->size();
-    result << std::setprecision(std::numeric_limits<double>::max_digits10);
-    for (const auto& row : *mod->get_derivatives()) {
-        result << ' ' << row.size();
+    result << "D " << mod->get_position() << ' ' << table->rows.size() << ' ' << table->cols.size();
+    for (const auto& r : table->rows) {
+        result << ' ' << r.first << ' ' << r.second;
+    }
+    for (const auto& c : table->cols) {
+        result << ' ' << c.first << ' ' << c.second;
+    }
+    for (const auto& row : table->values) {
         for (double value : row) {
             result << ' ' << value;
         }
@@ -680,36 +668,43 @@ void deserialize_derivatives(mpi_manager* manager, const std::string& parameter,
         }
         mod->set_sons_reliability(sonPosition, std::move(sonRels));
     } else if (resultType == "D") {
-        size_t rowCount;
-        if (! (line >> rowCount)) {
-            throw std::invalid_argument("Invalid serialized derivatives: missing row count");
+        size_t rowCount, colCount;
+        if (! (line >> rowCount >> colCount)) {
+            throw std::invalid_argument("Invalid serialized derivatives: missing table size");
         }
 
-        std::vector<std::vector<double>> derivatives;
-        derivatives.reserve(rowCount);
-        for (size_t i = 0; i < rowCount; ++i) {
-            size_t columnCount;
-            if (! (line >> columnCount)) {
-                throw std::invalid_argument("Invalid serialized derivatives: missing row size");
+        const auto read_transitions = [&line](size_t count) {
+            std::vector<Transition> out;
+            out.reserve(count);
+            for (size_t i = 0; i < count; ++i) {
+                Transition t;
+                if (! (line >> t.first >> t.second)) {
+                    throw std::invalid_argument(
+                        "Invalid serialized derivatives: missing transition");
+                }
+                out.push_back(t);
             }
-            std::vector<double> row;
-            row.reserve(columnCount);
-            for (size_t j = 0; j < columnCount; ++j) {
-                double value;
-                if (! (line >> value)) {
+            return out;
+        };
+
+        DerivativeTable table;
+        table.init(read_transitions(rowCount), read_transitions(colCount));
+
+        for (size_t i = 0; i < rowCount; ++i) {
+            for (size_t j = 0; j < colCount; ++j) {
+                if (! (line >> table.values[i][j])) {
                     throw std::invalid_argument("Invalid serialized derivatives: missing value");
                 }
-                row.push_back(value);
             }
-            derivatives.push_back(std::move(row));
         }
+
         std::string trailingData;
         if (line >> trailingData) {
             throw std::invalid_argument("Invalid serialized derivatives: unexpected trailing data");
         }
 
         mod->set_son_position(sonPosition);
-        mod->set_son_derivatives(&derivatives);
+        mod->set_son_derivatives(&table);
     } else {
         throw std::invalid_argument("Invalid serialized derivatives: unknown data type");
     }
