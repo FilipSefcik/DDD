@@ -9,7 +9,6 @@
 #include <libteddy/inc/io.hpp>
 #include <limits>
 #include <mpi.h>
-#include <numeric>
 #include <ostream>
 #include <sstream>
 #include <stdexcept>
@@ -492,36 +491,60 @@ void calculate_logical_derivative(mpi_manager* manager, const std::string& input
             int states = mod->get_states();
             int sonStates = mod->get_son_rel_count()->at(variable);
             DerivativeTable* mod_derivatives = mod->get_derivatives();
-            std::cout << "Calculating derivative for module " << mod->get_name() << " variable "
-                      << variable << std::endl;
+
+            if (mod_derivatives->is_empty()) {
+                mod_derivatives->init(states, mod->get_is_root(), sonStates, mod->get_is_leaf());
+            }
+
+            std::cout << "Calculating derivative for module " << mod->get_name() << std::endl;
 
             if (pla_type == 1) {
                 std::optional<teddy::pla_file_binary> file = teddy::load_binary_pla(path, nullptr);
                 teddy::bss_manager bssManager(file->input_count_, mod->get_var_count() * 1000);
                 teddy::bdd_manager::diagram_t f =
                     teddy::io::from_pla(bssManager, *file)[mod->get_function_column()];
-                for (int systemState = 0; systemState < states - 1; systemState++) {
-                    std::cout << "Calculating derivative for system state " << systemState
+
+                for (auto systemTransition : mod_derivatives->rows) {
+                    std::cout << "Calculating derivative for system transition ("
+                              << systemTransition.first << ", " << systemTransition.second << ")"
                               << std::endl;
-                    mod_derivatives->at(systemState) = std::vector<double>(sonStates - 1);
-                    for (int componentState = 0; componentState < sonStates - 1; componentState++) {
-                        std::cout << "Calculating derivative for component state " << componentState
-                                  << std::endl;
-                        teddy::bdd_manager::diagram_t df =
-                            bssManager.dpld({variable, componentState, componentState + 1},
-                                            teddy::dpld::basic(systemState, systemState + 1), f);
+                    for (auto componentTransition : mod_derivatives->cols) {
+                        std::cout << "Calculating derivative for component transition ("
+                                  << componentTransition.first << ", " << componentTransition.second
+                                  << ")" << std::endl;
+                        teddy::bdd_manager::diagram_t df = bssManager.dpld(
+                            {variable, componentTransition.first, componentTransition.second},
+                            teddy::dpld::basic(systemTransition.first, systemTransition.second), f);
                         ps = bssManager.calculate_probabilities(*mod->get_sons_reliability(), df);
-                        std::cout << "Derivative for system state " << systemState
-                                  << " component state " << componentState << ": " << ps.at(1)
-                                  << std::endl;
                         deriv = ps.at(1);
-                        std::cout << "vector size: " << mod_derivatives->size() << " x "
-                                  << mod_derivatives->at(systemState).size() << std::endl;
-                        mod_derivatives->at(systemState).at(componentState) = deriv;
+                        mod_derivatives->at(systemTransition, componentTransition) = deriv;
                     }
-                    std::cout << "got out of derivative for system state " << systemState
-                              << std::endl;
                 }
+
+                // for (int systemState = 0; systemState < states - 1; systemState++) {
+                //     std::cout << "Calculating derivative for system state " << systemState
+                //               << std::endl;
+                //     mod_derivatives->at(systemState) = std::vector<double>(sonStates - 1);
+                //     for (int componentState = 0; componentState < sonStates - 1;
+                //     componentState++) {
+                //         std::cout << "Calculating derivative for component state " <<
+                //         componentState
+                //                   << std::endl;
+                //         teddy::bdd_manager::diagram_t df =
+                //             bssManager.dpld({variable, componentState, componentState + 1},
+                //                             teddy::dpld::basic(systemState, systemState + 1), f);
+                //         ps = bssManager.calculate_probabilities(*mod->get_sons_reliability(),
+                //         df); std::cout << "Derivative for system state " << systemState
+                //                   << " component state " << componentState << ": " << ps.at(1)
+                //                   << std::endl;
+                //         deriv = ps.at(1);
+                //         std::cout << "vector size: " << mod_derivatives->size() << " x "
+                //                   << mod_derivatives->at(systemState).size() << std::endl;
+                //         mod_derivatives->at(systemState).at(componentState) = deriv;
+                //     }
+                //     std::cout << "got out of derivative for system state " << systemState
+                //               << std::endl;
+                // }
             } else if (pla_type == 0) {
                 std::optional<teddy::pla_file_mvl> file = teddy::load_mvl_pla(path, nullptr);
 
@@ -539,10 +562,27 @@ void calculate_logical_derivative(mpi_manager* manager, const std::string& input
                 //     std::cout << "Domain " << i << ": " << file->domains_.at(i) << std::endl;
                 // }
                 teddy::imss_manager::diagram_t f = teddy::io::from_pla(imssManager, *file);
-                teddy::imss_manager::diagram_t df =
-                    imssManager.dpld({variable, 0, 1}, teddy::dpld::basic(0, 1), f);
-                ps = imssManager.calculate_probabilities(*mod->get_sons_reliability(), df);
-                deriv = ps.at(1);
+
+                for (auto systemTransition : mod_derivatives->rows) {
+                    std::cout << "Calculating derivative for system transition ("
+                              << systemTransition.first << ", " << systemTransition.second << ")"
+                              << std::endl;
+                    for (auto componentTransition : mod_derivatives->cols) {
+                        std::cout << "Calculating derivative for component transition ("
+                                  << componentTransition.first << ", " << componentTransition.second
+                                  << ")" << std::endl;
+                        teddy::imss_manager::diagram_t df = imssManager.dpld(
+                            {variable, componentTransition.first, componentTransition.second},
+                            teddy::dpld::basic(systemTransition.first, systemTransition.second), f);
+                        ps = imssManager.calculate_probabilities(*mod->get_sons_reliability(), df);
+                        deriv = ps.at(1);
+                        mod_derivatives->at(systemTransition, componentTransition) = deriv;
+                    }
+                }
+                // teddy::imss_manager::diagram_t df =
+                //     imssManager.dpld({variable, 0, 1}, teddy::dpld::basic(0, 1), f);
+                // ps = imssManager.calculate_probabilities(*mod->get_sons_reliability(), df);
+                // deriv = ps.at(1);
             } else {
                 std::cout << "Invalid PLA file.\n";
                 return;
@@ -626,18 +666,7 @@ std::string serialize_derivatives(mpi_manager* manager, const std::string& input
         return result.str();
     }
 
-    result << "D " << mod->get_position() << ' ' << table->rows.size() << ' ' << table->cols.size();
-    for (const auto& r : table->rows) {
-        result << ' ' << r.first << ' ' << r.second;
-    }
-    for (const auto& c : table->cols) {
-        result << ' ' << c.first << ' ' << c.second;
-    }
-    for (const auto& row : table->values) {
-        for (double value : row) {
-            result << ' ' << value;
-        }
-    }
+    result << "D " << mod->get_position() << ' ' << table->to_string();
     return result.str();
 }
 
@@ -668,36 +697,7 @@ void deserialize_derivatives(mpi_manager* manager, const std::string& parameter,
         }
         mod->set_sons_reliability(sonPosition, std::move(sonRels));
     } else if (resultType == "D") {
-        size_t rowCount, colCount;
-        if (! (line >> rowCount >> colCount)) {
-            throw std::invalid_argument("Invalid serialized derivatives: missing table size");
-        }
-
-        const auto read_transitions = [&line](size_t count) {
-            std::vector<Transition> out;
-            out.reserve(count);
-            for (size_t i = 0; i < count; ++i) {
-                Transition t;
-                if (! (line >> t.first >> t.second)) {
-                    throw std::invalid_argument(
-                        "Invalid serialized derivatives: missing transition");
-                }
-                out.push_back(t);
-            }
-            return out;
-        };
-
-        DerivativeTable table;
-        table.init(read_transitions(rowCount), read_transitions(colCount));
-
-        for (size_t i = 0; i < rowCount; ++i) {
-            for (size_t j = 0; j < colCount; ++j) {
-                if (! (line >> table.values[i][j])) {
-                    throw std::invalid_argument("Invalid serialized derivatives: missing value");
-                }
-            }
-        }
-
+        DerivativeTable table = DerivativeTable::read(line);
         std::string trailingData;
         if (line >> trailingData) {
             throw std::invalid_argument("Invalid serialized derivatives: unexpected trailing data");

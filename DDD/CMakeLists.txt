@@ -17,6 +17,8 @@ add_executable(
     utils/callbacks.cpp
     utils/mpi_communicator.hpp
     utils/mpi_communicator.cpp
+    utils/derivative_table.hpp
+    utils/derivative_table.cpp
     ddd_core/ddd.hpp
     ddd_core/ddd.cpp
 )

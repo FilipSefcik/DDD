@@ -1,29 +1,9 @@
 #pragma once
+#include "../utils/derivative_table.hpp"
 #include "pla_function.hpp"
 #include <string>
 #include <unordered_map>
 #include <vector>
-
-using Transition = std::pair<int, int>; // (from, to), from > to
-
-struct DerivativeTable {
-    std::vector<Transition> rows; // system transitions (structure 1)
-    std::vector<Transition> cols; // component transitions (structure 2)
-    std::vector<std::vector<double>> values; // values[r][c]
-
-    void init(std::vector<Transition> r, std::vector<Transition> c) {
-        rows = std::move(r);
-        cols = std::move(c);
-        values.assign(rows.size(), std::vector<double>(cols.size(), 0.0));
-    }
-
-    // lookup by the actual pair, e.g. get({1,0}, {2,0})
-    double& at(Transition r, Transition c) {
-        size_t ri = std::find(rows.begin(), rows.end(), r) - rows.begin();
-        size_t ci = std::find(cols.begin(), cols.end(), c) - cols.begin();
-        return values.at(ri).at(ci); // .at() throws if the pair doesn't exist
-    }
-};
 
 /**
  * @brief Class module describes a module in config file
@@ -73,6 +53,7 @@ class module {
     DerivativeTable* get_son_derivatives() { return this->son_derivatives_; }
     int get_son_position() { return this->son_position_; }
     bool get_is_root() { return this->is_root_; }
+    bool get_is_leaf() { return this->son_count_ == 0; }
     std::string get_derivatives_as_string();
     std::string get_son_derivatives_as_string();
     std::string get_derivative_matrix();
