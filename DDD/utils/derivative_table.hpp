@@ -48,6 +48,14 @@ struct DerivativeTable {
     // Parses a whole string; trailing data is an error.
     static DerivativeTable from_string(const std::string& s);
 
+    // ---------- operations ----------
+
+    // Chain multiplication: this (M1 x M2) * other (M2 x X0) -> (M1 x X0).
+    // The columns of this must be the same set of transitions as the rows of other
+    // (same variable: component in the first table, system in the second).
+    // Throws std::invalid_argument if they don't match.
+    DerivativeTable multiply(const DerivativeTable& other) const;
+
   private:
     size_t row_index(const Transition& r) const;
     size_t col_index(const Transition& c) const;

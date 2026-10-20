@@ -597,6 +597,11 @@ void calculate_logical_derivative(mpi_manager* manager, const std::string& input
 
             mod->print_all();
 
+            if (mod->get_son_derivatives() && ! mod->get_son_derivatives()->is_empty()) {
+                DerivativeTable result = mod_derivatives->multiply(*mod->get_son_derivatives());
+                mod->set_derivatives(&result);
+            }
+
             // if (mod->get_son_derivative() >= 0) {
             //     deriv *= mod->get_son_derivative();
             // }

@@ -117,3 +117,33 @@ size_t DerivativeTable::col_index(const Transition& c) const {
         throw std::out_of_range("DerivativeTable: column pair not found");
     return static_cast<size_t>(it - cols.begin());
 }
+
+DerivativeTable DerivativeTable::multiply(const DerivativeTable& other) const {
+    if (cols.size() != other.rows.size())
+        throw std::invalid_argument(
+            "DerivativeTable::multiply: component transitions of the first table do not match "
+            "system transitions of the second");
+
+    // For each column k of this, find the row of other with the same transition.
+    std::vector<size_t> match(cols.size());
+    for (size_t k = 0; k < cols.size(); ++k) {
+        auto it = std::find(other.rows.begin(), other.rows.end(), cols[k]);
+        if (it == other.rows.end())
+            throw std::invalid_argument(
+                "DerivativeTable::multiply: transition " + std::to_string(cols[k].first) + "->" +
+                std::to_string(cols[k].second) + " is missing in the second table");
+        match[k] = static_cast<size_t>(it - other.rows.begin());
+    }
+
+    DerivativeTable result;
+    result.init(rows, other.cols); // zero-filled: system of first x component of second
+
+    for (size_t i = 0; i < rows.size(); ++i)
+        for (size_t j = 0; j < other.cols.size(); ++j) {
+            double sum = 0.0;
+            for (size_t k = 0; k < cols.size(); ++k)
+                sum += values[i][k] * other.values[match[k]][j];
+            result.values[i][j] = sum;
+        }
+    return result;
+}
