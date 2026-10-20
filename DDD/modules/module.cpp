@@ -47,7 +47,9 @@ module::module(std::string infoToString) {
     size_t afterPathIndex = plaIndex + 5; // ".pla" + space
     std::stringstream fields(infoToString.substr(afterPathIndex));
     fields >> this->function_column_ >> this->position_ >> this->states_ >> this->var_count_ >>
-        this->start_index_ >> this->end_index_ >> this->is_root_;
+        this->start_index_ >> this->end_index_ >> this->is_root_ >> this->is_derivative_leaf_;
+
+    std::cout << fields.str() << std::endl;
 
     // Initialize reliabilities
     this->my_reliabilities_ =
@@ -265,6 +267,7 @@ void module::print_all() {
     std::cout << "Function column: " << this->function_column_ << std::endl;
     std::cout << "Son count: " << this->son_count_ << std::endl;
     std::cout << "Is root: " << (this->is_root_ ? "Yes" : "No") << std::endl;
+    std::cout << "Is leaf: " << (this->is_derivative_leaf_ ? "Yes" : "No") << std::endl;
     std::cout << "Start index: " << this->start_index_ << std::endl;
     std::cout << "End index: " << this->end_index_ << std::endl;
     std::cout << "States: " << this->states_ << std::endl;

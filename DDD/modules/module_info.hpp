@@ -17,6 +17,7 @@ class module_info {
     int son_count_ = 0;
     int offset_start_ = 0;
     int offset_end_ = 0;
+    int is_derivative_leaf_ = 1;
 
   public:
     // Getters
@@ -32,6 +33,7 @@ class module_info {
     int get_son_count() const { return this->son_count_; }
     int get_offset_start() const { return this->offset_start_; }
     int get_offset_end() const { return this->offset_end_; }
+    int get_is_derivative_leaf() const { return this->is_derivative_leaf_; }
 
     // Setters
     void set_parent(module_info* parent) { this->parent_ = parent; }
@@ -45,6 +47,7 @@ class module_info {
     void set_sons_domains(std::vector<int>* domains);
     void set_offset_start(int offsetStart) { this->offset_start_ = offsetStart; }
     void set_offset_end(int offsetEnd) { this->offset_end_ = offsetEnd; }
+    void set_is_derivative_leaf(int isDerivativeLeaf) { this->is_derivative_leaf_ = isDerivativeLeaf; }
 
     void add_son(int sonStates) { this->sons_states_.push_back(sonStates); }
     void add_module(module_info* newModule);

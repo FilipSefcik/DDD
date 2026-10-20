@@ -23,6 +23,7 @@ class module {
     int end_index_ = 0;
     int son_position_ = -1;
     bool is_root_ = false;
+    bool is_derivative_leaf_ = false;
     DerivativeTable* derivatives_ = nullptr;
     DerivativeTable* son_derivatives_ = nullptr;
     std::vector<double>* my_reliabilities_ = nullptr;
@@ -53,7 +54,7 @@ class module {
     DerivativeTable* get_son_derivatives() { return this->son_derivatives_; }
     int get_son_position() { return this->son_position_; }
     bool get_is_root() { return this->is_root_; }
-    bool get_is_leaf() { return this->son_count_ == 0; }
+    bool get_is_derivative_leaf() { return this->is_derivative_leaf_; }
     std::string get_derivatives_as_string();
     std::string get_son_derivatives_as_string();
     std::string get_derivative_matrix();

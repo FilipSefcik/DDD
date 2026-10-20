@@ -1,6 +1,7 @@
 #include "module_info.hpp"
 #include <iostream>
 #include <sstream>
+#include <vector>
 
 void module_info::add_module(module_info* newModule) {
     this->son_count_++;
@@ -61,7 +62,11 @@ std::string module_info::to_string() const {
     int isRoot = ! this->parent_ ? 1 : 0;
     data << this->name_ << " " << this->pla_path_ << " " << this->function_column_ << " "
          << this->position_ << " " << this->states_ << " " << this->get_var_count() << " "
-         << this->offset_start_ << " " << this->offset_end_ << " " << isRoot;
+         << this->offset_start_ << " " << this->offset_end_ << " " << isRoot << " "
+         << this->is_derivative_leaf_;
+
+    std::cout << "Module info: " << data.str() << std::endl;
+
     for (int state : this->sons_states_) {
         data << " ";
         data << state;
@@ -108,9 +113,19 @@ int module_info::get_offset_surplus(int variableIndex) {
     int maxPosition = this->sons_.size();
     int index = 0;
     module_info* son;
+
+    for (module_info* sonTemp : this->sons_) {
+        if (variableIndex >= sonTemp->get_offset_start() &&
+            variableIndex <= sonTemp->get_offset_end()) {
+            this->is_derivative_leaf_ = 0;
+        }
+    }
+
     for (int i = this->offset_start_; i < variableIndex; i++) {
         son = this->sons_.at(sonPosition);
         if (variableIndex >= son->get_offset_start() && variableIndex <= son->get_offset_end()) {
+            std::cout << "Variable index " << variableIndex << " is within son " << son->get_name()
+                      << std::endl;
             return son->get_position();
         }
         if (i >= son->get_offset_start() && i < son->get_offset_end()) {

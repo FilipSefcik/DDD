@@ -400,6 +400,7 @@ void add_instruction_derivatives(module_info* mod, std::string* instructions, in
     if (condition >= mod->get_offset_start() && condition <= mod->get_offset_end()) {
         int variable = 0;
         if (mod->get_son_count() > 0) {
+            std::cout << "Calculating surplus for module " << mod->get_name() << std::endl;
             variable = mod->get_offset_surplus(condition);
         } else {
             variable = condition - mod->get_offset_start();
@@ -493,7 +494,8 @@ void calculate_logical_derivative(mpi_manager* manager, const std::string& input
             DerivativeTable* mod_derivatives = mod->get_derivatives();
 
             if (mod_derivatives->is_empty()) {
-                mod_derivatives->init(states, mod->get_is_root(), sonStates, mod->get_is_leaf());
+                mod_derivatives->init(states, mod->get_is_root(), sonStates,
+                                      mod->get_is_derivative_leaf());
             }
 
             std::cout << "Calculating derivative for module " << mod->get_name() << std::endl;
