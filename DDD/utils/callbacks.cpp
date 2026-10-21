@@ -625,14 +625,10 @@ void calculate_logical_derivative(mpi_manager* manager, const std::string& input
         module* son = manager->get_my_modules().at(paramSecond);
         // double instructionEndTime = MPI_Wtime() - instructionStartTime; // End time
         // linkExecutionTimes.push_back(instructionEndTime); // Store the time
+        parent->set_sons_reliability(son->get_position(), std::move(*son->get_my_reliabilities()));
+        parent->set_son_position(son->get_position());
+        parent->set_son_derivatives(son->get_derivatives());
 
-        if (son->get_derivatives() == nullptr) {
-            parent->set_sons_reliability(son->get_position(),
-                                         std::move(*son->get_my_reliabilities()));
-        } else {
-            parent->set_son_position(son->get_position());
-            parent->set_son_derivatives(son->get_derivatives());
-        }
     } else if (keyWord == "END") {
         module* mod = manager->get_my_modules().at(paramFirst);
         if (mod) {
