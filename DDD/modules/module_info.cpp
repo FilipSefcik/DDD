@@ -65,7 +65,7 @@ std::string module_info::to_string() const {
          << this->offset_start_ << " " << this->offset_end_ << " " << isRoot << " "
          << this->is_derivative_leaf_;
 
-    std::cout << "Module info: " << data.str() << std::endl;
+    // std::cout << "Module info: " << data.str() << std::endl;
 
     for (int state : this->sons_states_) {
         data << " ";
@@ -124,8 +124,9 @@ int module_info::get_offset_surplus(int variableIndex) {
     for (int i = this->offset_start_; i < variableIndex; i++) {
         son = this->sons_.at(sonPosition);
         if (variableIndex >= son->get_offset_start() && variableIndex <= son->get_offset_end()) {
-            std::cout << "Variable index " << variableIndex << " is within son " << son->get_name()
-                      << std::endl;
+            // std::cout << "Variable index " << variableIndex << " is within son " <<
+            // son->get_name()
+            //           << std::endl;
             return son->get_position();
         }
         if (i >= son->get_offset_start() && i < son->get_offset_end()) {

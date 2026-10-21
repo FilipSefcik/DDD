@@ -77,8 +77,8 @@ bool divide_evenly(std::vector<module_info*>* modules, int nodeCount) {
     int nodeUsed = 0;
 
     for (module_info* mod : *modules) {
-        std::cout << "Assigning module " << mod->get_name() << " to process " << nodeUsed
-                  << std::endl;
+        // std::cout << "Assigning module " << mod->get_name() << " to process " << nodeUsed
+        //           << std::endl;
         mod->set_assigned_process(nodeUsed);
         nodeUsed = (nodeUsed + 1) % nodeCount;
     }
@@ -113,8 +113,8 @@ bool divide_by_var_count(std::vector<module_info*>* modules, int nodeCount) {
             }
         }
         nodeVarCount.at(nodeUsed) += modVarCount;
-        std::cout << "Assigning module " << mod->get_name() << " with " << modVarCount
-                  << " variables to process " << nodeUsed << std::endl;
+        // std::cout << "Assigning module " << mod->get_name() << " with " << modVarCount
+        //           << " variables to process " << nodeUsed << std::endl;
         mod->set_assigned_process(nodeUsed);
     }
 
@@ -265,8 +265,8 @@ bool divide_for_merging(std::vector<module_info*>* modules, int nodeCount) {
             mod->set_assigned_process(mod->get_parent()->get_assigned_process());
             continue;
         }
-        std::cout << "Assigning module " << mod->get_name() << " to process " << nodeUsed
-                  << std::endl;
+        // std::cout << "Assigning module " << mod->get_name() << " to process " << nodeUsed
+        //           << std::endl;
         mod->set_assigned_process(nodeUsed);
         nodeUsed = (nodeUsed + 1) % nodeCount;
     }
@@ -400,7 +400,7 @@ void add_instruction_derivatives(module_info* mod, std::string* instructions, in
     if (condition >= mod->get_offset_start() && condition <= mod->get_offset_end()) {
         int variable = 0;
         if (mod->get_son_count() > 0) {
-            std::cout << "Calculating surplus for module " << mod->get_name() << std::endl;
+            // std::cout << "Calculating surplus for module " << mod->get_name() << std::endl;
             variable = mod->get_offset_surplus(condition);
         } else {
             variable = condition - mod->get_offset_start();
@@ -476,6 +476,8 @@ void calculate_logical_derivative(mpi_manager* manager, const std::string& input
             }
 
             mod->set_my_reliability(&ps);
+            std::cout << "Calculated reliabilities for module " << mod->get_name() << std::endl;
+            mod->print_reliabilities();
 
         } else {
             std::cout << "Module not found.\n";
@@ -499,6 +501,8 @@ void calculate_logical_derivative(mpi_manager* manager, const std::string& input
             }
 
             std::cout << "Calculating derivative for module " << mod->get_name() << std::endl;
+            mod->print_reliabilities();
+            mod->print_sons_reliabilities();
 
             if (pla_type == 1) {
                 std::optional<teddy::pla_file_binary> file = teddy::load_binary_pla(path, nullptr);
@@ -590,14 +594,14 @@ void calculate_logical_derivative(mpi_manager* manager, const std::string& input
                 return;
             }
 
-            std::cout << "Derivatives are not yet implemented.\n";
+            // std::cout << "Derivatives are not yet implemented.\n";
 
             if (deriv < 0) {
                 std::cout << "Error calculating derivative.\n";
                 return;
             }
 
-            mod->print_all();
+            // mod->print_all();
 
             if (mod->get_son_derivatives() && ! mod->get_son_derivatives()->is_empty()) {
                 DerivativeTable result = mod_derivatives->multiply(*mod->get_son_derivatives());
@@ -665,15 +669,21 @@ std::string serialize_derivatives(mpi_manager* manager, const std::string& input
     result << std::setprecision(std::numeric_limits<double>::max_digits10);
 
     const DerivativeTable* table = mod->get_derivatives();
-    if (table == nullptr) {
+    if (table->is_empty()) {
         result << "A " << mod->get_position();
         for (double rel : *mod->get_my_reliabilities()) {
             result << ' ' << rel;
         }
+        std::cout << "Serialized reliabilities for module " << mod->get_name() << ": "
+                  << result.str() << std::endl;
         return result.str();
     }
 
     result << "D " << mod->get_position() << ' ' << table->to_string();
+
+    std::cout << "Serialized derivatives for module " << mod->get_name() << ": " << result.str()
+              << std::endl;
+
     return result.str();
 }
 
@@ -685,6 +695,9 @@ void deserialize_derivatives(mpi_manager* manager, const std::string& parameter,
         std::cout << "Module not found.\n";
         return;
     }
+
+    std::cout << "Deserializing derivatives for module " << mod->get_name()
+              << " from string: " << inputString << std::endl;
 
     std::istringstream line(inputString);
     std::string resultType;

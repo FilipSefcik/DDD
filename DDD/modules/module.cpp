@@ -49,7 +49,7 @@ module::module(std::string infoToString) {
     fields >> this->function_column_ >> this->position_ >> this->states_ >> this->var_count_ >>
         this->start_index_ >> this->end_index_ >> this->is_root_ >> this->is_derivative_leaf_;
 
-    std::cout << fields.str() << std::endl;
+    // std::cout << fields.str() << std::endl;
 
     // Initialize reliabilities
     this->my_reliabilities_ =
