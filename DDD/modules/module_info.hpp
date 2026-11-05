@@ -47,7 +47,9 @@ class module_info {
     void set_sons_domains(std::vector<int>* domains);
     void set_offset_start(int offsetStart) { this->offset_start_ = offsetStart; }
     void set_offset_end(int offsetEnd) { this->offset_end_ = offsetEnd; }
-    void set_is_derivative_leaf(int isDerivativeLeaf) { this->is_derivative_leaf_ = isDerivativeLeaf; }
+    void set_is_derivative_leaf(int isDerivativeLeaf) {
+        this->is_derivative_leaf_ = isDerivativeLeaf;
+    }
 
     void add_son(int sonStates) { this->sons_states_.push_back(sonStates); }
     void add_module(module_info* newModule);

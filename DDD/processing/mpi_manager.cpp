@@ -67,6 +67,7 @@ void mpi_manager::complete_instructions(const std::string& instructions, int sta
         std::istringstream inputLine(line);
 
         inputLine >> keyWord;
+        std::cout << "Executing instruction: " << keyWord << std::endl;
         // instructionStartTime = MPI_Wtime();
 
         if (keyWord == "SEND") {

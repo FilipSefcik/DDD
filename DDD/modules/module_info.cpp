@@ -17,6 +17,8 @@ void module_info::add_module(module_info* newModule) {
         newModule->set_offset_end(newModule->get_offset_end() + son->get_var_count() - 1);
     }
     this->add_offset_end(newModule, newModule->get_var_count());
+    std::cout << "Offset range: [" << newModule->get_offset_start() << ", "
+              << newModule->get_offset_end() << "]\n";
 }
 
 void module_info::add_priority(int sonPriority) {
@@ -65,11 +67,13 @@ std::string module_info::to_string() const {
          << this->offset_start_ << " " << this->offset_end_ << " " << isRoot << " "
          << this->is_derivative_leaf_;
 
-    // std::cout << "Module info: " << data.str() << std::endl;
+    std::cout << "Module info: " << data.str() << std::endl;
 
     for (int state : this->sons_states_) {
         data << " ";
         data << state;
+
+        std::cout << "Son state for module " << this->name_ << ": " << state << std::endl;
     }
 
     data << " " << this->sons_.size();

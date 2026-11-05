@@ -59,6 +59,7 @@ int is_binary_pla(const std::string& path, int* states, std::vector<int>* domain
                 }
                 if (domains) {
                     numbers.erase(numbers.begin());
+                    numbers.pop_back(); // Odstrániť prvé a posledné číslo
                     domains->insert(domains->end(), numbers.begin(), numbers.end());
                 }
             }
@@ -154,6 +155,7 @@ void calculate_true_density(mpi_manager* manager, const std::string& inputString
     inputStream >> keyWord >> paramFirst;
 
     if (keyWord == "EXEC") {
+        std::cout << "Checking module " << paramFirst << " for EXEC instruction.\n";
         inputStream >> paramSecond;
         module* mod = manager->get_my_modules().at(paramFirst);
         if (mod) {
@@ -449,7 +451,9 @@ void calculate_logical_derivative(mpi_manager* manager, const std::string& input
     if (keyWord == "EXEC") {
         inputStream >> paramSecond;
         module* mod = manager->get_my_modules().at(paramFirst);
+        std::cout << "Checking module " << paramFirst << " for EXEC instruction.\n";
         if (mod) {
+            std::cout << "Mod exists\n";
             mod->set_position(std::stoi(paramSecond));
             std::string const& path = mod->get_path();
             int pla_type = is_binary_pla(path, nullptr, nullptr);
@@ -646,6 +650,8 @@ void calculate_logical_derivative(mpi_manager* manager, const std::string& input
                 std::cout << "Invalid variable index\n";
                 return;
             }
+            std::cout << "Range of indexes for module " << mod->get_name() << ": ["
+                      << mod->get_start_index() << ", " << mod->get_end_index() << "]\n";
             std::cout << "Structural importances of variable " << state << ": "
                       << mod->get_derivative_matrix() << std::endl;
         } else {
