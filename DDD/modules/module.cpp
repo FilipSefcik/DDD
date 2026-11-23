@@ -26,6 +26,7 @@ module::~module() {
     delete this->sons_rel_count_;
     delete this->function_;
     delete this->sons_map_;
+    delete this->mvl_function_;
 }
 
 module::module(std::string infoToString) {
@@ -114,6 +115,34 @@ void module::insert_function_in_parallel(pla_function* otherFunction, std::strin
             if (sonPosition < pair.second) {
                 pair.second += otherFunction->get_var_count() - 1;
             }
+        }
+    }
+}
+
+void module::insert_mvl_function(mv_pla_function* otherFunction, std::string sonName) {
+    if (! this->mvl_function_ || ! otherFunction) {
+        throw std::runtime_error("insert_mvl_function: missing function for " + sonName);
+    }
+    int sonPosition = this->sons_map_->at(sonName);
+    this->mvl_function_->input_variables(*otherFunction, sonPosition);
+    for (auto& pair : *this->sons_map_) {
+        if (sonPosition < pair.second) {
+            pair.second += otherFunction->get_var_count() - 1;
+        }
+    }
+}
+
+void module::insert_mvl_function_in_parallel(mv_pla_function* otherFunction, std::string sonName,
+                                             int numOfParts) {
+    if (! this->mvl_function_ || ! otherFunction) {
+        throw std::runtime_error("insert_mvl_function_in_parallel: missing function for " +
+                                 sonName);
+    }
+    int sonPosition = this->sons_map_->at(sonName);
+    this->mvl_function_->input_variables_in_parallel(*otherFunction, sonPosition, numOfParts);
+    for (auto& pair : *this->sons_map_) {
+        if (sonPosition < pair.second) {
+            pair.second += otherFunction->get_var_count() - 1;
         }
     }
 }

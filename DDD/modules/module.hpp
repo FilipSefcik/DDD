@@ -1,5 +1,6 @@
 #pragma once
 #include "../utils/derivative_table.hpp"
+#include "mv_pla_function.hpp"
 #include "pla_function.hpp"
 #include <string>
 #include <unordered_map>
@@ -30,6 +31,7 @@ class module {
     std::vector<std::vector<double>>* sons_reliability_ = nullptr;
     std::vector<int>* sons_rel_count_ = nullptr;
     pla_function* function_ = nullptr;
+    mv_pla_function* mvl_function_ = nullptr;
     std::unordered_map<std::string, int>* sons_map_ = nullptr;
 
   public:
@@ -65,6 +67,9 @@ class module {
     pla_function* get_function() { return this->function_; }
     void initialize_pla_function() { this->function_ = new pla_function(this->path_); }
 
+    mv_pla_function* get_mvl_function() { return this->mvl_function_; }
+    void initialize_mvl_function() { this->mvl_function_ = new mv_pla_function(this->path_); }
+
     // setters
 
     void set_path(const std::string& paPath) { this->path_ = paPath; }
@@ -88,6 +93,10 @@ class module {
                          std::string sonName);
     void insert_function_in_parallel(pla_function* otherFunction, std::string sonName,
                                      int numOfParts);
+
+    void insert_mvl_function(mv_pla_function* otherFunction, std::string sonName);
+    void insert_mvl_function_in_parallel(mv_pla_function* otherFunction, std::string sonName,
+                                         int numOfParts);
 
     // prints used to get info
     // used only during troubleshooting

@@ -314,26 +314,53 @@ void execute_merging(mpi_manager* manager, const std::string& inputString) {
         inputStream >> paramSecond;
         module* parent = manager->get_my_modules().at(paramFirst);
         module* son = manager->get_my_modules().at(paramSecond);
+        int calulated_state = manager->get_calculated_state();
         if (parent && son) {
-            if (! son->get_function()) {
-                son->initialize_pla_function();
-            }
-            // if (! help) {
-            //     help = new pla_function(son->get_path());
-            //     additionalVars = help->sort_by_function();
-            //     otherVarCount = help->get_var_count();
-            //     otherFunValCount = help->get_fun_val_count();
-            // }
-            if (! parent->get_function()) {
-                parent->initialize_pla_function();
-            }
+            int pla_type = is_binary_pla(son->get_path(), nullptr, nullptr);
+            if (pla_type == 1) {
 
-            if (manager->get_calculated_state() == 0) {
-                parent->insert_function(son->get_function(), son->get_name());
-            } else if (manager->get_calculated_state() == 1) {
-                parent->insert_function_in_parallel(son->get_function(), son->get_name(), 2);
+                if (! son->get_function()) {
+                    son->initialize_pla_function();
+                }
+                // if (! help) {
+                //     help = new pla_function(son->get_path());
+                //     additionalVars = help->sort_by_function();
+                //     otherVarCount = help->get_var_count();
+                //     otherFunValCount = help->get_fun_val_count();
+                // }
+                if (! parent->get_function()) {
+                    parent->initialize_pla_function();
+                }
+
+                std::cout << "Merging module " << son->get_name() << " into module "
+                          << parent->get_name() << std::endl;
+
+                if (calulated_state == 0) {
+                    parent->insert_function(son->get_function(), son->get_name());
+                } else if (calulated_state == 1) {
+                    parent->insert_function_in_parallel(son->get_function(), son->get_name(), 2);
+                } else {
+                    throw std::runtime_error("Use 0 for normal merging, 1 for parallel merging.");
+                }
+                std::cout << "Merging completed for module " << son->get_name() << std::endl;
+            } else if (pla_type == 0) {
+                if (! son->get_mvl_function()) {
+                    son->initialize_mvl_function();
+                }
+                if (! parent->get_mvl_function()) {
+                    parent->initialize_mvl_function();
+                }
+                if (calulated_state == 0) {
+                    parent->insert_mvl_function(son->get_mvl_function(), son->get_name());
+                } else if (calulated_state == 1) {
+                    parent->insert_mvl_function_in_parallel(son->get_mvl_function(),
+                                                            son->get_name(), 2);
+                } else {
+                    throw std::runtime_error("Use 0 for normal merging, 1 for parallel merging.");
+                }
             } else {
-                throw std::runtime_error("Use 0 for normal merging, 1 for parallel merging.");
+                std::cout << "Invalid PLA file.\n";
+                return;
             }
 
             // parent->insert_function(son->get_function(), son->get_name());
@@ -346,11 +373,19 @@ void execute_merging(mpi_manager* manager, const std::string& inputString) {
     } else if (keyWord == "END") {
         module* mod = manager->get_my_modules().at(paramFirst);
         if (mod) {
-            if (mod->get_function()) {
+            // if (mod->get_function()) {
+            //     mod->set_path("../merged/" + mod->get_name() + ".pla");
+            //     mod->get_function()->write_to_pla(mod->get_path());
+            //     // help->free_sort(additionalVars, 2);
+            //     // help->~pla_function();
+            // }
+            if (mod->get_function() || mod->get_mvl_function()) {
                 mod->set_path("../merged/" + mod->get_name() + ".pla");
-                mod->get_function()->write_to_pla(mod->get_path());
-                // help->free_sort(additionalVars, 2);
-                // help->~pla_function();
+                if (mod->get_function()) {
+                    mod->get_function()->write_to_pla(mod->get_path());
+                } else {
+                    mod->get_mvl_function()->write_to_pla(mod->get_path());
+                }
             }
             std::cout << "Merged module saved to: " << mod->get_path() << std::endl;
         } else {
@@ -389,7 +424,7 @@ void deserialize_merging(mpi_manager* manager, const std::string& parameter,
     std::string sonName, sonPath;
     std::getline(line, sonName);
     std::getline(line, sonPath);
-    module* son = new module(sonName, 0);
+    module* son = new module(sonName, 0); // PASTATES 0???
     son->set_path(sonPath);
     manager->add_module(son);
 }

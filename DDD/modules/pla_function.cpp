@@ -316,7 +316,7 @@ void pla_function::input_variables(pla_function* other, int position) {
 
     this->assign(newPla);
 
-    newPla.~pla_function();
+    // newPla.~pla_function();
     free(matchCount);
     delete[] whateverInput;
     delete[] newVars;
@@ -364,7 +364,7 @@ void pla_function::input_variables(char*** additionalVars, int otherVarCount,
 
     this->assign(newPla);
 
-    newPla.~pla_function();
+    // newPla.~pla_function();
     free(matchCount);
     delete[] whateverInput;
     delete[] newVars;
@@ -455,7 +455,7 @@ void pla_function::merge_into_main(pla_function** parts, int numberOfParts) {
     }
 
     this->assign(newPla);
-    newPla.~pla_function();
+    // newPla.~pla_function();
 }
 
 void pla_function::input_variables_in_parallel(pla_function* other, int position,
