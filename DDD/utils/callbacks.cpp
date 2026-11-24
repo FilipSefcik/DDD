@@ -643,8 +643,21 @@ void calculate_logical_derivative(mpi_manager* manager, const std::string& input
             // mod->print_all();
 
             if (mod->get_son_derivatives() && ! mod->get_son_derivatives()->is_empty()) {
+                std::cout << "Multiplying derivatives for module " << mod->get_name() << std::endl;
+                std::cout << "Son derivatives: " << mod->get_son_derivatives_as_string()
+                          << std::endl;
                 DerivativeTable result = mod_derivatives->multiply(*mod->get_son_derivatives());
                 mod->set_derivatives(&result);
+            }
+
+            if (! mod->get_son_derivatives()) {
+                std::cout << "Son derivatives are null.\n";
+            }
+
+            if (mod->get_son_derivatives()->is_empty()) {
+                std::cout << "Son derivatives are empty.\n";
+                std::cout << "Son derivatives: " << mod->get_son_derivatives_as_string()
+                          << std::endl;
             }
 
             // if (mod->get_son_derivative() >= 0) {
@@ -666,7 +679,10 @@ void calculate_logical_derivative(mpi_manager* manager, const std::string& input
         // linkExecutionTimes.push_back(instructionEndTime); // Store the time
         parent->set_sons_reliability(son->get_position(), std::move(*son->get_my_reliabilities()));
         parent->set_son_position(son->get_position());
-        parent->set_son_derivatives(son->get_derivatives());
+
+        if (son->get_derivatives() && ! son->get_derivatives()->is_empty()) {
+            parent->set_son_derivatives(son->get_derivatives());
+        }
 
     } else if (keyWord == "END") {
         module* mod = manager->get_my_modules().at(paramFirst);
