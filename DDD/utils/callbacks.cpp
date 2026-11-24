@@ -476,8 +476,6 @@ void add_instruction_derivatives(module_info* mod, std::string* instructions, in
     }
 }
 
-// std::vector<double> linkExecutionTimes;
-
 void calculate_logical_derivative(mpi_manager* manager, const std::string& inputString) {
     std::string keyWord, paramFirst, paramSecond;
     std::istringstream inputStream(inputString);
@@ -486,23 +484,18 @@ void calculate_logical_derivative(mpi_manager* manager, const std::string& input
     if (keyWord == "EXEC") {
         inputStream >> paramSecond;
         module* mod = manager->get_my_modules().at(paramFirst);
-        std::cout << "Checking module " << paramFirst << " for EXEC instruction.\n";
         if (mod) {
-            std::cout << "Mod exists\n";
             mod->set_position(std::stoi(paramSecond));
             std::string const& path = mod->get_path();
             int pla_type = is_binary_pla(path, nullptr, nullptr);
             std::vector<double> ps;
             if (pla_type == 1) {
-                // std::cout << mod->get_var_count() << std::endl;
                 std::optional<teddy::pla_file_binary> file = teddy::load_binary_pla(path, nullptr);
-                // std::cout << file->input_count_ << std::endl;
 
                 teddy::bss_manager bssManager(file->input_count_, mod->get_var_count() * 100);
                 teddy::bdd_manager::diagram_t f =
                     teddy::io::from_pla(bssManager, *file)[mod->get_function_column()];
                 ps = bssManager.calculate_probabilities(*mod->get_sons_reliability(), f);
-                // std::cout << "Done\n";
             } else if (pla_type == 0) {
                 std::optional<teddy::pla_file_mvl> file = teddy::load_mvl_pla(path, nullptr);
                 teddy::imss_manager imssManager(file->input_count_, mod->get_var_count() * 100,
@@ -515,9 +508,6 @@ void calculate_logical_derivative(mpi_manager* manager, const std::string& input
             }
 
             mod->set_my_reliability(&ps);
-            std::cout << "Calculated reliabilities for module " << mod->get_name() << std::endl;
-            mod->print_reliabilities();
-
         } else {
             std::cout << "Module not found.\n";
         }
@@ -539,10 +529,6 @@ void calculate_logical_derivative(mpi_manager* manager, const std::string& input
                                       mod->get_is_derivative_leaf());
             }
 
-            std::cout << "Calculating derivative for module " << mod->get_name() << std::endl;
-            mod->print_reliabilities();
-            mod->print_sons_reliabilities();
-
             if (pla_type == 1) {
                 std::optional<teddy::pla_file_binary> file = teddy::load_binary_pla(path, nullptr);
                 teddy::bss_manager bssManager(file->input_count_, mod->get_var_count() * 1000);
@@ -550,13 +536,7 @@ void calculate_logical_derivative(mpi_manager* manager, const std::string& input
                     teddy::io::from_pla(bssManager, *file)[mod->get_function_column()];
 
                 for (auto systemTransition : mod_derivatives->rows) {
-                    std::cout << "Calculating derivative for system transition ("
-                              << systemTransition.first << ", " << systemTransition.second << ")"
-                              << std::endl;
                     for (auto componentTransition : mod_derivatives->cols) {
-                        std::cout << "Calculating derivative for component transition ("
-                                  << componentTransition.first << ", " << componentTransition.second
-                                  << ")" << std::endl;
                         teddy::bdd_manager::diagram_t df = bssManager.dpld(
                             {variable, componentTransition.first, componentTransition.second},
                             teddy::dpld::basic(systemTransition.first, systemTransition.second), f);
@@ -565,57 +545,15 @@ void calculate_logical_derivative(mpi_manager* manager, const std::string& input
                         mod_derivatives->at(systemTransition, componentTransition) = deriv;
                     }
                 }
-
-                // for (int systemState = 0; systemState < states - 1; systemState++) {
-                //     std::cout << "Calculating derivative for system state " << systemState
-                //               << std::endl;
-                //     mod_derivatives->at(systemState) = std::vector<double>(sonStates - 1);
-                //     for (int componentState = 0; componentState < sonStates - 1;
-                //     componentState++) {
-                //         std::cout << "Calculating derivative for component state " <<
-                //         componentState
-                //                   << std::endl;
-                //         teddy::bdd_manager::diagram_t df =
-                //             bssManager.dpld({variable, componentState, componentState + 1},
-                //                             teddy::dpld::basic(systemState, systemState + 1), f);
-                //         ps = bssManager.calculate_probabilities(*mod->get_sons_reliability(),
-                //         df); std::cout << "Derivative for system state " << systemState
-                //                   << " component state " << componentState << ": " << ps.at(1)
-                //                   << std::endl;
-                //         deriv = ps.at(1);
-                //         std::cout << "vector size: " << mod_derivatives->size() << " x "
-                //                   << mod_derivatives->at(systemState).size() << std::endl;
-                //         mod_derivatives->at(systemState).at(componentState) = deriv;
-                //     }
-                //     std::cout << "got out of derivative for system state " << systemState
-                //               << std::endl;
-                // }
             } else if (pla_type == 0) {
                 std::optional<teddy::pla_file_mvl> file = teddy::load_mvl_pla(path, nullptr);
 
-                // std::cout << "Loaded " << path << " successfully.\n";
-                // std::cout << "File info: input_count = " << file->input_count_
-                //           << ", product_count = " << file->product_count_ << ", domains = ";
-                // for (const auto& domain : file->domains_) {
-                //     std::cout << domain << " ";
-                // }
-                // std::cout << std::endl;
-
                 teddy::imss_manager imssManager(file->input_count_, mod->get_var_count() * 1000,
                                                 file->domains_);
-                // for (unsigned int i = 0; i < file->domains_.size(); i++) {
-                //     std::cout << "Domain " << i << ": " << file->domains_.at(i) << std::endl;
-                // }
                 teddy::imss_manager::diagram_t f = teddy::io::from_pla(imssManager, *file);
 
                 for (auto systemTransition : mod_derivatives->rows) {
-                    std::cout << "Calculating derivative for system transition ("
-                              << systemTransition.first << ", " << systemTransition.second << ")"
-                              << std::endl;
                     for (auto componentTransition : mod_derivatives->cols) {
-                        std::cout << "Calculating derivative for component transition ("
-                                  << componentTransition.first << ", " << componentTransition.second
-                                  << ")" << std::endl;
                         teddy::imss_manager::diagram_t df = imssManager.dpld(
                             {variable, componentTransition.first, componentTransition.second},
                             teddy::dpld::basic(systemTransition.first, systemTransition.second), f);
@@ -624,47 +562,20 @@ void calculate_logical_derivative(mpi_manager* manager, const std::string& input
                         mod_derivatives->at(systemTransition, componentTransition) = deriv;
                     }
                 }
-                // teddy::imss_manager::diagram_t df =
-                //     imssManager.dpld({variable, 0, 1}, teddy::dpld::basic(0, 1), f);
-                // ps = imssManager.calculate_probabilities(*mod->get_sons_reliability(), df);
-                // deriv = ps.at(1);
             } else {
                 std::cout << "Invalid PLA file.\n";
                 return;
             }
-
-            // std::cout << "Derivatives are not yet implemented.\n";
 
             if (deriv < 0) {
                 std::cout << "Error calculating derivative.\n";
                 return;
             }
 
-            // mod->print_all();
-
             if (mod->get_son_derivatives() && ! mod->get_son_derivatives()->is_empty()) {
-                std::cout << "Multiplying derivatives for module " << mod->get_name() << std::endl;
-                std::cout << "Son derivatives: " << mod->get_son_derivatives_as_string()
-                          << std::endl;
                 DerivativeTable result = mod_derivatives->multiply(*mod->get_son_derivatives());
                 mod->set_derivatives(&result);
             }
-
-            if (! mod->get_son_derivatives()) {
-                std::cout << "Son derivatives are null.\n";
-            }
-
-            if (mod->get_son_derivatives()->is_empty()) {
-                std::cout << "Son derivatives are empty.\n";
-                std::cout << "Son derivatives: " << mod->get_son_derivatives_as_string()
-                          << std::endl;
-            }
-
-            // if (mod->get_son_derivative() >= 0) {
-            //     deriv *= mod->get_son_derivative();
-            // }
-
-            // mod->set_derivative(deriv);
         } else {
             std::cout << "Module not found.\n";
         }
@@ -672,11 +583,8 @@ void calculate_logical_derivative(mpi_manager* manager, const std::string& input
     } else if (keyWord == "LINK") {
         inputStream >> paramSecond;
 
-        // double instructionStartTime = MPI_Wtime(); // Start time
         module* parent = manager->get_my_modules().at(paramFirst);
         module* son = manager->get_my_modules().at(paramSecond);
-        // double instructionEndTime = MPI_Wtime() - instructionStartTime; // End time
-        // linkExecutionTimes.push_back(instructionEndTime); // Store the time
         parent->set_sons_reliability(son->get_position(), std::move(*son->get_my_reliabilities()));
         parent->set_son_position(son->get_position());
 
@@ -688,21 +596,10 @@ void calculate_logical_derivative(mpi_manager* manager, const std::string& input
         module* mod = manager->get_my_modules().at(paramFirst);
         if (mod) {
             int state = manager->get_calculated_state();
-            // double totalLinkTime = 0.0;
-            // for (double time : linkExecutionTimes) {
-            //     totalLinkTime += time;
-            // }
-            // double averageLinkTime =
-            //     (linkExecutionTimes.empty()) ? 0.0 : totalLinkTime / linkExecutionTimes.size();
-            // std::cout << "Average time to get module: " << averageLinkTime << " seconds."
-            //           << std::endl;
-
             if (state < mod->get_start_index() || state > mod->get_end_index()) {
                 std::cout << "Invalid variable index\n";
                 return;
             }
-            std::cout << "Range of indexes for module " << mod->get_name() << ": ["
-                      << mod->get_start_index() << ", " << mod->get_end_index() << "]\n";
             std::cout << "Structural importances of variable " << state << ": "
                       << mod->get_derivative_matrix() << std::endl;
         } else {
