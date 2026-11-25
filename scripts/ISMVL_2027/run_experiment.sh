@@ -18,7 +18,7 @@ PLA_DIR=$1
 RUN_ID=$2
 
 # append all output (stdout+stderr) into the per-experiment file
-exec >> test_outputs/script_output_divider_"$RUN_ID".txt 2>&1
+exec >> test_outputs/script_output_ISMVL_"$RUN_ID".txt 2>&1
 
 CONFIG="$PLA_DIR/system.conf"
 MERGED_DIR="../merged"

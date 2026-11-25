@@ -6,7 +6,7 @@ SEEDS_FILE=test_outputs/seeds.txt
 NUM_SEEDS=10
 
 CONFIGS=(
-  "1 10 3 3"
+  "1 3 3 3"
   # "11 20 3 2"
   # "21 30 3 1"
 )
@@ -45,13 +45,13 @@ for config in "${CONFIGS[@]}"; do
   > "$OUTPUT_FILE"
 
   echo "Cleaning old test data..."
-  rm -f test_outputs/script_output_divider_*.txt
-  rm -rf ../load_files/divider_test/divider_test_*
+  rm -f test_outputs/script_output_ISMVL_*.txt
+  rm -rf ../load_files/ISMVL_test/ISMVL_test_*
 
   echo "--- Starting Batch: Interval $MIN_VAL-$MAX_VAL, Depth $DEPTH ---"
 
   for RANDOM_SEED in "${SEEDS[@]}"; do
-    PLA="../load_files/divider_test/divider_test_$GLOBAL_ID"
+    PLA="../load_files/ISMVL_test/ISMVL_test_$GLOBAL_ID"
 
     # 1. Header line
     echo "=== Running experiment number $GLOBAL_ID (Config $MIN_VAL-$MAX_VAL) ===" | tee -a "$OUTPUT_FILE"
@@ -70,7 +70,7 @@ for config in "${CONFIGS[@]}"; do
   done
 
   # Generate Excel + CSV
-  EXCEL_NAME="Report_${MIN_VAL}-${MAX_VAL}_Depth${DEPTH}_States${NUM_STATES}_TRUE_DENSITY.xlsx"
+  EXCEL_NAME="Report_${MIN_VAL}-${MAX_VAL}_Depth${DEPTH}_States${NUM_STATES}_MV_SI.xlsx"
   python3 time_parser.py "test_outputs" "$OUTPUT_FILE" "$EXCEL_NAME"
 done
 

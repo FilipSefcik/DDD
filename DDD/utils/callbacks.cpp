@@ -14,6 +14,8 @@
 #include <stdexcept>
 #include <vector>
 
+static double g_calculation_time = 0.0;
+
 int is_binary_pla(const std::string& path, int* states, std::vector<int>* domains) {
     std::ifstream file(path);
     if (! file.is_open()) {
@@ -350,6 +352,8 @@ void execute_merging(mpi_manager* manager, const std::string& inputString) {
                 if (! parent->get_mvl_function()) {
                     parent->initialize_mvl_function();
                 }
+                std::cout << "Merging module " << son->get_name() << " into module "
+                          << parent->get_name() << std::endl;
                 if (calulated_state == 0) {
                     parent->insert_mvl_function(son->get_mvl_function(), son->get_name());
                 } else if (calulated_state == 1) {
@@ -401,6 +405,10 @@ std::string serialize_merging(mpi_manager* manager, const std::string& inputStri
         if (mod->get_function()) {
             mod->set_path("../merged/" + mod->get_name() + ".pla");
             mod->get_function()->write_to_pla(mod->get_path());
+        }
+        if (mod->get_mvl_function()) {
+            mod->set_path("../merged/" + mod->get_name() + ".pla");
+            mod->get_mvl_function()->write_to_pla(mod->get_path());
         }
         result = mod->get_name() + "\n" + mod->get_path();
     } else {
@@ -492,16 +500,20 @@ void calculate_logical_derivative(mpi_manager* manager, const std::string& input
             if (pla_type == 1) {
                 std::optional<teddy::pla_file_binary> file = teddy::load_binary_pla(path, nullptr);
 
+                double start = MPI_Wtime(); // PLA is loaded, calculation starts
                 teddy::bss_manager bssManager(file->input_count_, mod->get_var_count() * 100);
                 teddy::bdd_manager::diagram_t f =
                     teddy::io::from_pla(bssManager, *file)[mod->get_function_column()];
                 ps = bssManager.calculate_probabilities(*mod->get_sons_reliability(), f);
+                g_calculation_time += MPI_Wtime() - start; // calculation ended
             } else if (pla_type == 0) {
                 std::optional<teddy::pla_file_mvl> file = teddy::load_mvl_pla(path, nullptr);
+                double start = MPI_Wtime(); // PLA is loaded, calculation starts
                 teddy::imss_manager imssManager(file->input_count_, mod->get_var_count() * 100,
                                                 file->domains_);
                 teddy::imss_manager::diagram_t f = teddy::io::from_pla(imssManager, *file);
                 ps = imssManager.calculate_probabilities(*mod->get_sons_reliability(), f);
+                g_calculation_time += MPI_Wtime() - start; // calculation ended
             } else {
                 std::cout << "Invalid PLA file.\n";
                 return;
@@ -531,6 +543,7 @@ void calculate_logical_derivative(mpi_manager* manager, const std::string& input
 
             if (pla_type == 1) {
                 std::optional<teddy::pla_file_binary> file = teddy::load_binary_pla(path, nullptr);
+                double start = MPI_Wtime(); // PLA is loaded, calculation starts
                 teddy::bss_manager bssManager(file->input_count_, mod->get_var_count() * 1000);
                 teddy::bdd_manager::diagram_t f =
                     teddy::io::from_pla(bssManager, *file)[mod->get_function_column()];
@@ -545,9 +558,11 @@ void calculate_logical_derivative(mpi_manager* manager, const std::string& input
                         mod_derivatives->at(systemTransition, componentTransition) = deriv;
                     }
                 }
+                g_calculation_time += MPI_Wtime() - start; // calculation ended
             } else if (pla_type == 0) {
                 std::optional<teddy::pla_file_mvl> file = teddy::load_mvl_pla(path, nullptr);
 
+                double start = MPI_Wtime(); // PLA is loaded, calculation starts
                 teddy::imss_manager imssManager(file->input_count_, mod->get_var_count() * 1000,
                                                 file->domains_);
                 teddy::imss_manager::diagram_t f = teddy::io::from_pla(imssManager, *file);
@@ -562,6 +577,7 @@ void calculate_logical_derivative(mpi_manager* manager, const std::string& input
                         mod_derivatives->at(systemTransition, componentTransition) = deriv;
                     }
                 }
+                g_calculation_time += MPI_Wtime() - start; // calculation ended
             } else {
                 std::cout << "Invalid PLA file.\n";
                 return;
@@ -602,6 +618,9 @@ void calculate_logical_derivative(mpi_manager* manager, const std::string& input
             }
             std::cout << "Structural importances of variable " << state << ": "
                       << mod->get_derivative_matrix() << std::endl;
+
+            std::printf("Time of calculation: %.9f\n", g_calculation_time);
+            g_calculation_time = 0.0;
         } else {
             std::cout << "Module not found.\n";
         }

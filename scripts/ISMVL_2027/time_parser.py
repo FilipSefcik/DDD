@@ -24,7 +24,7 @@ def section_time(content, name):
 
 def parse_times(output_dir):
     rows = []
-    for path in glob.glob(os.path.join(output_dir, 'script_output_divider_*.txt')):
+    for path in glob.glob(os.path.join(output_dir, 'script_output_ISMVL_*.txt')):
         exp_id = int(re.search(r'_(\d+)\.txt$', path).group(1))
         with open(path, 'r', encoding='utf-8') as f:
             content = f.read()
